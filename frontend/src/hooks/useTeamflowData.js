@@ -58,7 +58,7 @@ function mapProject(project, projectTasks, projectMembers, index) {
     completedTaskCount: completedTasks,
     progress: totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0,
     tone: ['violet', 'blue', 'green'][index % 3],
-    memberInitials: projectMembers.slice(0, 3).map((member) => member.initials),
+    members: projectMembers,
   }
 }
 
@@ -120,8 +120,8 @@ export function useTeamflowData(enabled) {
         )
 
         const allTasks = projectResults.flatMap((item) => item.tasks)
-
         const projectMembers = {}
+
         projectResults.forEach((item) => {
           projectMembers[item.project._id] = item.members
         })
@@ -140,7 +140,7 @@ export function useTeamflowData(enabled) {
             const existing = memberMap.get(key)
             if (existing) {
               existing.activeTasks += loadMap.get(key) || 0
-              existing.projectIds.push(item.project._id)
+              if (!existing.projectIds.includes(item.project._id)) existing.projectIds.push(item.project._id)
             } else {
               memberMap.set(key, {
                 ...member,
