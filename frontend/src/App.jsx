@@ -71,6 +71,7 @@ export default function App() {
           page={page}
           onOpenMenu={() => setSidebarOpen(true)}
           onLogout={logout}
+          onExitDemo={logout}
           demoMode={demoMode}
           notifications={activeData.notifications}
           onMarkRead={handleMarkNotificationRead}
