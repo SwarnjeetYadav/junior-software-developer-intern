@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar'
 import Topbar from './components/Topbar'
 import CreateTaskModal from './components/CreateTaskModal'
 import CreateProjectModal from './components/CreateProjectModal'
+import TaskDetailsModal from './components/TaskDetailsModal'
 import { tasks as initialTasks } from './data/teamflowMock'
 import Overview from './pages/Overview'
 import Login from './pages/Login'
@@ -18,15 +19,14 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
   const [projectModalOpen, setProjectModalOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState(null)
   const [createdTasks, setCreatedTasks] = useState([])
 
   const allTasks = useMemo(() => [...createdTasks, ...initialTasks], [createdTasks])
-
   if (!user) return <Login />
 
-  const remoteState = liveData.connected
   const activeData = demoMode
-    ? { connected: false, error: '', summary: null, projects: [], tasks: [] }
+    ? { connected: false, error: '', summary: null, projects: [], tasks: [], members: [], activity: [], notifications: [] }
     : liveData
 
   const navigate = (nextPage) => {
@@ -34,49 +34,93 @@ export default function App() {
     setSidebarOpen(false)
   }
 
-  const createTask = (task) => {
-    setCreatedTasks((current) => [task, ...current])
-    setTaskModalOpen(false)
-    setPage('My Tasks')
-  }
-
-  const createProject = async (payload) => {
+  const handleCreateTask = async (payload) => {
     if (demoMode) {
-      setProjectModalOpen(false)
+      setCreatedTasks((current) => [payload, ...current])
+      setTaskModalOpen(false)
+      setPage('My Tasks')
       return
     }
-    await api.createProject(payload)
+
+    await api.createTask(payload.projectId, payload.payload)
+    setTaskModalOpen(false)
+    setPage('My Tasks')
     liveData.refresh()
+  }
+
+  const handleCreateProject = async (payload) => {
+    if (demoMode) return
+    await api.createProject(payload)
+    setProjectModalOpen(false)
     setPage('Projects')
+    liveData.refresh()
+  }
+
+  const handleMarkNotificationRead = async (notificationId) => {
+    await api.markNotificationRead(notificationId)
+    liveData.refresh()
   }
 
   return (
     <div className="app-shell">
       <Sidebar page={page} onNavigate={navigate} open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
       <div className="app-main">
-        <Topbar page={page} onOpenMenu={() => setSidebarOpen(true)} onLogout={logout} demoMode={demoMode} />
+        <Topbar
+          page={page}
+          onOpenMenu={() => setSidebarOpen(true)}
+          onLogout={logout}
+          demoMode={demoMode}
+          notifications={activeData.notifications}
+          onMarkRead={handleMarkNotificationRead}
+        />
+
         <main className="content">
           {page === 'Overview' ? (
             <Overview
               onNavigate={navigate}
               onCreateTask={() => setTaskModalOpen(true)}
               onSuggestAssignee={() => setTaskModalOpen(true)}
+              onSelectTask={setSelectedTask}
               liveData={activeData}
             />
           ) : (
             <GenericPage
               page={page}
-              taskRows={demoMode ? allTasks : liveData.tasks.length ? liveData.tasks : initialTasks}
+              taskRows={demoMode ? allTasks : activeData.tasks.length ? activeData.tasks : initialTasks}
               onCreateTask={() => setTaskModalOpen(true)}
               onCreateProject={() => setProjectModalOpen(true)}
+              onSelectTask={setSelectedTask}
               liveData={activeData}
             />
           )}
         </main>
       </div>
+
       {sidebarOpen ? <button className="mobile-overlay" type="button" onClick={() => setSidebarOpen(false)} aria-label="Close navigation" /> : null}
-      <CreateTaskModal open={taskModalOpen} onClose={() => setTaskModalOpen(false)} onCreate={createTask} />
-      <CreateProjectModal open={projectModalOpen} onClose={() => setProjectModalOpen(false)} onCreate={createProject} />
+
+      <CreateTaskModal
+        open={taskModalOpen}
+        onClose={() => setTaskModalOpen(false)}
+        onCreate={handleCreateTask}
+        liveMode={!demoMode}
+        project={!demoMode ? activeData.projects[0] : null}
+        members={!demoMode ? activeData.members : []}
+      />
+
+      <CreateProjectModal
+        open={projectModalOpen}
+        onClose={() => setProjectModalOpen(false)}
+        onCreate={handleCreateProject}
+      />
+
+      <TaskDetailsModal
+        task={selectedTask}
+        open={Boolean(selectedTask)}
+        liveMode={!demoMode}
+        onClose={() => setSelectedTask(null)}
+        onChanged={liveData.refresh}
+      />
     </div>
   )
 }
