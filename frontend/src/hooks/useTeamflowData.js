@@ -47,6 +47,21 @@ function formatActivity(item) {
   return item.action.replaceAll('_', ' ').toLowerCase()
 }
 
+function mapProject(project, projectTasks, projectMembers, index) {
+  const totalTasks = projectTasks.length
+  const completedTasks = projectTasks.filter((task) => task.statusValue === 'COMPLETED').length
+
+  return {
+    ...project,
+    memberCount: projectMembers.length,
+    taskCount: totalTasks,
+    completedTaskCount: completedTasks,
+    progress: totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0,
+    tone: ['violet', 'blue', 'green'][index % 3],
+    memberInitials: projectMembers.slice(0, 3).map((member) => member.initials),
+  }
+}
+
 export function useTeamflowData(enabled) {
   const [refreshKey, setRefreshKey] = useState(0)
   const [state, setState] = useState({
@@ -57,6 +72,7 @@ export function useTeamflowData(enabled) {
     projects: [],
     tasks: [],
     members: [],
+    membersByProject: {},
     activity: [],
     notifications: [],
   })
@@ -79,36 +95,65 @@ export function useTeamflowData(enabled) {
         ])
 
         const projectList = projectsResult.data || []
-        const taskResults = await Promise.all(
+        const projectResults = await Promise.all(
           projectList.map(async (project) => {
-            const result = await api.listTasks(project._id)
-            return (result.data || []).map((task) => mapTask(task, project))
+            const [taskResult, memberResult] = await Promise.all([
+              api.listTasks(project._id),
+              api.listMembers(project._id),
+            ])
+            return {
+              project,
+              tasks: (taskResult.data || []).map((task) => mapTask(task, project)),
+              members: (memberResult.data || [])
+                .filter((item) => item.userId)
+                .map((item, memberIndex) => ({
+                  id: item.userId._id,
+                  name: item.userId.name,
+                  email: item.userId.email,
+                  role: item.userId.role,
+                  status: item.userId.status,
+                  initials: initialsFor(item.userId.name),
+                  tone: ['violet', 'blue', 'green', 'amber', 'rose'][memberIndex % 5],
+                })),
+            }
           }),
         )
-        const allTasks = taskResults.flat().slice(0, 50)
 
-        let members = []
-        const firstProject = projectList[0]
-        if (firstProject?._id) {
-          const memberResult = await api.listMembers(firstProject._id)
+        const allTasks = projectResults.flatMap((item) => item.tasks)
+
+        const projectMembers = {}
+        projectResults.forEach((item) => {
+          projectMembers[item.project._id] = item.members
+        })
+
+        const memberMap = new Map()
+        projectResults.forEach((item) => {
           const loadMap = new Map()
-
-          for (const task of allTasks.filter((item) => item.projectId === firstProject._id)) {
-            if (task.assigneeId) {
-              loadMap.set(String(task.assigneeId), (loadMap.get(String(task.assigneeId)) || 0) + (task.statusValue === 'COMPLETED' ? 0 : 1))
+          for (const task of item.tasks) {
+            if (task.assigneeId && task.statusValue !== 'COMPLETED') {
+              loadMap.set(String(task.assigneeId), (loadMap.get(String(task.assigneeId)) || 0) + 1)
             }
           }
 
-          members = (memberResult.data || [])
-            .filter((item) => item.userId)
-            .map((item, index) => ({
-              id: item.userId._id,
-              name: item.userId.name,
-              initials: initialsFor(item.userId.name),
-              activeTasks: loadMap.get(String(item.userId._id)) || 0,
-              tone: ['violet', 'blue', 'green', 'amber', 'rose'][index % 5],
-            }))
-        }
+          item.members.forEach((member) => {
+            const key = String(member.id)
+            const existing = memberMap.get(key)
+            if (existing) {
+              existing.activeTasks += loadMap.get(key) || 0
+              existing.projectIds.push(item.project._id)
+            } else {
+              memberMap.set(key, {
+                ...member,
+                activeTasks: loadMap.get(key) || 0,
+                projectIds: [item.project._id],
+              })
+            }
+          })
+        })
+
+        const projects = projectResults.map((item, index) =>
+          mapProject(item.project, item.tasks, item.members, index),
+        )
 
         if (!cancelled) {
           setState({
@@ -116,9 +161,10 @@ export function useTeamflowData(enabled) {
             connected: true,
             error: '',
             summary: dashboardResult.data,
-            projects: projectList,
+            projects,
             tasks: allTasks,
-            members,
+            members: [...memberMap.values()],
+            membersByProject: projectMembers,
             activity: (activityResult.data || []).map(mapActivity),
             notifications: (notificationResult.data || []).map((item) => ({ ...item, unread: !item.readAt })),
           })
