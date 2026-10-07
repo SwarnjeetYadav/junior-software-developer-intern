@@ -99,6 +99,18 @@ API request
 - Added client-side password confirmation and minimum-length validation before registration.
 - Added browser regression coverage for account mode switching and demo exit.
 
+
+### Phase 8: Live Data Integrity Cleanup
+
+#### Completed
+- Removed mock task, project, activity and workload fallbacks from authenticated live pages.
+- Dashboard greeting and date are now derived from the signed-in account and current date/time.
+- Live Projects, Team, Reports, Settings and My Tasks views now show empty states when the API returns no records instead of demo records.
+- Team Member users no longer see Project Manager-only project/member management controls.
+- Project progress and member counts remain derived from live API records.
+- Project member listing is now readable by authorized project members while member search/add remains manager-controlled.
+- Added browser regression coverage to verify a new empty live account does not see demo users or projects.
+
 ## Current Architecture
 
 Frontend
