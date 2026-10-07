@@ -174,6 +174,14 @@ describe('TeamFlow API end to end workflow', () => {
     expect(notificationsResponse.status).toBe(200)
 
     const teammateToken = await login(teammate.email)
+
+    const teammateMembersResponse = await request(app)
+      .get('/api/v1/projects/' + projectId + '/members')
+      .set('Authorization', 'Bearer ' + teammateToken)
+
+    expect(teammateMembersResponse.status).toBe(200)
+    expect(teammateMembersResponse.body.data).toHaveLength(3)
+
     const teammateNotifications = await request(app)
       .get('/api/v1/notifications')
       .set('Authorization', 'Bearer ' + teammateToken)
