@@ -174,3 +174,64 @@ test('login screen supports account creation and demo exit returns to login', as
   await page.getByRole('button', { name: /Exit demo · Back to sign in/i }).click()
   await expect(page.getByRole('heading', { name: /Work with clarity/i })).toBeVisible()
 })
+
+
+async function routeEmptyLiveWorkspace(page) {
+  return page.route('**/api/v1/**', async (route) => {
+    const request = route.request()
+    const url = new URL(request.url())
+    const path = url.pathname.replace('/api/v1', '')
+    const json = async (status, data) => route.fulfill({
+      status,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true, data }),
+    })
+
+    if (request.method() === 'GET' && path === '/dashboard/summary') {
+      return json(200, { activeProjects: 0, openTasks: 0, completedTasks: 0, overdueTasks: 0 })
+    }
+    if (request.method() === 'GET' && path === '/projects') return json(200, [])
+    if (request.method() === 'GET' && path === '/activity') return json(200, [])
+    if (request.method() === 'GET' && path === '/notifications') return json(200, [])
+    if (request.method() === 'GET' && path === '/auth/me') return json(200, {
+      id: 'test-user',
+      name: 'test1',
+      email: 'test1@example.com',
+      role: 'TEAM_MEMBER',
+      status: 'ACTIVE',
+    })
+    return json(200, [])
+  })
+}
+
+test('new live user sees only real account data when workspace is empty', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('teamflow_token', 'test-token')
+    localStorage.setItem('teamflow_user', JSON.stringify({
+      id: 'test-user',
+      name: 'test1',
+      email: 'test1@example.com',
+      role: 'TEAM_MEMBER',
+    }))
+    localStorage.removeItem('teamflow_demo')
+  })
+  await routeEmptyLiveWorkspace(page)
+  await page.goto('/')
+
+  await expect(page.getByRole('heading', { name: /Good (morning|afternoon|evening), test1/i })).toBeVisible()
+  await expect(page.getByText('No projects yet.', { exact: false })).toBeVisible()
+  await expect(page.getByText(/No team workload data yet/i)).toBeVisible()
+  await expect(page.getByText('TeamFlow Web App')).not.toBeVisible()
+  await expect(page.getByText('Ankit Kumar')).not.toBeVisible()
+  await expect(page.getByText('Swarnjeet')).not.toBeVisible()
+
+  await page.getByRole('button', { name: 'Projects' }).click()
+  await expect(page.getByRole('button', { name: /New project/i })).not.toBeVisible()
+  await expect(page.getByText(/No projects yet/i)).toBeVisible()
+
+  await page.getByRole('button', { name: 'Team' }).click()
+  await expect(page.getByText(/No team members are visible/i)).toBeVisible()
+
+  await page.getByRole('button', { name: 'Reports' }).click()
+  await expect(page.getByText('No tasks available yet.')).toBeVisible()
+})
