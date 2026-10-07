@@ -2,9 +2,9 @@
 
 Backend for the TeamFlow Smart Task Management and Collaboration Platform.
 
-## Phase 3: Testing and Refactoring
+## Phase 4: API Integration Testing
 
-The backend is now structured for the Week 4 and Week 5 engineering phase.
+The backend now includes an executable integration test path using an isolated in-memory MongoDB instance and HTTP-level assertions.
 
 ### Current features
 
@@ -24,32 +24,42 @@ The backend is now structured for the Week 4 and Week 5 engineering phase.
 - Smart assignment logic is isolated in an assignment service.
 - Controllers remain thin and delegate to services.
 - Project scoped authorization is kept inside service boundaries.
-- Database query responsibilities are kept out of the frontend.
 - Internal server errors are not returned directly to clients.
 
-### Automated test baseline
+### Automated test suites
 
-Run:
+Unit baseline:
 
-    npm install
     npm test
 
-Current tests cover:
+Integration suite:
 
-- Supported and unsupported task priorities
-- Supported and unsupported task statuses
-- Empty project member handling
-- Least loaded smart assignee selection
-Configure the existing `.env` file with `MONGODB_URI` and `JWT_SECRET`. You can also set `PORT`, `CLIENT_ORIGIN`, `SEED_MANAGER_EMAIL`, and `SEED_MANAGER_PASSWORD` as needed. Keep secrets out of version control.
+    npm run test:integration
 
-Additional API integration tests should be added when the MongoDB backed test environment is configured.
+The integration suite provisions a disposable in-memory MongoDB database, then exercises a realistic flow:
+
+    Login
+      -> Create Project
+      -> Add Member
+      -> Create Existing Work
+      -> Smart Assignment
+      -> Add Comment
+      -> Read Notifications
+      -> Read Activity
+      -> Verify Persistence
+
+It also verifies that a non-member cannot read a private project.
 
 ### Local setup
 
-1. Copy .env.example to .env.
-2. Set MONGODB_URI and JWT_SECRET.
-3. Install dependencies.
-4. Start MongoDB.
-5. Run npm run dev.
+1. Copy .env.example to .env for normal development only.
+2. Install dependencies.
+3. Run npm test for unit tests.
+4. Run npm run test:integration for isolated API integration tests.
+5. Run npm run dev for the development server.
 
 The repository intentionally excludes .env and node_modules.
+
+### Test note
+
+mongodb-memory-server downloads a MongoDB binary for the isolated test environment, so the first integration test run may take longer than subsequent runs.
