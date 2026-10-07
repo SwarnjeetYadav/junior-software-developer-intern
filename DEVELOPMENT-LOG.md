@@ -88,6 +88,17 @@ API request
 - Covered live project member search and add flow.
 - Updated CI to install Chromium and run the browser suite.
 
+
+### Phase 7: Authentication UX
+
+#### Completed
+- Demo mode is now session-only and no longer persists as an authenticated-looking local user after a page refresh.
+- Added a visible “Exit demo · Back to sign in” control in the workspace header.
+- Added a full Create Account flow to the login screen.
+- New accounts are created through the existing backend registration endpoint and are provisioned as TEAM_MEMBER users.
+- Added client-side password confirmation and minimum-length validation before registration.
+- Added browser regression coverage for account mode switching and demo exit.
+
 ## Current Architecture
 
 Frontend
