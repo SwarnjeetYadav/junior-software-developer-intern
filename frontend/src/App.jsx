@@ -4,15 +4,20 @@ import Topbar from './components/Topbar'
 import CreateTaskModal from './components/CreateTaskModal'
 import { tasks as initialTasks } from './data/teamflowMock'
 import Overview from './pages/Overview'
+import Login from './pages/Login'
 import { GenericPage } from './pages'
+import { useAuth } from './auth/AuthProvider'
 
 export default function App() {
+  const { user, logout, demoMode } = useAuth()
   const [page, setPage] = useState('Overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
   const [createdTasks, setCreatedTasks] = useState([])
 
   const allTasks = useMemo(() => [...createdTasks, ...initialTasks], [createdTasks])
+
+  if (!user) return <Login />
 
   const navigate = (nextPage) => {
     setPage(nextPage)
@@ -28,9 +33,8 @@ export default function App() {
   return (
     <div className="app-shell">
       <Sidebar page={page} onNavigate={navigate} open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
       <div className="app-main">
-        <Topbar page={page} onOpenMenu={() => setSidebarOpen(true)} />
+        <Topbar page={page} onOpenMenu={() => setSidebarOpen(true)} onLogout={logout} demoMode={demoMode} />
         <main className="content">
           {page === 'Overview' ? (
             <Overview
@@ -47,16 +51,8 @@ export default function App() {
           )}
         </main>
       </div>
-
-      {sidebarOpen ? (
-        <button className="mobile-overlay" type="button" onClick={() => setSidebarOpen(false)} aria-label="Close navigation" />
-      ) : null}
-
-      <CreateTaskModal
-        open={taskModalOpen}
-        onClose={() => setTaskModalOpen(false)}
-        onCreate={createTask}
-      />
+      {sidebarOpen ? <button className="mobile-overlay" type="button" onClick={() => setSidebarOpen(false)} aria-label="Close navigation" /> : null}
+      <CreateTaskModal open={taskModalOpen} onClose={() => setTaskModalOpen(false)} onCreate={createTask} />
     </div>
   )
 }
