@@ -5,7 +5,7 @@ import Badge from '../components/Badge'
 import ProjectCard from '../components/ProjectCard'
 import { pageCopy, projects as mockProjects, tasks, workload } from '../data/teamflowMock'
 
-export function GenericPage({ page, taskRows = tasks, onCreateTask, liveData }) {
+export function GenericPage({ page, taskRows = tasks, onCreateTask, onCreateProject, liveData }) {
   const copy = pageCopy[page] || pageCopy.Projects
   const remoteProjects = liveData.connected ? liveData.projects : []
   const rows = liveData.connected && liveData.tasks.length ? liveData.tasks : taskRows
@@ -19,11 +19,15 @@ export function GenericPage({ page, taskRows = tasks, onCreateTask, liveData }) 
       due: project.dueDate ? new Date(project.dueDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) : 'No due date',
       tasks: 'Live',
     })) : mockProjects
+
     return (
       <div className="page-stack">
-        <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
+        <section className="page-title-block page-title-inline">
+          <div><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></div>
+          <button className="primary-button primary-button-dark" type="button" onClick={onCreateProject}> <span>＋</span> New project</button>
+        </section>
         <div className="project-grid">{projectsToShow.map((project, index) => <ProjectCard key={project.name + index} project={project} />)}</div>
-        <div className="panel"><SectionHeader title="Project work queue" subtitle="Tasks from the current project feed." action="Create new" onAction={onCreateTask} /><TaskTable tasks={rows} /></div>
+        <div className="panel"><SectionHeader title="Project work queue" subtitle={liveData.connected ? 'Tasks from the current project feed.' : 'Demo task data for the UI review.'} action="Create new" onAction={onCreateTask} /><TaskTable tasks={rows} /></div>
       </div>
     )
   }
@@ -55,7 +59,7 @@ export function GenericPage({ page, taskRows = tasks, onCreateTask, liveData }) 
     return (
       <div className="page-stack">
         <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
-        <div className="panel settings-panel">{['Workspace name','Default task priority','Notification preferences','Smart assignment','Theme preference'].map((label) => <div className="setting-row" key={label}><div><strong>{label}</strong><p>Configured for the Product Team workspace.</p></div><button className="toggle toggle-on"><span /></button></div>)}</div>
+        <div className="panel settings-panel">{['Workspace name','Default task priority','Notification preferences','Smart assignment','Theme preference'].map((label) => <div className="setting-row" key={label}><div><strong>{label}</strong><p>Configured for the Product Team workspace.</p></div><button className="toggle toggle-on" type="button"><span /></button></div>)}</div>
       </div>
     )
   }
