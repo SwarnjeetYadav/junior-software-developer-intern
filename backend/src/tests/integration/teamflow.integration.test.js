@@ -90,6 +90,28 @@ describe('TeamFlow API end to end workflow', () => {
 
     expect(memberResponse.status).toBe(201)
 
+    const candidateResponse = await request(app)
+      .get('/api/v1/projects/' + projectId + '/members/candidates')
+      .query({ q: 'member@test' })
+      .set('Authorization', 'Bearer ' + token)
+
+    expect(candidateResponse.status).toBe(200)
+    expect(candidateResponse.body.data).toHaveLength(0)
+
+    const membersResponse = await request(app)
+      .get('/api/v1/projects/' + projectId + '/members')
+      .set('Authorization', 'Bearer ' + token)
+
+    expect(membersResponse.status).toBe(200)
+    expect(membersResponse.body.data).toHaveLength(2)
+
+    const duplicateMemberResponse = await request(app)
+      .post('/api/v1/projects/' + projectId + '/members')
+      .set('Authorization', 'Bearer ' + token)
+      .send({ userId: teammate._id })
+
+    expect(duplicateMemberResponse.status).toBe(409)
+
     // Give the manager one active task so smart assignment should prefer the teammate.
     const firstTaskResponse = await request(app)
       .post('/api/v1/tasks/project/' + projectId)
