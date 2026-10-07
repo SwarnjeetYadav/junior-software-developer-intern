@@ -18,7 +18,15 @@ async function ensureManager(projectId, userId, role) {
 }
 
 export async function listMembers(projectId, userId, role) {
-  await ensureManager(projectId, userId, role)
+  if (!mongoose.isValidObjectId(projectId)) throw new ApiError(400, 'Invalid project id')
+
+  const project = await Project.findById(projectId).lean()
+  if (!project) throw new ApiError(404, 'Project not found')
+
+  if (role !== 'ADMINISTRATOR' && String(project.ownerId) !== String(userId)) {
+    const member = await ProjectMember.exists({ projectId, userId })
+    if (!member) throw new ApiError(403, 'You are not a member of this project')
+  }
 
   return ProjectMember.find({ projectId })
     .populate('userId', 'name email role status')
