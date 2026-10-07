@@ -5,9 +5,8 @@ import ProjectMember from '../models/ProjectMember.js'
 import ActivityLog from '../models/ActivityLog.js'
 import Notification from '../models/Notification.js'
 import { ApiError } from '../utils/apiError.js'
-
-const priorities = new Set(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
-const statuses = new Set(['TODO', 'IN_PROGRESS', 'REVIEW', 'BLOCKED', 'COMPLETED'])
+import { isValidPriority, isValidStatus } from '../utils/taskRules.js'
+import { suggestAssignee } from './assignment.service.js'
 
 async function ensureProjectAccess(projectId, userId, role) {
   if (!mongoose.isValidObjectId(projectId)) throw new ApiError(400, 'Invalid project id')
@@ -22,24 +21,6 @@ async function ensureProjectAccess(projectId, userId, role) {
   return project
 }
 
-async function suggestAssignee(projectId) {
-  const members = await ProjectMember.find({ projectId }).select('userId').lean()
-  if (!members.length) return null
-
-  const ids = members.map((item) => item.userId)
-  const counts = await Task.aggregate([
-    { $match: { projectId: new mongoose.Types.ObjectId(projectId), assigneeId: { $in: ids }, status: { $ne: 'COMPLETED' } } },
-    { $group: { _id: '$assigneeId', activeTaskCount: { $sum: 1 } } },
-  ])
-  const load = new Map(counts.map((item) => [String(item._id), item.activeTaskCount]))
-
-  let best = ids[0]
-  for (const id of ids) {
-    if ((load.get(String(id)) || 0) < (load.get(String(best)) || 0)) best = id
-  }
-  return best
-}
-
 export async function createTask({ userId, role, projectId, payload }) {
   const project = await ensureProjectAccess(projectId, userId, role)
   const title = payload?.title?.trim()
@@ -48,7 +29,7 @@ export async function createTask({ userId, role, projectId, payload }) {
   if (title.length > 180) throw new ApiError(400, 'Task title is too long')
 
   const priority = payload.priority || 'MEDIUM'
-  if (!priorities.has(priority)) throw new ApiError(400, 'Invalid task priority')
+  if (!isValidPriority(priority)) throw new ApiError(400, 'Invalid task priority')
 
   const dueDate = payload.dueDate ? new Date(payload.dueDate) : null
   if (payload.dueDate && Number.isNaN(dueDate.getTime())) throw new ApiError(400, 'Invalid due date')
@@ -98,8 +79,8 @@ export async function listTasks({ userId, role, projectId, query = {} }) {
   await ensureProjectAccess(projectId, userId, role)
 
   const filter = { projectId }
-  if (query.status && statuses.has(query.status)) filter.status = query.status
-  if (query.priority && priorities.has(query.priority)) filter.priority = query.priority
+  if (query.status && isValidStatus(query.status)) filter.status = query.status
+  if (query.priority && isValidPriority(query.priority)) filter.priority = query.priority
   if (query.assigneeId && mongoose.isValidObjectId(query.assigneeId)) filter.assigneeId = query.assigneeId
 
   return Task.find(filter)
@@ -116,8 +97,8 @@ export async function updateTask({ userId, role, taskId, payload }) {
 
   await ensureProjectAccess(task.projectId, userId, role)
 
-  if (payload.status && !statuses.has(payload.status)) throw new ApiError(400, 'Invalid task status')
-  if (payload.priority && !priorities.has(payload.priority)) throw new ApiError(400, 'Invalid task priority')
+  if (payload.status && !isValidStatus(payload.status)) throw new ApiError(400, 'Invalid task status')
+  if (payload.priority && !isValidPriority(payload.priority)) throw new ApiError(400, 'Invalid task priority')
   if (payload.title !== undefined && !payload.title?.trim()) throw new ApiError(400, 'Task title cannot be empty')
 
   if (payload.assigneeId) {
