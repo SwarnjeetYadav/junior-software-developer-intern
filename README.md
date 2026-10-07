@@ -17,7 +17,7 @@ This repository records the weekly internship documentation and the actual TeamF
 
 ## Project Status
 
-**Documentation completed and active application development in progress.**
+**Documentation completed and application development in progress with live API integration and browser regression coverage.**
 
 ## Weekly Progress
 
@@ -32,41 +32,51 @@ This repository records the weekly internship documentation and the actual TeamF
 
 ## Application Build
 
-### Frontend Phase
+### Frontend
 
-The React frontend foundation is implemented under frontend.
+The React frontend is implemented under frontend.
 
 - Responsive TeamFlow workspace
-- Reusable navigation and dashboard components
-- Task creation modal
-- Workload aware smart assignment preview
-- Authentication screen
-- API client foundation
-- Demo mode for visual review
+- Live authenticated workspace loading
+- Live project listing and creation
+- Project-aware live task creation
+- Live task filtering by status and priority
+- Live task updates for status, priority, assignee and due date
+- Live task comments
+- Live project progress and member counts
+- Live team workload aggregation
+- Live project member search and add flow
+- Notification popover with mark-as-read
+- Activity feed
+- Demo mode for UI review
+- Playwright browser regression suite
 
-### Backend Phase
+### Backend
 
-The Express and MongoDB backend foundation is implemented under backend.
+The Express and MongoDB backend is implemented under backend.
 
 - Authentication and JWT
 - Role based access
 - Projects
 - Project membership
+- Member candidate search
 - Tasks
 - Smart assignment
 - Activity logging
 - Notifications
 - Dashboard summary
 - Centralized error handling
+- Vitest unit tests
+- Disposable MongoDB integration tests
 
-## Next Build Steps
+## CI
 
-1. Connect real authenticated frontend sessions to project and task API data.
-2. Add project creation and member management UI.
-3. Replace mock task creation with API backed persistence.
-4. Add comments, activity history, and notification UI.
-5. Add automated unit and integration tests.
-6. Refine performance, security, accessibility, and deployment configuration.
+GitHub Actions validates:
+
+- Backend unit tests
+- Backend API integration tests
+- Frontend production build
+- Chromium browser regression tests
 
 ## Repository Structure
 
@@ -81,12 +91,6 @@ The Express and MongoDB backend foundation is implemented under backend.
 
 ## Actual Application Build
 
-The six-week documentation is now being used as the engineering blueprint for a real TeamFlow application build.
-
-- Frontend foundation is implemented under frontend.
-- Express and MongoDB backend foundation is implemented under backend.
-- Authentication and API client foundation are connected.
-- A controlled local demo seed is available for backend development.
-- Live project and dashboard data can be loaded by the frontend when the backend is configured.
+The six-week documentation is now being used as the engineering blueprint for the TeamFlow application.
 
 See DEVELOPMENT-LOG.md for the implementation history and next milestones.
