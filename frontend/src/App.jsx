@@ -1,16 +1,30 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Sidebar from './components/Sidebar'
 import Topbar from './components/Topbar'
 import CreateTaskModal from './components/CreateTaskModal'
 import CreateProjectModal from './components/CreateProjectModal'
 import TaskDetailsModal from './components/TaskDetailsModal'
-import { projects as demoProjects, tasks as initialTasks } from './data/teamflowMock'
+import { projects as demoProjects } from './data/teamflowMock'
 import Overview from './pages/Overview'
 import Login from './pages/Login'
 import { GenericPage } from './pages'
 import { useAuth } from './auth/AuthProvider'
 import { useTeamflowData } from './hooks/useTeamflowData'
 import { api } from './lib/api'
+
+const ROUTES = {
+  Overview: '/',
+  Projects: '/projects',
+  'My Tasks': '/my-tasks',
+  Team: '/team',
+  Reports: '/reports',
+  Settings: '/settings',
+}
+
+function pageFromPath(pathname) {
+  const match = Object.entries(ROUTES).find(([, path]) => path === pathname)
+  return match?.[0] || 'Overview'
+}
 
 function LoadingScreen() {
   return (
@@ -25,12 +39,33 @@ function LoadingScreen() {
 export default function App() {
   const { user, logout, demoMode, authLoading } = useAuth()
   const liveData = useTeamflowData(Boolean(user) && !demoMode)
-  const [page, setPage] = useState('Overview')
+  const [page, setPage] = useState(() => pageFromPath(window.location.pathname))
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
   const [projectModalOpen, setProjectModalOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState(null)
-  const [createdTasks, setCreatedTasks] = useState([])
+
+  useEffect(() => {
+    const handlePopState = () => setPage(pageFromPath(window.location.pathname))
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  useEffect(() => {
+    if (authLoading) return
+
+    if (!user) {
+      if (window.location.pathname !== '/auth/login') {
+        window.history.replaceState({}, '', '/auth/login')
+      }
+      return
+    }
+
+    if (window.location.pathname === '/auth/login' || !Object.values(ROUTES).includes(window.location.pathname)) {
+      window.history.replaceState({}, '', ROUTES[page] || '/')
+      setPage((current) => Object.prototype.hasOwnProperty.call(ROUTES, current) ? current : 'Overview')
+    }
+  }, [user, authLoading, page])
 
   if (authLoading) return <LoadingScreen />
   if (!user) return <Login />
@@ -40,22 +75,20 @@ export default function App() {
     : liveData
 
   const navigate = (nextPage) => {
+    const nextPath = ROUTES[nextPage] || '/'
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({ page: nextPage }, '', nextPath)
+    }
     setPage(nextPage)
     setSelectedTask(null)
     setSidebarOpen(false)
   }
 
   const handleCreateTask = async (payload) => {
-    if (demoMode) {
-      setCreatedTasks((current) => [payload, ...current])
-      setTaskModalOpen(false)
-      setPage('My Tasks')
-      return
-    }
-
+    if (demoMode) return
     await api.createTask(payload.projectId, payload.payload)
     setTaskModalOpen(false)
-    setPage('My Tasks')
+    navigate('My Tasks')
     liveData.refresh()
   }
 
@@ -63,7 +96,7 @@ export default function App() {
     if (demoMode) return
     await api.createProject(payload)
     setProjectModalOpen(false)
-    setPage('Projects')
+    navigate('Projects')
     liveData.refresh()
   }
 
@@ -101,14 +134,13 @@ export default function App() {
           ) : (
             <GenericPage
               page={page}
-              taskRows={demoMode ? [...createdTasks, ...initialTasks] : activeData.tasks}
               onCreateTask={() => setTaskModalOpen(true)}
               onCreateProject={() => setProjectModalOpen(true)}
               onSelectTask={setSelectedTask}
               liveData={activeData}
               currentUserId={user.id}
               currentUser={user}
-              canManageProjects={user.role === 'ADMINISTRATOR' || user.role === 'PROJECT_MANAGER'}
+              canCreateProjects={!demoMode}
               onMembersChanged={liveData.refresh}
             />
           )}
