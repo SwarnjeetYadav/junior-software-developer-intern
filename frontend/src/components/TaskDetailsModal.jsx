@@ -11,21 +11,46 @@ const statusLabels = [
   ['BLOCKED', 'Blocked'],
   ['COMPLETED', 'Completed'],
 ]
+const priorityOptions = [
+  ['LOW', 'Low'],
+  ['MEDIUM', 'Medium'],
+  ['HIGH', 'High'],
+  ['CRITICAL', 'Critical'],
+]
 
-export default function TaskDetailsModal({ task, open, liveMode, onClose, onChanged }) {
+function memberInitials(name = 'TF') {
+  return name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()
+}
+
+export default function TaskDetailsModal({ task, open, liveMode, projectMembers = [], onClose, onChanged }) {
   const [comments, setComments] = useState([])
   const [comment, setComment] = useState('')
   const [status, setStatus] = useState(task?.statusValue || 'TODO')
+  const [priority, setPriority] = useState(task?.priorityValue || 'MEDIUM')
+  const [assigneeId, setAssigneeId] = useState(task?.assigneeId || '')
+  const [dueDate, setDueDate] = useState(task?.dueDate ? String(task.dueDate).slice(0, 10) : '')
   const [loading, setLoading] = useState(false)
   const [commentBusy, setCommentBusy] = useState(false)
+  const [savingField, setSavingField] = useState('')
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!open || !task || !liveMode || !task.apiId) return undefined
+    if (!open || !task) return undefined
+
+    setStatus(task.statusValue || 'TODO')
+    setPriority(task.priorityValue || 'MEDIUM')
+    setAssigneeId(task.assigneeId || '')
+    setDueDate(task.dueDate ? String(task.dueDate).slice(0, 10) : '')
+    setComment('')
+    setError('')
+
+    if (!liveMode || !task.apiId) {
+      setComments([])
+      return undefined
+    }
 
     let cancelled = false
     setLoading(true)
-    setError('')
 
     api.listComments(task.apiId)
       .then((result) => {
@@ -38,26 +63,48 @@ export default function TaskDetailsModal({ task, open, liveMode, onClose, onChan
         if (!cancelled) setLoading(false)
       })
 
-    setStatus(task.statusValue || 'TODO')
     return () => { cancelled = true }
   }, [open, task, liveMode])
 
   if (!open || !task) return null
 
-  const updateStatus = async (nextStatus) => {
-    if (!liveMode || !task.apiId) {
-      setStatus(nextStatus)
-      return
-    }
+  const saveField = async (field, value) => {
+    if (!liveMode || !task.apiId) return
 
+    setSavingField(field)
+    setError('')
     try {
-      setStatus(nextStatus)
-      await api.updateTask(task.apiId, { status: nextStatus })
+      await api.updateTask(task.apiId, { [field]: value })
       onChanged?.()
     } catch (err) {
       setError(err.message)
-      setStatus(task.statusValue || 'TODO')
+      if (field === 'status') setStatus(task.statusValue || 'TODO')
+      if (field === 'priority') setPriority(task.priorityValue || 'MEDIUM')
+      if (field === 'assigneeId') setAssigneeId(task.assigneeId || '')
+      if (field === 'dueDate') setDueDate(task.dueDate ? String(task.dueDate).slice(0, 10) : '')
+    } finally {
+      setSavingField('')
     }
+  }
+
+  const updateStatus = async (nextStatus) => {
+    setStatus(nextStatus)
+    await saveField('status', nextStatus)
+  }
+
+  const updatePriority = async (nextPriority) => {
+    setPriority(nextPriority)
+    await saveField('priority', nextPriority)
+  }
+
+  const updateAssignee = async (nextAssignee) => {
+    setAssigneeId(nextAssignee)
+    await saveField('assigneeId', nextAssignee || null)
+  }
+
+  const updateDueDate = async (nextDueDate) => {
+    setDueDate(nextDueDate)
+    await saveField('dueDate', nextDueDate || null)
   }
 
   const submitComment = async (event) => {
@@ -93,17 +140,48 @@ export default function TaskDetailsModal({ task, open, liveMode, onClose, onChan
         </div>
 
         <div className="task-detail-meta">
-          <div><span className="detail-label">Assignee</span><strong>{task.assigneeName || 'Unassigned'}</strong></div>
-          <div><span className="detail-label">Priority</span><Badge color={task.priority === 'High' || task.priority === 'Critical' ? 'rose' : task.priority === 'Medium' ? 'amber' : 'blue'}>{task.priority}</Badge></div>
+          <div>
+            <span className="detail-label">Assignee</span>
+            <strong>{task.assigneeName || 'Unassigned'}</strong>
+          </div>
+          <div>
+            <span className="detail-label">Priority</span>
+            <Badge color={task.priority === 'High' || task.priority === 'Critical' ? 'rose' : task.priority === 'Medium' ? 'amber' : 'blue'}>{task.priority}</Badge>
+          </div>
           <div><span className="detail-label">Due</span><strong>{task.due}</strong></div>
         </div>
 
-        <div className="field task-status-field">
-          <span>Status</span>
-          <select value={status} onChange={(event) => updateStatus(event.target.value)} disabled={!liveMode}>
-            {statusLabels.map(([value, label]) => <option value={value} key={value}>{label}</option>)}
-          </select>
-        </div>
+        {liveMode ? (
+          <div className="field-grid task-edit-grid">
+            <label className="field">
+              <span>Status</span>
+              <select value={status} onChange={(event) => updateStatus(event.target.value)} disabled={savingField === 'status'}>
+                {statusLabels.map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+              </select>
+            </label>
+            <label className="field">
+              <span>Priority</span>
+              <select value={priority} onChange={(event) => updatePriority(event.target.value)} disabled={savingField === 'priority'}>
+                {priorityOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+              </select>
+            </label>
+            <label className="field">
+              <span>Assignee</span>
+              <select value={assigneeId} onChange={(event) => updateAssignee(event.target.value)} disabled={savingField === 'assigneeId'}>
+                <option value="">Unassigned</option>
+                {projectMembers.map((member) => <option value={member.id} key={member.id}>{member.name}</option>)}
+              </select>
+            </label>
+            <label className="field">
+              <span>Due date</span>
+              <input type="date" value={dueDate} onChange={(event) => updateDueDate(event.target.value)} disabled={savingField === 'dueDate'} />
+            </label>
+          </div>
+        ) : (
+          <div className="field task-status-field"><span>Status</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="TODO">Todo</option><option value="IN_PROGRESS">In Progress</option><option value="REVIEW">Review</option><option value="BLOCKED">Blocked</option><option value="COMPLETED">Completed</option></select></div>
+        )}
+
+        {task.description ? <div className="task-description-block"><span className="detail-label">Description</span><p>{task.description}</p></div> : null}
 
         <div className="details-divider" />
 
@@ -114,7 +192,7 @@ export default function TaskDetailsModal({ task, open, liveMode, onClose, onChan
             <div className="comment-list">
               {comments.map((item) => (
                 <div className="comment-item" key={item._id}>
-                  <Avatar initials={(item.userId?.name || 'TF').split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()} color="violet" size="sm" />
+                  <Avatar initials={memberInitials(item.userId?.name)} color="violet" size="sm" />
                   <div><strong>{item.userId?.name || 'Team member'}</strong><p>{item.message}</p><small>{new Date(item.createdAt).toLocaleString('en-IN')}</small></div>
                 </div>
               ))}
