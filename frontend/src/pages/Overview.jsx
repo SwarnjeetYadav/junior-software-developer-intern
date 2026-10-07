@@ -5,7 +5,7 @@ import ProjectCard from '../components/ProjectCard'
 import TaskTable from '../components/TaskTable'
 import ActivityFeed from '../components/ActivityFeed'
 import WorkloadCard from '../components/WorkloadCard'
-import { activity, projects as mockProjects, stats as mockStats, tasks as mockTasks, workload } from '../data/teamflowMock'
+import { activity as mockActivity, projects as mockProjects, stats as mockStats, tasks as mockTasks, workload as mockWorkload } from '../data/teamflowMock'
 
 function mapRemoteStats(summary) {
   if (!summary) return mockStats
@@ -17,18 +17,30 @@ function mapRemoteStats(summary) {
   ]
 }
 
-export default function Overview({ onNavigate, onCreateTask, onSuggestAssignee, liveData }) {
+export default function Overview({ onNavigate, onCreateTask, onSuggestAssignee, onSelectTask, liveData }) {
   const remoteMode = liveData.connected
   const displayStats = remoteMode ? mapRemoteStats(liveData.summary) : mockStats
-  const displayProjects = remoteMode ? liveData.projects.map((project, index) => ({
-    name: project.name,
-    meta: 'Live workspace · Project',
-    progress: 0,
-    tone: ['violet', 'blue', 'green'][index % 3],
-    due: project.dueDate ? new Date(project.dueDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) : 'No due date',
-    tasks: 'Live',
-  })) : mockProjects
+  const displayProjects = remoteMode
+    ? liveData.projects.map((project, index) => ({
+        name: project.name,
+        meta: 'Live workspace · Project',
+        progress: 0,
+        tone: ['violet', 'blue', 'green'][index % 3],
+        due: project.dueDate ? new Date(project.dueDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) : 'No due date',
+        tasks: 'Live',
+      }))
+    : mockProjects
   const displayTasks = remoteMode && liveData.tasks.length ? liveData.tasks : mockTasks
+  const displayActivity = remoteMode && liveData.activity.length ? liveData.activity : mockActivity
+  const displayWorkload = remoteMode && liveData.members.length
+    ? liveData.members.map((member) => ({
+        initials: member.initials,
+        name: member.name,
+        tasks: member.activeTasks,
+        status: member.activeTasks <= 5 ? 'Light' : member.activeTasks <= 7 ? 'Balanced' : 'Busy',
+        tone: member.tone,
+      }))
+    : mockWorkload
 
   return (
     <div className="page-stack">
@@ -51,19 +63,19 @@ export default function Overview({ onNavigate, onCreateTask, onSuggestAssignee, 
 
       <section>
         <SectionHeader title="Active projects" subtitle="A quick snapshot of the work your team is shipping." action="View all projects" onAction={() => onNavigate('Projects')} />
-        <div className="project-grid">{displayProjects.length ? displayProjects.map((project, index) => <ProjectCard key={project.name + index} project={project} />) : <div className="empty-state">No projects yet. Create your first workspace project from the API.</div>}</div>
+        <div className="project-grid">{displayProjects.length ? displayProjects.map((project, index) => <ProjectCard key={project.name + index} project={project} />) : <div className="empty-state">No projects yet. Create your first workspace project.</div>}</div>
       </section>
 
       <section className="content-grid content-grid-main">
         <div className="panel task-panel">
           <SectionHeader title="Priority tasks" subtitle="The work most likely to need your attention." action="Open task board" onAction={() => onNavigate('My Tasks')} />
-          <TaskTable tasks={displayTasks} />
+          <TaskTable tasks={displayTasks} onSelectTask={onSelectTask} />
         </div>
-        <WorkloadCard members={workload} onSuggest={onSuggestAssignee} />
+        <WorkloadCard members={displayWorkload} onSuggest={onSuggestAssignee} />
       </section>
 
       <section className="content-grid content-grid-bottom">
-        <div className="panel"><SectionHeader title="Recent activity" subtitle="A lightweight audit trail of important work." /><ActivityFeed items={activity} /></div>
+        <div className="panel"><SectionHeader title="Recent activity" subtitle="A lightweight audit trail of important work." /><ActivityFeed items={displayActivity} /></div>
         <div className="panel">
           <SectionHeader title="Completion trend" subtitle="Completed tasks over the last 7 days." />
           <div className="trend-chart">{[42,55,48,72,60,82,76].map((v, i) => <div className="trend-column" key={i}><div className="trend-bar" style={{ height: v + '%' }} /></div>)}</div>
