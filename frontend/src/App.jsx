@@ -12,8 +12,18 @@ import { useAuth } from './auth/AuthProvider'
 import { useTeamflowData } from './hooks/useTeamflowData'
 import { api } from './lib/api'
 
+function LoadingScreen() {
+  return (
+    <div className="auth-loading-screen" role="status" aria-live="polite">
+      <span className="brand-mark">TF</span>
+      <strong>Loading TeamFlow…</strong>
+      <small>Checking your session</small>
+    </div>
+  )
+}
+
 export default function App() {
-  const { user, logout, demoMode } = useAuth()
+  const { user, logout, demoMode, authLoading } = useAuth()
   const liveData = useTeamflowData(Boolean(user) && !demoMode)
   const [page, setPage] = useState('Overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -22,7 +32,7 @@ export default function App() {
   const [selectedTask, setSelectedTask] = useState(null)
   const [createdTasks, setCreatedTasks] = useState([])
 
-
+  if (authLoading) return <LoadingScreen />
   if (!user) return <Login />
 
   const activeData = demoMode
@@ -31,6 +41,7 @@ export default function App() {
 
   const navigate = (nextPage) => {
     setPage(nextPage)
+    setSelectedTask(null)
     setSidebarOpen(false)
   }
 
