@@ -13,25 +13,13 @@ export default function CreateTaskModal({ open, onClose, onCreate, project, memb
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
-  const options = liveMode
-    ? members
-    : demoMembers
-
+  const options = liveMode ? members : demoMembers
   const suggested = useMemo(
     () => [...options].sort((a, b) => (a.activeTasks || 0) - (b.activeTasks || 0))[0],
     [options],
   )
 
   if (!open) return null
-
-  const reset = () => {
-    setTitle('')
-    setPriority('Medium')
-    setDueDate('')
-    setAssigneeId('')
-    setError('')
-    setBusy(false)
-  }
 
   const submit = async (event) => {
     event.preventDefault()
@@ -75,7 +63,13 @@ export default function CreateTaskModal({ open, onClose, onCreate, project, memb
           due: dueDate || 'Not set',
         })
       }
-      reset()
+
+      setTitle('')
+      setPriority('Medium')
+      setDueDate('')
+      setAssigneeId('')
+      setError('')
+      setBusy(false)
     } catch (err) {
       setError(err.message)
       setBusy(false)
@@ -92,7 +86,6 @@ export default function CreateTaskModal({ open, onClose, onCreate, project, memb
 
         <form onSubmit={submit}>
           <label className="field"><span>Task title</span><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. Finalize sprint review report" /></label>
-
           <div className="field-grid">
             <label className="field"><span>Priority</span><select value={priority} onChange={(event) => setPriority(event.target.value)}><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></label>
             <label className="field"><span>Due date</span><input type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} /></label>
@@ -122,13 +115,7 @@ export default function CreateTaskModal({ open, onClose, onCreate, project, memb
           </div>
 
           {error ? <div className="login-error">{error}</div> : null}
-
-          <div className="modal-actions">
-            <button type="button" className="ghost-dark-button" onClick={onClose} disabled={busy}>Cancel</button>
-            <button type="submit" className="primary-button primary-button-dark" disabled={busy}>
-              <Icon name="plus" size={15} /> {busy ? 'Creating...' : 'Create task'}
-            </button>
-          </div>
+          <div className="modal-actions"><button type="button" className="ghost-dark-button" onClick={onClose} disabled={busy}>Cancel</button><button type="submit" className="primary-button primary-button-dark" disabled={busy}><Icon name="plus" size={15} /> {busy ? 'Creating...' : 'Create task'}</button></div>
         </form>
       </section>
     </div>
