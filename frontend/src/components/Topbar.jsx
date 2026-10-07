@@ -13,7 +13,7 @@ export default function Topbar({ page, onOpenMenu, onLogout, onExitDemo, demoMod
     <header className="topbar">
       <div className="topbar-left">
         <button className="icon-button mobile-menu" type="button" onClick={onOpenMenu} aria-label="Open navigation"><Icon name="menu" size={20} /></button>
-        <div className="breadcrumb"><span>Product Team</span><span className="breadcrumb-sep">/</span><strong>{page}</strong></div>
+        <div className="breadcrumb"><span>{demoMode ? 'Product Team' : 'My Workspace'}</span><span className="breadcrumb-sep">/</span><strong>{page}</strong></div>
         {demoMode ? <button className="exit-demo-button" type="button" onClick={onExitDemo}>Exit demo · Back to sign in</button> : null}
       </div>
 
