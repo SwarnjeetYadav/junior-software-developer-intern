@@ -110,7 +110,7 @@ async function seedLiveSession(page) {
 
 test('demo workspace navigation and task creation remain functional', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('button', { name: /Use demo workspace/i }).click()
+  await page.getByRole('button', { name: /Preview demo workspace/i }).click()
   await expect(page.getByRole('heading', { name: /Good afternoon/i })).toBeVisible()
 
   await page.getByRole('button', { name: 'My Tasks' }).click()
