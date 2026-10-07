@@ -2,41 +2,61 @@
 
 The frontend for the TeamFlow Smart Task Management and Collaboration Platform.
 
-## Current phase
+## Current Phase
 
-Phase 1 establishes the reusable visual foundation of the product. The app includes a responsive workspace shell, dashboard, project cards, task table, activity feed, workload view, reports, settings, and a reusable task creation modal with a workload-aware smart assignment preview.
+The frontend now includes the reusable visual foundation and the first authentication layer.
 
-The current release intentionally uses mock data so the experience can be built and reviewed before API and database integration.
+### Implemented
+
+- Responsive workspace shell
+- Sidebar and topbar navigation
+- Overview dashboard
+- Project cards
+- Task table
+- Team workload view
+- Recent activity feed
+- Reports and settings views
+- Reusable Create Task modal
+- Workload aware smart assignment preview
+- Login screen
+- API client for the TeamFlow backend
+- Local demo workspace mode
+
+The UI currently keeps dashboard mock data isolated so the visual experience can be reviewed without a running database. Real authentication is connected to the backend API.
 
 ## Structure
 
-- `src/components` — reusable UI components
-- `src/data` — mock/domain data used by the prototype
-- `src/pages` — page level compositions
-- `src/App.jsx` — application state and navigation
+- src/components - reusable UI primitives and feature components
+- src/pages - page level compositions
+- src/data - mock and domain data
+- src/auth - authentication provider
+- src/lib - API client and integration helpers
+- src/App.jsx - application state and navigation
 
-## Run locally
+## Run
 
-```bash
 npm install
 npm run dev
-```
 
-## Product sequence
+## API Configuration
+
+Copy .env.example to .env and set the backend API base URL if it differs from http://localhost:5000/api/v1.
+
+## Build Sequence
 
 1. Reusable frontend foundation
-2. API and MongoDB integration
-3. Authentication and role based access
-4. Project and task CRUD
-5. Smart assignment service
-6. Notifications, activity history, and reports
-7. Automated testing and refinement
+2. Express and MongoDB backend
+3. Authentication integration
+4. Project and task persistence
+5. Smart assignment service integration
+6. Notifications and activity history
+7. Automated testing and production refinement
 
-## Design principles
+## Design Principles
 
-- Feature based component composition
-- Reusable visual primitives
+- Reusable components
+- Feature oriented composition
 - Data driven UI
 - Responsive layouts
-- Thin page components
-- Clear separation between UI data and business logic
+- Clear separation between UI and API logic
+- No secrets in the frontend repository
