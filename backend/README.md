@@ -1,56 +1,53 @@
 # TeamFlow API
 
-Backend foundation for the TeamFlow Smart Task Management and Collaboration Platform.
+Backend for the TeamFlow Smart Task Management and Collaboration Platform.
 
-## Current Phase
+## Phase 3: Testing and Refactoring
 
-Phase 2 adds the Express and MongoDB backend foundation aligned with the Week 2 architecture and Week 3 feature prototype.
+The backend is now structured for the Week 4 and Week 5 engineering phase.
 
-## Implemented
+### Current features
 
-- Health endpoint
 - JWT authentication
-- User registration and login
 - Role based authorization
-- Project creation and listing
-- Project scoped access checks
-- Project member listing and addition
-- Task creation and listing
-- Task update for status priority assignee and due date
-- Workload aware smart assignment
+- Projects and project membership
+- Tasks and smart assignment
 - Activity logging
-- In application assignment notifications
+- Notifications
 - Dashboard summary
+- Comments
 - Centralized API error handling
 
-## API Base
+### Refactoring improvements
 
-/api/v1
+- Task status and priority rules are centralized.
+- Smart assignment logic is isolated in an assignment service.
+- Controllers remain thin and delegate to services.
+- Project scoped authorization is kept inside service boundaries.
+- Database query responsibilities are kept out of the frontend.
+- Internal server errors are not returned directly to clients.
 
-## Endpoints
+### Automated test baseline
 
-POST /auth/register
-POST /auth/login
-GET /auth/me
-GET /projects
-POST /projects
-GET /projects/:projectId
-GET /projects/:projectId/members
-POST /projects/:projectId/members
-GET /tasks/project/:projectId
-POST /tasks/project/:projectId
-PATCH /tasks/:taskId
-GET /dashboard/summary
-GET /health
+Run:
 
-## Setup
+    npm install
+    npm test
 
-Copy .env.example to .env and provide MONGODB_URI and JWT_SECRET.
+Current tests cover:
+- Supported and unsupported task priorities
+- Supported and unsupported task statuses
+- Empty project member handling
+- Least loaded smart assignee selection
 
-Install dependencies with npm install and run npm run dev.
+Additional API integration tests should be added when the MongoDB backed test environment is configured.
 
-Registration creates a Team Member account. Elevated roles should be provisioned by an administrator or controlled seed process rather than supplied by an open registration request.
+### Local setup
 
-## Security
+1. Copy .env.example to .env.
+2. Set MONGODB_URI and JWT_SECRET.
+3. Install dependencies.
+4. Start MongoDB.
+5. Run npm run dev.
 
-Do not commit .env or secrets. Passwords are stored as hashes. Protected endpoints require a Bearer access token. Project membership is checked before project scoped operations and backend validation remains authoritative.
+The repository intentionally excludes .env and node_modules.
