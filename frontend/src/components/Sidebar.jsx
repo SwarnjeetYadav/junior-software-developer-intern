@@ -22,7 +22,7 @@ export default function Sidebar({ page, onNavigate, open, onClose, user, liveDat
 
       <div className="workspace-switcher">
         <span className="workspace-logo">P</span>
-        <span className="workspace-copy"><small>Workspace</small><strong>Product Team</strong></span>
+        <span className="workspace-copy"><small>Workspace</small><strong>{liveData?.connected ? 'My Workspace' : 'Product Team'}</strong></span>
         <span className="chevron">⌄</span>
       </div>
 
