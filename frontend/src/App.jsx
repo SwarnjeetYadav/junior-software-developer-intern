@@ -22,7 +22,7 @@ export default function App() {
   const [selectedTask, setSelectedTask] = useState(null)
   const [createdTasks, setCreatedTasks] = useState([])
 
-  const allTasks = useMemo(() => [...createdTasks, ...initialTasks], [createdTasks])
+  const allTasks = useMemo(() => [...createdTasks], [createdTasks])
 
   if (!user) return <Login />
 
@@ -86,16 +86,19 @@ export default function App() {
               onSuggestAssignee={() => setTaskModalOpen(true)}
               onSelectTask={setSelectedTask}
               liveData={activeData}
+              user={user}
             />
           ) : (
             <GenericPage
               page={page}
-              taskRows={demoMode ? allTasks : activeData.tasks}
+              taskRows={demoMode ? [...createdTasks, ...initialTasks] : activeData.tasks}
               onCreateTask={() => setTaskModalOpen(true)}
               onCreateProject={() => setProjectModalOpen(true)}
               onSelectTask={setSelectedTask}
               liveData={activeData}
               currentUserId={user.id}
+              currentUser={user}
+              canManageProjects={user.role === 'ADMINISTRATOR' || user.role === 'PROJECT_MANAGER'}
               onMembersChanged={liveData.refresh}
             />
           )}
