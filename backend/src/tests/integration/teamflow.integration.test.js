@@ -239,6 +239,18 @@ describe('TeamFlow API end to end workflow', () => {
     expect(projectsResponse.status).toBe(200)
     expect(projectsResponse.body.data).toHaveLength(1)
     expect(projectsResponse.body.data[0].name).toBe('My First TeamFlow Project')
+
+    const taskResponse = await request(app)
+      .post('/api/v1/tasks/project/' + response.body.data._id)
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        title: 'My first task',
+        priority: 'MEDIUM',
+      })
+
+    expect(taskResponse.status).toBe(201)
+    expect(taskResponse.body.data.title).toBe('My first task')
+    expect(String(taskResponse.body.data.createdBy)).toBe(String(user._id))
   })
 
   it('rejects access to a project for a non-member', async () => {
