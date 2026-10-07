@@ -331,7 +331,10 @@ export function GenericPage({
       return (
         <div className="page-stack">
           <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
-          <div className="panel settings-panel">{['Workspace name','Default task priority','Notification preferences','Smart assignment','Theme preference'].map((label) => <div className="setting-row" key={label}><div><strong>{label}</strong><p>Configured for the Product Team demo workspace.</p></div><button className="toggle toggle-on" type="button"><span /></button></div>)}</div>
+          <div className="panel settings-panel">
+            <div className="setting-row"><div><strong>Demo mode</strong><p>These values belong only to the local demo workspace.</p></div><span className="setting-value">Preview</span></div>
+            <div className="setting-row"><div><strong>Sample projects</strong><p>Demo records are displayed only while Preview Demo is active.</p></div><span className="setting-value">Enabled</span></div>
+          </div>
         </div>
       )
     }
@@ -351,14 +354,6 @@ export function GenericPage({
   }
 
   return (
-      <div className="page-stack">
-        <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
-        <div className="panel settings-panel">{['Workspace name','Default task priority','Notification preferences','Smart assignment','Theme preference'].map((label) => <div className="setting-row" key={label}><div><strong>{label}</strong><p>Configured for the Product Team workspace.</p></div><button className="toggle toggle-on" type="button"><span /></button></div>)}</div>
-      </div>
-    )
-  }
-
-  return (
     <div className="page-stack">
       <section className="page-title-block page-title-inline">
         <div><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></div>
@@ -367,7 +362,7 @@ export function GenericPage({
       {liveData.connected ? <TaskFilters search={search} setSearch={setSearch} status={status} setStatus={setStatus} priority={priority} setPriority={setPriority} /> : null}
       <div className="panel">
         <SectionHeader
-          title={page === 'My Tasks' ? 'Your live task queue' : 'Task queue'}
+          title={page === 'My Tasks' ? 'Your task queue' : 'Task queue'}
           subtitle={liveData.connected ? rows.length + ' matching task' + (rows.length === 1 ? '' : 's') + ' from the TeamFlow API.' : 'Demo task data for the UI review.'}
         />
         <TaskTable tasks={rows} onSelectTask={onSelectTask} />
