@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import Sidebar from './components/Sidebar'
 import Topbar from './components/Topbar'
 import CreateTaskModal from './components/CreateTaskModal'
@@ -22,7 +22,6 @@ export default function App() {
   const [selectedTask, setSelectedTask] = useState(null)
   const [createdTasks, setCreatedTasks] = useState([])
 
-  const allTasks = useMemo(() => [...createdTasks], [createdTasks])
 
   if (!user) return <Login />
 
