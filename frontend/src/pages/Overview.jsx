@@ -21,13 +21,14 @@ export default function Overview({ onNavigate, onCreateTask, onSuggestAssignee, 
   const remoteMode = liveData.connected
   const displayStats = remoteMode ? mapRemoteStats(liveData.summary) : mockStats
   const displayProjects = remoteMode
-    ? liveData.projects.map((project, index) => ({
+    ? liveData.projects.map((project) => ({
         name: project.name,
-        meta: 'Live workspace · Project',
-        progress: 0,
-        tone: ['violet', 'blue', 'green'][index % 3],
+        meta: (project.status || 'ACTIVE').replaceAll('_', ' ') + ' · ' + (project.memberCount || 0) + ' members',
+        progress: project.progress || 0,
+        tone: project.tone || 'violet',
         due: project.dueDate ? new Date(project.dueDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) : 'No due date',
-        tasks: 'Live',
+        tasks: (project.completedTaskCount || 0) + ' / ' + (project.taskCount || 0) + ' tasks',
+        members: project.members || [],
       }))
     : mockProjects
   const displayTasks = remoteMode && liveData.tasks.length ? liveData.tasks : mockTasks
