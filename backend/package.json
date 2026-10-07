@@ -7,7 +7,7 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "seed:demo": "node src/scripts/seedDemo.js",
-    "test": "vitest run",
+    "test": "vitest run src/tests/taskRules.test.js src/tests/assignment.service.test.js",
     "test:watch": "vitest",
     "test:integration": "vitest run src/tests/integration"
   },
