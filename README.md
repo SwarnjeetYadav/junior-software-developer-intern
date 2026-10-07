@@ -78,3 +78,15 @@ The Express and MongoDB backend foundation is implemented under backend.
 - Week-6-Testing-and-Final-Review
 - frontend
 - backend
+
+## Actual Application Build
+
+The six-week documentation is now being used as the engineering blueprint for a real TeamFlow application build.
+
+- Frontend foundation is implemented under frontend.
+- Express and MongoDB backend foundation is implemented under backend.
+- Authentication and API client foundation are connected.
+- A controlled local demo seed is available for backend development.
+- Live project and dashboard data can be loaded by the frontend when the backend is configured.
+
+See DEVELOPMENT-LOG.md for the implementation history and next milestones.
