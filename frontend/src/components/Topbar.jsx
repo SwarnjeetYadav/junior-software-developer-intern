@@ -3,7 +3,7 @@ import Icon from './Icon'
 import { useState } from 'react'
 import { currentUser } from '../data/teamflowMock'
 
-export default function Topbar({ page, onOpenMenu, onLogout, demoMode, notifications = [], onMarkRead, user: propUser }) {
+export default function Topbar({ page, onOpenMenu, onLogout, onExitDemo, demoMode, notifications = [], onMarkRead, user: propUser }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState(false)
   const user = propUser || (demoMode ? currentUser : JSON.parse(localStorage.getItem('teamflow_user') || 'null') || currentUser)
@@ -14,6 +14,7 @@ export default function Topbar({ page, onOpenMenu, onLogout, demoMode, notificat
       <div className="topbar-left">
         <button className="icon-button mobile-menu" type="button" onClick={onOpenMenu} aria-label="Open navigation"><Icon name="menu" size={20} /></button>
         <div className="breadcrumb"><span>Product Team</span><span className="breadcrumb-sep">/</span><strong>{page}</strong></div>
+        {demoMode ? <button className="exit-demo-button" type="button" onClick={onExitDemo}>Exit demo · Back to sign in</button> : null}
       </div>
 
       <div className="topbar-actions">
@@ -46,7 +47,7 @@ export default function Topbar({ page, onOpenMenu, onLogout, demoMode, notificat
             <span className="user-chip-name">{user.name}</span>
             <span className="chevron">⌄</span>
           </button>
-          {menuOpen ? <div className="profile-dropdown"><strong>{user.role || 'Project Manager'}</strong>{demoMode ? <span>Demo workspace</span> : <span>Connected to API</span>}<button type="button" onClick={onLogout}>Sign out</button></div> : null}
+          {menuOpen ? <div className="profile-dropdown"><strong>{user.role || 'Project Manager'}</strong>{demoMode ? <span>Demo workspace</span> : <span>Connected to API</span>}<button type="button" onClick={onLogout}>{demoMode ? 'Exit demo & return to login' : 'Sign out'}</button></div> : null}
         </div>
       </div>
     </header>
