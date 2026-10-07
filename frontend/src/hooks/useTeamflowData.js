@@ -1,30 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { api } from '../lib/api'
 
-const statusLabel = {
-  TODO: 'Todo',
-  IN_PROGRESS: 'In Progress',
-  REVIEW: 'Review',
-  BLOCKED: 'Blocked',
-  COMPLETED: 'Completed',
-}
-
-const priorityLabel = {
-  LOW: 'Low',
-  MEDIUM: 'Medium',
-  HIGH: 'High',
-  CRITICAL: 'Critical',
-}
+const statusLabel = { TODO: 'Todo', IN_PROGRESS: 'In Progress', REVIEW: 'Review', BLOCKED: 'Blocked', COMPLETED: 'Completed' }
+const priorityLabel = { LOW: 'Low', MEDIUM: 'Medium', HIGH: 'High', CRITICAL: 'Critical' }
 
 export function useTeamflowData(enabled) {
-  const [state, setState] = useState({
-    loading: false,
-    connected: false,
-    error: '',
-    summary: null,
-    projects: [],
-    tasks: [],
-  })
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [state, setState] = useState({ loading: false, connected: false, error: '', summary: null, projects: [], tasks: [] })
+
+  const refresh = useCallback(() => setRefreshKey((value) => value + 1), [])
 
   useEffect(() => {
     let cancelled = false
@@ -32,13 +16,8 @@ export function useTeamflowData(enabled) {
 
     const load = async () => {
       setState((current) => ({ ...current, loading: true, error: '' }))
-
       try {
-        const [dashboardResult, projectsResult] = await Promise.all([
-          api.dashboard(),
-          api.listProjects(),
-        ])
-
+        const [dashboardResult, projectsResult] = await Promise.all([api.dashboard(), api.listProjects()])
         let remoteTasks = []
         const firstProject = projectsResult.data?.[0]
 
@@ -68,19 +47,14 @@ export function useTeamflowData(enabled) {
         }
       } catch (error) {
         if (!cancelled) {
-          setState((current) => ({
-            ...current,
-            loading: false,
-            connected: false,
-            error: error.message,
-          }))
+          setState((current) => ({ ...current, loading: false, connected: false, error: error.message }))
         }
       }
     }
 
     load()
     return () => { cancelled = true }
-  }, [enabled])
+  }, [enabled, refreshKey])
 
-  return state
+  return { ...state, refresh }
 }
