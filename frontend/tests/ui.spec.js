@@ -127,6 +127,7 @@ test('live Projects view uses API data and task filters', async ({ page }) => {
   await page.goto('/')
 
   await page.getByRole('button', { name: 'Projects', exact: true }).click()
+  await expect(page).toHaveURL(/\/projects$/)
   await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible()
   await expect(page.getByText('TeamFlow Web App')).toBeVisible()
   await expect(page.getByText('50%')).toBeVisible()
@@ -148,6 +149,7 @@ test('live Team view can search and add a project member', async ({ page }) => {
   await page.goto('/')
 
   await page.getByRole('button', { name: 'Team', exact: true }).click()
+  await expect(page).toHaveURL(/\/team$/)
   await expect(page.getByRole('heading', { name: 'Manage project members' })).toBeVisible()
 
   await page.getByPlaceholder(/Priya or priya@example.com/i).fill('Priya')
@@ -277,6 +279,11 @@ test('live workspace navigation never drops to a blank page', async ({ page }) =
     ['Settings', 'Settings'],
   ]) {
     await page.getByRole('button', { name: label, exact: true }).click()
+    const route = label === 'My Tasks' ? '/my-tasks' : '/' + label.toLowerCase()
+    await expect(page).toHaveURL(new RegExp(route.replace('/', '\\/') + '
+  }
+})
+))
     await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible()
   }
 })
