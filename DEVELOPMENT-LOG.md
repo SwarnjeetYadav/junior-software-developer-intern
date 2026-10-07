@@ -122,6 +122,19 @@ API request
 - Increased UI typography across navigation, dashboard, tables, cards, forms, modals, reports and settings for a more readable balanced scale.
 - Added browser regression coverage for authenticated navigation across Projects, My Tasks, Team, Reports and Settings.
 
+
+### Phase 10: URL Routing, Create Project and Typography Refinement
+
+#### Completed
+- Added stable client-side routes for Overview, Projects, My Tasks, Team, Reports and Settings.
+- Browser back/forward navigation now restores the corresponding workspace page.
+- Authenticated sessions are redirected away from `/auth/login`; unauthenticated sessions are normalized to the login route.
+- Added a functional Create Project action to the live Projects page for authenticated users.
+- The backend now permits authenticated users to create projects; the creator becomes the project owner and initial project member.
+- Project member management remains owner/administrator controlled.
+- Added a final typography refinement pass that increases secondary/subtext sizes for readability without oversized headings.
+- Added regression coverage for page URLs and project-creation access.
+
 ## Current Architecture
 
 Frontend
