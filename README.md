@@ -14,13 +14,13 @@ This repository records the weekly internship work, documentation, planning, imp
 - End Date: 10 November 2026
 
 ## Project Status
-Week 1 planning and requirements analysis completed.
+**Week 1 and Week 2 completed.**
 
 ## Weekly Progress
 | Week | Focus | Status |
 |---|---|---|
 | Week 1 | Project Planning and Requirements Analysis | Completed |
-| Week 2 | System Design | Planned |
+| Week 2 | Design Documentation and Architecture Planning | Completed |
 | Week 3 | Core Development | Planned |
 | Week 4 | Feature Development | Planned |
 | Week 5 | Integration and Refinement | Planned |
@@ -28,11 +28,11 @@ Week 1 planning and requirements analysis completed.
 
 ## Repository Structure
 - `Week-1-Project-Planning/` - planning and requirements
-- `Week-2-System-Design/` - architecture, database, API and UI design
+- `Week-2-System-Design/` - architecture, data flow, modules, API planning and technology decisions
 - `Week-3-Core-Development/` - authentication and foundational modules
 - `Week-4-Feature-Development/` - project and task features
 - `Week-5-Integration-and-Refinement/` - dashboard, notifications and integration
 - `Week-6-Testing-and-Final-Review/` - testing, fixes, documentation and final review
 
 ## Project Note
-TeamFlow is a hypothetical project created for the internship task and planning exercise. The repository will be updated weekly with the work appropriate to each internship task.
+TeamFlow is a hypothetical project created for the internship tasks and planning exercises. The repository will be updated weekly with work appropriate to each assigned task.
