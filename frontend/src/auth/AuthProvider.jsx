@@ -56,16 +56,8 @@ export function AuthProvider({ children }) {
         if (!cancelled) setAuthLoading(false)
       })
 
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [])
-
-  useEffect(() => {
-    if (user && window.location.pathname === '/auth/login') {
-      window.history.replaceState({}, '', '/')
-    }
-  }, [user])
 
   const login = async (credentials) => {
     const result = await api.login(credentials)
@@ -75,7 +67,6 @@ export function AuthProvider({ children }) {
     setUser(result.data.user)
     setDemoMode(false)
     setAuthLoading(false)
-    window.history.replaceState({}, '', '/')
     return result.data.user
   }
 
@@ -87,7 +78,6 @@ export function AuthProvider({ children }) {
     setUser(result.data.user)
     setDemoMode(false)
     setAuthLoading(false)
-    window.history.replaceState({}, '', '/')
     return result.data.user
   }
 
@@ -97,7 +87,6 @@ export function AuthProvider({ children }) {
     setUser(demoUser)
     setDemoMode(true)
     setAuthLoading(false)
-    window.history.replaceState({}, '', '/')
   }
 
   const logout = () => {
@@ -105,7 +94,6 @@ export function AuthProvider({ children }) {
     setUser(null)
     setDemoMode(false)
     setAuthLoading(false)
-    window.history.replaceState({}, '', '/')
   }
 
   const value = useMemo(
