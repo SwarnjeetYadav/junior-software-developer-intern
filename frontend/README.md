@@ -40,7 +40,7 @@ npm run dev
 
 ## API Configuration
 
-Copy .env.example to .env and set the backend API base URL if it differs from http://localhost:5000/api/v1.
+Configure the existing `.env` file with `VITE_API_BASE_URL` if the backend API base URL differs from `http://localhost:5000/api/v1`.
 
 ## Build Sequence
 

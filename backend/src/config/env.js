@@ -1,9 +1,17 @@
 import 'dotenv/config'
 
+const mongoUri = process.env.MONGODB_URI?.trim()
+const jwtSecret = process.env.JWT_SECRET?.trim()
+
+if (!mongoUri) throw new Error('MONGODB_URI is required in backend/.env')
+if (!jwtSecret) throw new Error('JWT_SECRET is required in backend/.env')
+
 export const env = {
   port: Number(process.env.PORT || 5000),
   nodeEnv: process.env.NODE_ENV || 'development',
-  mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/teamflow',
-  jwtSecret: process.env.JWT_SECRET || 'development_only_change_me',
+  mongoUri,
+  jwtSecret,
   clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+  SEED_MANAGER_EMAIL: process.env.SEED_MANAGER_EMAIL || 'manager@example.com',
+  SEED_MANAGER_PASSWORD: process.env.SEED_MANAGER_PASSWORD || '123456'
 }

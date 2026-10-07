@@ -35,10 +35,12 @@ Run:
     npm test
 
 Current tests cover:
+
 - Supported and unsupported task priorities
 - Supported and unsupported task statuses
 - Empty project member handling
 - Least loaded smart assignee selection
+Configure the existing `.env` file with `MONGODB_URI` and `JWT_SECRET`. You can also set `PORT`, `CLIENT_ORIGIN`, `SEED_MANAGER_EMAIL`, and `SEED_MANAGER_PASSWORD` as needed. Keep secrets out of version control.
 
 Additional API integration tests should be added when the MongoDB backed test environment is configured.
 
