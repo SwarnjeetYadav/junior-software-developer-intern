@@ -200,7 +200,7 @@ export function GenericPage({
   const rows = filterRows(page === 'Projects' && selectedProjectId ? projectRows : myRows, search, status, priority)
 
   if (page === 'Projects') {
-    const projectsToShow = remoteProjects.length
+    const projectsToShow = liveData.connected
       ? remoteProjects.map((project) => projectCard(project, liveData))
       : mockProjects
 
@@ -208,90 +208,149 @@ export function GenericPage({
       <div className="page-stack">
         <section className="page-title-block page-title-inline">
           <div><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></div>
-          <button className="primary-button primary-button-dark" type="button" onClick={onCreateProject}>＋ New project</button>
+          {canManageProjects ? <button className="primary-button primary-button-dark" type="button" onClick={onCreateProject}>＋ New project</button> : null}
         </section>
 
         {liveData.connected ? (
-          <div className="project-toolbar">
-            <span>{remoteProjects.length} live project{remoteProjects.length === 1 ? '' : 's'}</span>
-            {liveData.loading ? <small>Refreshing workspace...</small> : null}
-          </div>
-        ) : null}
-
-        <div className="project-grid">
-          {projectsToShow.length ? projectsToShow.map((project) => (
-            <ProjectCard
-              key={project._id || project.name}
-              project={project}
-              onOpen={remoteProjects.length ? (item) => setSelectedProjectId(item._id) : undefined}
-            />
-          )) : <div className="empty-state">No projects yet. Create your first workspace project.</div>}
-        </div>
-
-        {remoteProjects.length ? (
-          <div className="panel">
-            <div className="project-queue-head">
-              <SectionHeader
-                title="Project work queue"
-                subtitle="Live tasks for the selected project."
-                action="Create new"
-                onAction={onCreateTask}
-              />
-              <select value={selectedProjectId} onChange={(event) => setSelectedProjectId(event.target.value)} aria-label="Select project task queue">
-                {remoteProjects.map((project) => <option value={project._id} key={project._id}>{project.name}</option>)}
-              </select>
+          <>
+            <div className="project-toolbar">
+              <span>{remoteProjects.length} project{remoteProjects.length === 1 ? '' : 's'} available to your account</span>
+              {liveData.loading ? <small>Refreshing workspace...</small> : null}
             </div>
-            <TaskFilters search={search} setSearch={setSearch} status={status} setStatus={setStatus} priority={priority} setPriority={setPriority} />
-            <TaskTable tasks={rows} onSelectTask={onSelectTask} />
-          </div>
+            <div className="project-grid">
+              {projectsToShow.length
+                ? projectsToShow.map((project) => <ProjectCard key={project._id} project={project} onOpen={(item) => setSelectedProjectId(item._id)} />)
+                : <div className="empty-state">No projects yet. A Project Manager can create a project and add you to it.</div>}
+            </div>
+
+            {remoteProjects.length ? (
+              <div className="panel">
+                <div className="project-queue-head">
+                  <SectionHeader title="Project work queue" subtitle="Live tasks for the selected project." action="Create new" onAction={onCreateTask} />
+                  <select value={selectedProjectId} onChange={(event) => setSelectedProjectId(event.target.value)} aria-label="Select project task queue">
+                    {remoteProjects.map((project) => <option value={project._id} key={project._id}>{project.name}</option>)}
+                  </select>
+                </div>
+                <TaskFilters search={search} setSearch={setSearch} status={status} setStatus={setStatus} priority={priority} setPriority={setPriority} />
+                <TaskTable tasks={rows} onSelectTask={onSelectTask} />
+              </div>
+            ) : (
+              <div className="panel">
+                <SectionHeader title="Project work queue" subtitle="There is no project to show yet." />
+                <div className="empty-state">Create a project first, then its tasks will appear here.</div>
+              </div>
+            )}
+          </>
         ) : (
-          <div className="panel"><SectionHeader title="Project work queue" subtitle="Demo task data for the UI review." action="Create new" onAction={onCreateTask} /><TaskTable tasks={taskRows} onSelectTask={onSelectTask} /></div>
+          <>
+            <div className="project-grid">{projectsToShow.map((project, index) => <ProjectCard key={project.name + index} project={project} />)}</div>
+            <div className="panel"><SectionHeader title="Project work queue" subtitle="Demo task data for the UI review." action="Create new" onAction={onCreateTask} /><TaskTable tasks={taskRows} onSelectTask={onSelectTask} /></div>
+          </>
         )}
       </div>
     )
   }
 
   if (page === 'Team') {
-    const people = liveData.connected && liveData.members.length
-      ? liveData.members
-      : workload.map((member) => ({ ...member, email: 'demo@example.com', role: 'TEAM_MEMBER' }))
+    const people = liveData.connected ? liveData.members : workload
 
     return (
       <div className="page-stack">
         <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
-        {liveData.connected ? <MemberManager projects={remoteProjects} membersByProject={liveData.membersByProject} onChanged={onMembersChanged} /> : null}
-        <div className="panel"><SectionHeader title="Team capacity" subtitle={liveData.connected ? 'Live members aggregated across your projects.' : 'Mock data from the TeamFlow planning model.'} /><div className="team-grid">
-          {people.map((member) => (
-            <div className="team-card" key={member.id || member.name}>
-              <Avatar initials={member.initials} color={member.tone} size="lg" />
-              <div><h3>{member.name}</h3><p>{member.email}</p></div>
-              <Badge color={member.activeTasks <= 5 ? 'blue' : member.activeTasks <= 7 ? 'green' : 'amber'}>{member.activeTasks <= 5 ? 'Light' : member.activeTasks <= 7 ? 'Balanced' : 'Busy'}</Badge>
-              <span className="team-stat">{member.activeTasks || 0} active tasks · {member.projectIds?.length || 0} project{(member.projectIds?.length || 0) === 1 ? '' : 's'}</span>
+        {liveData.connected && canManageProjects && remoteProjects.length ? (
+          <MemberManager projects={remoteProjects} membersByProject={liveData.membersByProject} onChanged={onMembersChanged} />
+        ) : null}
+        <div className="panel">
+          <SectionHeader title="Team capacity" subtitle={liveData.connected ? 'Live members aggregated across your projects.' : 'Mock data from the TeamFlow planning model.'} />
+          {liveData.connected && !remoteProjects.length ? (
+            <div className="empty-state">No team members are visible because you are not assigned to any project yet.</div>
+          ) : people.length ? (
+            <div className="team-grid">
+              {people.map((member) => (
+                <div className="team-card" key={member.id || member.name}>
+                  <Avatar initials={member.initials} color={member.tone} size="lg" />
+                  <div><h3>{member.name}</h3><p>{member.email}</p></div>
+                  <Badge color={member.activeTasks <= 5 ? 'blue' : member.activeTasks <= 7 ? 'green' : 'amber'}>{member.activeTasks <= 5 ? 'Light' : member.activeTasks <= 7 ? 'Balanced' : 'Busy'}</Badge>
+                  <span className="team-stat">{member.activeTasks || 0} active tasks · {member.projectIds?.length || 0} project{(member.projectIds?.length || 0) === 1 ? '' : 's'}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div></div>
+          ) : <div className="empty-state">No team members have been added yet.</div>}
+        </div>
       </div>
     )
   }
 
   if (page === 'Reports') {
-    const summary = liveData.connected ? liveData.summary : null
-    const totalTasks = summary ? summary.openTasks + summary.completedTasks : 0
+    if (!liveData.connected) {
+      return (
+        <div className="page-stack">
+          <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
+          <div className="reports-grid">
+            <div className="panel report-big"><SectionHeader title="Project health" subtitle="Portfolio distribution for the demo workspace." /><div className="donut-wrap"><div className="donut" style={{ background: 'conic-gradient(#6f5cf5 0 68%, #ececf5 68%)' }}><span>68%</span></div><div><strong>Healthy</strong><p>Demo portfolio data.</p><Badge color="green">+9% this month</Badge></div></div></div>
+            <div className="panel report-big"><SectionHeader title="Delivery velocity" subtitle="Demo completed tasks per week." /><div className="mini-bars">{[38,52,47,67,60,78,83].map((v, i) => <span key={i} style={{ height: v + '%' }} />)}</div><div className="report-metric"><strong>24.6</strong><span>avg tasks / week</span></div></div>
+          </div>
+        </div>
+      )
+    }
+
+    const summary = liveData.summary || { activeProjects: 0, openTasks: 0, completedTasks: 0, overdueTasks: 0 }
+    const totalTasks = summary.openTasks + summary.completedTasks
     const completion = totalTasks ? Math.round((summary.completedTasks / totalTasks) * 100) : 0
+    const statusValues = ['TODO', 'IN_PROGRESS', 'REVIEW', 'BLOCKED', 'COMPLETED']
+    const statusCounts = statusValues.map((value) => liveData.tasks.filter((task) => task.statusValue === value).length)
+    const maxStatusCount = Math.max(...statusCounts, 1)
 
     return (
       <div className="page-stack">
         <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
         <div className="reports-grid">
-          <div className="panel report-big"><SectionHeader title="Project health" subtitle="Portfolio distribution by current status." /><div className="donut-wrap"><div className="donut" style={summary ? { background: 'conic-gradient(#6f5cf5 0 ' + completion + '%, #ececf5 ' + completion + '%)' } : undefined}><span>{summary ? completion + '%' : '68%'}</span></div><div><strong>{summary ? 'Live progress' : 'Healthy'}</strong><p>{summary ? totalTasks + ' total tracked tasks.' : '5 of 8 projects are on track.'}</p><Badge color="green">{summary ? summary.completedTasks + ' complete' : '+9% this month'}</Badge></div></div></div>
-          <div className="panel report-big"><SectionHeader title="Delivery velocity" subtitle="Tasks completed per week." /><div className="mini-bars">{[38,52,47,67,60,78,83].map((v, i) => <span key={i} style={{ height: v + '%' }} />)}</div><div className="report-metric"><strong>{summary ? summary.completedTasks : '24.6'}</strong><span>{summary ? 'completed tasks' : 'avg tasks / week'}</span></div></div>
+          <div className="panel report-big">
+            <SectionHeader title="Project health" subtitle="Completion based on tasks visible to your account." />
+            <div className="donut-wrap">
+              <div className="donut" style={{ background: 'conic-gradient(#6f5cf5 0 ' + completion + '%, #ececf5 ' + completion + '%)' }}><span>{completion}%</span></div>
+              <div><strong>Live progress</strong><p>{summary.activeProjects} active project{summary.activeProjects === 1 ? '' : 's'} · {totalTasks} tracked task{totalTasks === 1 ? '' : 's'}</p><Badge color={summary.completedTasks ? 'green' : 'neutral'}>{summary.completedTasks} complete</Badge></div>
+            </div>
+          </div>
+          <div className="panel report-big">
+            <SectionHeader title="Task status mix" subtitle="Current task counts by workflow status." />
+            {totalTasks ? (
+              <>
+                <div className="mini-bars">{statusCounts.map((value, index) => <span key={statusValues[index]} style={{ height: Math.max(12, (value / maxStatusCount) * 100) + '%' }} />)}</div>
+                <div className="report-metric"><strong>{totalTasks}</strong><span>tracked tasks</span></div>
+              </>
+            ) : <div className="empty-state">No tasks available yet.</div>}
+          </div>
         </div>
       </div>
     )
   }
 
   if (page === 'Settings') {
+    if (!liveData.connected) {
+      return (
+        <div className="page-stack">
+          <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
+          <div className="panel settings-panel">{['Workspace name','Default task priority','Notification preferences','Smart assignment','Theme preference'].map((label) => <div className="setting-row" key={label}><div><strong>{label}</strong><p>Configured for the Product Team demo workspace.</p></div><button className="toggle toggle-on" type="button"><span /></button></div>)}</div>
+        </div>
+      )
+    }
+
     return (
+      <div className="page-stack">
+        <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
+        <div className="panel settings-panel">
+          <div className="setting-row"><div><strong>Account name</strong><p>{currentUser?.name || '—'}</p></div><span className="setting-value">{currentUser?.role?.replaceAll('_', ' ') || '—'}</span></div>
+          <div className="setting-row"><div><strong>Email</strong><p>{currentUser?.email || '—'}</p></div><span className="setting-value">Signed-in account</span></div>
+          <div className="setting-row"><div><strong>Visible projects</strong><p>Projects currently available to your account.</p></div><span className="setting-value">{remoteProjects.length}</span></div>
+          <div className="setting-row"><div><strong>Visible tasks</strong><p>Tasks currently available to your account.</p></div><span className="setting-value">{allRows.length}</span></div>
+          <div className="setting-row"><div><strong>Workspace connection</strong><p>Frontend data is loaded from the TeamFlow API.</p></div><span className="setting-value">Connected</span></div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
       <div className="page-stack">
         <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
         <div className="panel settings-panel">{['Workspace name','Default task priority','Notification preferences','Smart assignment','Theme preference'].map((label) => <div className="setting-row" key={label}><div><strong>{label}</strong><p>Configured for the Product Team workspace.</p></div><button className="toggle toggle-on" type="button"><span /></button></div>)}</div>
