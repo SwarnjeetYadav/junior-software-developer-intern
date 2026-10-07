@@ -2,7 +2,12 @@ import Icon from './Icon'
 import Avatar from './Avatar'
 import { currentUser, navItems } from '../data/teamflowMock'
 
-export default function Sidebar({ page, onNavigate, open, onClose }) {
+export default function Sidebar({ page, onNavigate, open, onClose, user, liveData }) {
+  const displayUser = user || currentUser
+  const openTaskCount = liveData?.connected
+    ? liveData.tasks.filter((task) => task.assigneeId && String(task.assigneeId) === String(displayUser.id) && task.statusValue !== 'COMPLETED').length
+    : 12
+
   return (
     <aside className={'sidebar ' + (open ? 'sidebar-open' : '')}>
       <div className="sidebar-top">
@@ -32,7 +37,7 @@ export default function Sidebar({ page, onNavigate, open, onClose }) {
           >
             <span className="nav-icon"><Icon name={item.icon} size={17} /></span>
             <span>{item.label}</span>
-            {item.label === 'My Tasks' ? <span className="nav-count">12</span> : null}
+            {item.label === 'My Tasks' ? <span className="nav-count">{openTaskCount}</span> : null}
           </button>
         ))}
 
@@ -54,8 +59,8 @@ export default function Sidebar({ page, onNavigate, open, onClose }) {
         </div>
 
         <div className="profile-mini">
-          <Avatar initials={currentUser.initials} color="violet" size="lg" />
-          <span><strong>{currentUser.name}</strong><small>{currentUser.role}</small></span>
+          <Avatar initials={displayUser.initials || displayUser.name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'TF'} color="violet" size="lg" />
+          <span><strong>{displayUser.name || currentUser.name}</strong><small>{displayUser.role || currentUser.role}</small></span>
           <Icon name="settings" size={16} />
         </div>
       </div>
