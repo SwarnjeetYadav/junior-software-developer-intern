@@ -32,7 +32,7 @@ Create a comprehensive technical design and architecture plan for the TeamFlow h
 The system uses a layered client server architecture. The React client communicates with a Node.js and Express REST API over HTTPS. The backend applies authentication, authorization, validation and business logic before reading or updating MongoDB. Important actions are recorded in activity history.
 
 ## Deliverables
-- Week 2 design document in DOCX
+- Week 2 design document in DOCX: `Week_2_TeamFlow_Design_Documentation_and_Architecture_Plan.docx` (prepared for submission)
 - Architecture diagram
 - Data flow diagram
 - Weekly design record
