@@ -210,6 +210,37 @@ describe('TeamFlow API end to end workflow', () => {
     expect(persistedActivityCount).toBeGreaterThanOrEqual(2)
   })
 
+  it('allows a newly registered team member to create and own a project', async () => {
+    const user = await createUser({
+      name: 'New Project Owner',
+      email: 'newowner@test.teamflow',
+      role: 'TEAM_MEMBER',
+    })
+
+    const token = await login(user.email)
+
+    const response = await request(app)
+      .post('/api/v1/projects')
+      .set('Authorization', 'Bearer ' + token)
+      .send({
+        name: 'My First TeamFlow Project',
+        description: 'Created by a new account',
+        status: 'PLANNING',
+      })
+
+    expect(response.status).toBe(201)
+    expect(response.body.data.name).toBe('My First TeamFlow Project')
+    expect(String(response.body.data.ownerId)).toBe(String(user._id))
+
+    const projectsResponse = await request(app)
+      .get('/api/v1/projects')
+      .set('Authorization', 'Bearer ' + token)
+
+    expect(projectsResponse.status).toBe(200)
+    expect(projectsResponse.body.data).toHaveLength(1)
+    expect(projectsResponse.body.data[0].name).toBe('My First TeamFlow Project')
+  })
+
   it('rejects access to a project for a non-member', async () => {
     const manager = await createUser({
       name: 'Owner',
