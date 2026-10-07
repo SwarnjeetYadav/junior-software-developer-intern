@@ -177,6 +177,7 @@ export function GenericPage({
   currentUserId,
   currentUser,
   onMembersChanged,
+  canCreateProjects = false,
   canManageProjects = false,
 }) {
   const copy = pageCopy[page] || pageCopy.Projects
@@ -210,7 +211,7 @@ export function GenericPage({
       <div className="page-stack">
         <section className="page-title-block page-title-inline">
           <div><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></div>
-          {canManageProjects ? <button className="primary-button primary-button-dark" type="button" onClick={onCreateProject}>＋ New project</button> : null}
+          {canCreateProjects ? <button className="primary-button primary-button-dark" type="button" onClick={onCreateProject}>＋ New project</button> : null}
         </section>
 
         {liveData.connected ? (
@@ -259,7 +260,7 @@ export function GenericPage({
     return (
       <div className="page-stack">
         <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
-        {liveData.connected && canManageProjects && remoteProjects.length ? (
+        {liveData.connected && (canManageProjects || remoteProjects.some((project) => String(project.ownerId) === String(currentUserId))) && remoteProjects.length ? (
           <MemberManager projects={remoteProjects} membersByProject={liveData.membersByProject} onChanged={onMembersChanged} />
         ) : null}
         <div className="panel">
