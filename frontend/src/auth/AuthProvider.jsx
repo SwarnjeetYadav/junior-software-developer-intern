@@ -3,12 +3,23 @@ import { api } from '../lib/api'
 
 const AuthContext = createContext(null)
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const raw = localStorage.getItem('teamflow_user')
+function getStoredUser() {
+  const token = localStorage.getItem('teamflow_token')
+  if (!token) return null
+
+  const raw = localStorage.getItem('teamflow_user')
+  try {
     return raw ? JSON.parse(raw) : null
-  })
-  const [demoMode, setDemoMode] = useState(() => localStorage.getItem('teamflow_demo') === 'true')
+  } catch {
+    localStorage.removeItem('teamflow_user')
+    localStorage.removeItem('teamflow_token')
+    return null
+  }
+}
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(getStoredUser)
+  const [demoMode, setDemoMode] = useState(false)
 
   const login = async (credentials) => {
     const result = await api.login(credentials)
@@ -31,10 +42,10 @@ export function AuthProvider({ children }) {
   }
 
   const enterDemo = () => {
-    const demoUser = { name: 'Swarnjeet Yadav', initials: 'SY', role: 'Project Manager' }
+    const demoUser = { id: 'demo-user', name: 'Swarnjeet Yadav', initials: 'SY', role: 'PROJECT_MANAGER' }
     localStorage.removeItem('teamflow_token')
-    localStorage.setItem('teamflow_user', JSON.stringify(demoUser))
-    localStorage.setItem('teamflow_demo', 'true')
+    localStorage.removeItem('teamflow_user')
+    localStorage.removeItem('teamflow_demo')
     setUser(demoUser)
     setDemoMode(true)
   }
