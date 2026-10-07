@@ -2,6 +2,14 @@ import Icon from './Icon'
 import Avatar from './Avatar'
 import { currentUser, navItems } from '../data/teamflowMock'
 
+function displayRole(role = '') {
+  return role
+    .replaceAll('_', ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
+
 export default function Sidebar({ page, onNavigate, open, onClose, user, liveData }) {
   const displayUser = user || currentUser
   const openTaskCount = liveData?.connected
@@ -60,7 +68,7 @@ export default function Sidebar({ page, onNavigate, open, onClose, user, liveDat
 
         <div className="profile-mini">
           <Avatar initials={displayUser.initials || displayUser.name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'TF'} color="violet" size="lg" />
-          <span><strong>{displayUser.name || currentUser.name}</strong><small>{displayUser.role || currentUser.role}</small></span>
+          <span><strong>{displayUser.name || currentUser.name}</strong><small>{displayRole(displayUser.role || currentUser.role)}</small></span>
           <Icon name="settings" size={16} />
         </div>
       </div>
