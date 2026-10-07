@@ -155,3 +155,22 @@ test('live Team view can search and add a project member', async ({ page }) => {
   await page.getByRole('button', { name: 'Add' }).click()
   await expect(page.getByText(/Priya Shah added/i)).toBeVisible()
 })
+
+
+test('login screen supports account creation and demo exit returns to login', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: /Work with clarity/i })).toBeVisible()
+
+  await page.getByRole('button', { name: /Create an account/i }).click()
+  await expect(page.getByRole('heading', { name: /Create your workspace account/i })).toBeVisible()
+  await expect(page.getByLabel('Full name')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Create account' })).toBeVisible()
+
+  await page.getByRole('button', { name: /Sign in/i }).last().click()
+  await expect(page.getByRole('heading', { name: /Work with clarity/i })).toBeVisible()
+
+  await page.getByRole('button', { name: /Preview demo workspace/i }).click()
+  await expect(page.getByRole('button', { name: /Exit demo · Back to sign in/i })).toBeVisible()
+  await page.getByRole('button', { name: /Exit demo · Back to sign in/i }).click()
+  await expect(page.getByRole('heading', { name: /Work with clarity/i })).toBeVisible()
+})
