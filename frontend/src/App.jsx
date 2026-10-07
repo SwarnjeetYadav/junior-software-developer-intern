@@ -4,7 +4,7 @@ import Topbar from './components/Topbar'
 import CreateTaskModal from './components/CreateTaskModal'
 import CreateProjectModal from './components/CreateProjectModal'
 import TaskDetailsModal from './components/TaskDetailsModal'
-import { tasks as initialTasks } from './data/teamflowMock'
+import { projects as demoProjects, tasks as initialTasks } from './data/teamflowMock'
 import Overview from './pages/Overview'
 import Login from './pages/Login'
 import { GenericPage } from './pages'
@@ -23,10 +23,11 @@ export default function App() {
   const [createdTasks, setCreatedTasks] = useState([])
 
   const allTasks = useMemo(() => [...createdTasks, ...initialTasks], [createdTasks])
+
   if (!user) return <Login />
 
   const activeData = demoMode
-    ? { connected: false, error: '', summary: null, projects: [], tasks: [], members: [], activity: [], notifications: [] }
+    ? { connected: false, loading: false, error: '', summary: null, projects: [], tasks: [], members: [], membersByProject: {}, activity: [], notifications: [], refresh: () => {} }
     : liveData
 
   const navigate = (nextPage) => {
@@ -63,7 +64,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar page={page} onNavigate={navigate} open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar page={page} onNavigate={navigate} open={sidebarOpen} onClose={() => setSidebarOpen(false)} user={user} liveData={activeData} />
 
       <div className="app-main">
         <Topbar
@@ -73,6 +74,7 @@ export default function App() {
           demoMode={demoMode}
           notifications={activeData.notifications}
           onMarkRead={handleMarkNotificationRead}
+          user={user}
         />
 
         <main className="content">
@@ -87,11 +89,13 @@ export default function App() {
           ) : (
             <GenericPage
               page={page}
-              taskRows={demoMode ? allTasks : activeData.tasks.length ? activeData.tasks : initialTasks}
+              taskRows={demoMode ? allTasks : activeData.tasks}
               onCreateTask={() => setTaskModalOpen(true)}
               onCreateProject={() => setProjectModalOpen(true)}
               onSelectTask={setSelectedTask}
               liveData={activeData}
+              currentUserId={user.id}
+              onMembersChanged={liveData.refresh}
             />
           )}
         </main>
@@ -104,8 +108,9 @@ export default function App() {
         onClose={() => setTaskModalOpen(false)}
         onCreate={handleCreateTask}
         liveMode={!demoMode}
-        project={!demoMode ? activeData.projects[0] : null}
-        members={!demoMode ? activeData.members : []}
+        projects={!demoMode ? activeData.projects : []}
+        membersByProject={!demoMode ? activeData.membersByProject : {}}
+        demoProject={demoProjects[0]}
       />
 
       <CreateProjectModal
@@ -118,6 +123,7 @@ export default function App() {
         task={selectedTask}
         open={Boolean(selectedTask)}
         liveMode={!demoMode}
+        projectMembers={!demoMode && selectedTask ? (activeData.membersByProject[selectedTask.projectId] || []) : []}
         onClose={() => setSelectedTask(null)}
         onChanged={liveData.refresh}
       />
