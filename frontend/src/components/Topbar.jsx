@@ -3,10 +3,10 @@ import Icon from './Icon'
 import { useState } from 'react'
 import { currentUser } from '../data/teamflowMock'
 
-export default function Topbar({ page, onOpenMenu, onLogout, demoMode, notifications = [], onMarkRead }) {
+export default function Topbar({ page, onOpenMenu, onLogout, demoMode, notifications = [], onMarkRead, user: propUser }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState(false)
-  const user = demoMode ? currentUser : JSON.parse(localStorage.getItem('teamflow_user') || 'null') || currentUser
+  const user = propUser || (demoMode ? currentUser : JSON.parse(localStorage.getItem('teamflow_user') || 'null') || currentUser)
   const unreadCount = notifications.filter((item) => item.unread).length
 
   return (
@@ -42,7 +42,7 @@ export default function Topbar({ page, onOpenMenu, onLogout, demoMode, notificat
 
         <div className="profile-menu">
           <button className="user-chip" type="button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen}>
-            <Avatar initials={user.initials || 'SY'} color="violet" size="sm" />
+            <Avatar initials={user.initials || user.name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'TF'} color="violet" size="sm" />
             <span className="user-chip-name">{user.name}</span>
             <span className="chevron">⌄</span>
           </button>
