@@ -3,6 +3,14 @@ import Icon from './Icon'
 import { useState } from 'react'
 import { currentUser } from '../data/teamflowMock'
 
+function displayRole(role = '') {
+  return role
+    .replaceAll('_', ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
+
 export default function Topbar({ page, onOpenMenu, onLogout, onExitDemo, demoMode, notifications = [], onMarkRead, user: propUser }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState(false)
@@ -47,7 +55,7 @@ export default function Topbar({ page, onOpenMenu, onLogout, onExitDemo, demoMod
             <span className="user-chip-name">{user.name}</span>
             <span className="chevron">⌄</span>
           </button>
-          {menuOpen ? <div className="profile-dropdown"><strong>{user.role || 'Project Manager'}</strong>{demoMode ? <span>Demo workspace</span> : <span>Connected to API</span>}<button type="button" onClick={onLogout}>{demoMode ? 'Exit demo & return to login' : 'Sign out'}</button></div> : null}
+          {menuOpen ? <div className="profile-dropdown"><strong>{displayRole(user.role || 'PROJECT_MANAGER')}</strong>{demoMode ? <span>Demo workspace</span> : <span>Connected to API</span>}<button type="button" onClick={onLogout}>{demoMode ? 'Exit demo & return to login' : 'Sign out'}</button></div> : null}
         </div>
       </div>
     </header>
