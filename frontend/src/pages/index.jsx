@@ -1,24 +1,208 @@
+import { useEffect, useMemo, useState } from 'react'
 import SectionHeader from '../components/SectionHeader'
 import TaskTable from '../components/TaskTable'
 import Avatar from '../components/Avatar'
 import Badge from '../components/Badge'
 import ProjectCard from '../components/ProjectCard'
+import { api } from '../lib/api'
 import { pageCopy, projects as mockProjects, tasks, workload } from '../data/teamflowMock'
 
-export function GenericPage({ page, taskRows = tasks, onCreateTask, onCreateProject, onSelectTask, liveData }) {
+const statusOptions = [
+  ['', 'All statuses'],
+  ['TODO', 'Todo'],
+  ['IN_PROGRESS', 'In Progress'],
+  ['REVIEW', 'Review'],
+  ['BLOCKED', 'Blocked'],
+  ['COMPLETED', 'Completed'],
+]
+const priorityOptions = [
+  ['', 'All priorities'],
+  ['LOW', 'Low'],
+  ['MEDIUM', 'Medium'],
+  ['HIGH', 'High'],
+  ['CRITICAL', 'Critical'],
+]
+
+function projectCard(project, liveData) {
+  const members = liveData.membersByProject?.[project._id] || []
+  return {
+    ...project,
+    meta: (project.status || 'ACTIVE').replaceAll('_', ' ') + ' · ' + (project.memberCount || 0) + ' members',
+    progress: project.progress || 0,
+    due: project.dueDate
+      ? new Date(project.dueDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
+      : 'No due date',
+    tasks: (project.completedTaskCount || 0) + ' / ' + (project.taskCount || 0) + ' tasks',
+    members,
+  }
+}
+
+function filterRows(rows, search, status, priority) {
+  const normalized = search.trim().toLowerCase()
+  return rows.filter((task) => {
+    const matchesSearch = !normalized
+      || task.title.toLowerCase().includes(normalized)
+      || task.project.toLowerCase().includes(normalized)
+      || (task.assigneeName || '').toLowerCase().includes(normalized)
+    const matchesStatus = !status || task.statusValue === status
+    const matchesPriority = !priority || task.priorityValue === priority
+    return matchesSearch && matchesStatus && matchesPriority
+  })
+}
+
+function TaskFilters({ search, setSearch, status, setStatus, priority, setPriority }) {
+  return (
+    <div className="task-filters">
+      <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Filter tasks..." aria-label="Filter tasks" />
+      <select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filter task status">
+        {statusOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+      </select>
+      <select value={priority} onChange={(event) => setPriority(event.target.value)} aria-label="Filter task priority">
+        {priorityOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+      </select>
+    </div>
+  )
+}
+
+function MemberManager({ projects, membersByProject, onChanged }) {
+  const [projectId, setProjectId] = useState(projects[0]?._id || '')
+  const [query, setQuery] = useState('')
+  const [candidates, setCandidates] = useState([])
+  const [searching, setSearching] = useState(false)
+  const [addingId, setAddingId] = useState('')
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+
+  useEffect(() => {
+    if (!projectId && projects[0]?._id) setProjectId(projects[0]._id)
+    if (projectId && !projects.some((project) => project._id === projectId)) setProjectId(projects[0]?._id || '')
+  }, [projects, projectId])
+
+  useEffect(() => {
+    setCandidates([])
+    setMessage('')
+    setError('')
+
+    const term = query.trim()
+    if (term.length < 2 || !projectId) return undefined
+
+    let cancelled = false
+    const timer = setTimeout(async () => {
+      setSearching(true)
+      try {
+        const result = await api.searchMemberCandidates(projectId, term)
+        if (!cancelled) setCandidates(result.data || [])
+      } catch (err) {
+        if (!cancelled) setError(err.message)
+      } finally {
+        if (!cancelled) setSearching(false)
+      }
+    }, 250)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [query, projectId])
+
+  const currentMembers = membersByProject?.[projectId] || []
+
+  const add = async (member) => {
+    setAddingId(member._id)
+    setError('')
+    setMessage('')
+    try {
+      await api.addMember(projectId, member._id)
+      setMessage(member.name + ' added to the project.')
+      setCandidates((current) => current.filter((item) => item._id !== member._id))
+      setQuery('')
+      onChanged?.()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setAddingId('')
+    }
+  }
+
+  return (
+    <div className="member-manager">
+      <div className="member-manager-head">
+        <div><span className="eyebrow">Live membership</span><h2>Manage project members</h2><p>Add active TeamFlow users to the selected project.</p></div>
+        <select value={projectId} onChange={(event) => setProjectId(event.target.value)} aria-label="Project for member management">
+          {projects.map((project) => <option key={project._id} value={project._id}>{project.name}</option>)}
+        </select>
+      </div>
+
+      <div className="member-manager-columns">
+        <div className="member-list-box">
+          <div className="member-box-head"><strong>Current members</strong><span>{currentMembers.length}</span></div>
+          {currentMembers.length ? currentMembers.map((member) => (
+            <div className="member-row" key={member.id}>
+              <Avatar initials={member.initials} color={member.tone} size="sm" />
+              <div><strong>{member.name}</strong><small>{member.email} · {member.role?.replaceAll('_', ' ')}</small></div>
+              <Badge color="green">Active</Badge>
+            </div>
+          )) : <div className="comment-empty">No members loaded for this project.</div>}
+        </div>
+
+        <div className="member-list-box">
+          <div className="member-box-head"><strong>Add a member</strong><span>Search by name or email</span></div>
+          <input className="member-search-input" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="e.g. Priya or priya@example.com" />
+          {searching ? <div className="comment-empty">Searching users...</div> : null}
+          {!searching && query.trim().length >= 2 && !candidates.length ? <div className="comment-empty">No active users available.</div> : null}
+          <div className="member-candidate-list">
+            {candidates.map((member) => (
+              <div className="member-row" key={member._id}>
+                <Avatar initials={member.name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()} color="violet" size="sm" />
+                <div><strong>{member.name}</strong><small>{member.email} · {member.role?.replaceAll('_', ' ')}</small></div>
+                <button className="small-action-button" type="button" onClick={() => add(member)} disabled={addingId === member._id}>{addingId === member._id ? 'Adding...' : 'Add'}</button>
+              </div>
+            ))}
+          </div>
+          {message ? <div className="success-banner">{message}</div> : null}
+          {error ? <div className="login-error">{error}</div> : null}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function GenericPage({
+  page,
+  taskRows = tasks,
+  onCreateTask,
+  onCreateProject,
+  onSelectTask,
+  liveData,
+  currentUserId,
+  onMembersChanged,
+}) {
   const copy = pageCopy[page] || pageCopy.Projects
   const remoteProjects = liveData.connected ? liveData.projects : []
-  const rows = liveData.connected && liveData.tasks.length ? liveData.tasks : taskRows
+  const [selectedProjectId, setSelectedProjectId] = useState('')
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('')
+  const [priority, setPriority] = useState('')
+
+  useEffect(() => {
+    if (!selectedProjectId && remoteProjects[0]?._id) setSelectedProjectId(remoteProjects[0]._id)
+    if (selectedProjectId && !remoteProjects.some((project) => project._id === selectedProjectId)) setSelectedProjectId(remoteProjects[0]?._id || '')
+  }, [remoteProjects, selectedProjectId])
+
+  const allRows = liveData.connected ? liveData.tasks : taskRows
+  const myRows = page === 'My Tasks'
+    ? allRows.filter((task) => task.assigneeId && String(task.assigneeId) === String(currentUserId))
+    : allRows
+
+  const projectRows = selectedProjectId
+    ? myRows.filter((task) => String(task.projectId) === String(selectedProjectId))
+    : myRows
+  const rows = filterRows(page === 'Projects' && selectedProjectId ? projectRows : myRows, search, status, priority)
 
   if (page === 'Projects') {
-    const projectsToShow = remoteProjects.length ? remoteProjects.map((project, index) => ({
-      name: project.name,
-      meta: 'Live workspace · Project',
-      progress: 0,
-      tone: ['violet', 'blue', 'green'][index % 3],
-      due: project.dueDate ? new Date(project.dueDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) : 'No due date',
-      tasks: 'Live',
-    })) : mockProjects
+    const projectsToShow = remoteProjects.length
+      ? remoteProjects.map((project) => projectCard(project, liveData))
+      : mockProjects
 
     return (
       <div className="page-stack">
@@ -26,28 +210,65 @@ export function GenericPage({ page, taskRows = tasks, onCreateTask, onCreateProj
           <div><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></div>
           <button className="primary-button primary-button-dark" type="button" onClick={onCreateProject}>＋ New project</button>
         </section>
-        <div className="project-grid">{projectsToShow.map((project, index) => <ProjectCard key={project.name + index} project={project} />)}</div>
-        <div className="panel"><SectionHeader title="Project work queue" subtitle={liveData.connected ? 'Tasks from the current project feed.' : 'Demo task data for the UI review.'} action="Create new" onAction={onCreateTask} /><TaskTable tasks={rows} onSelectTask={onSelectTask} /></div>
+
+        {liveData.connected ? (
+          <div className="project-toolbar">
+            <span>{remoteProjects.length} live project{remoteProjects.length === 1 ? '' : 's'}</span>
+            {liveData.loading ? <small>Refreshing workspace...</small> : null}
+          </div>
+        ) : null}
+
+        <div className="project-grid">
+          {projectsToShow.length ? projectsToShow.map((project) => (
+            <ProjectCard
+              key={project._id || project.name}
+              project={project}
+              onOpen={remoteProjects.length ? (item) => setSelectedProjectId(item._id) : undefined}
+            />
+          )) : <div className="empty-state">No projects yet. Create your first workspace project.</div>}
+        </div>
+
+        {remoteProjects.length ? (
+          <div className="panel">
+            <div className="project-queue-head">
+              <SectionHeader
+                title="Project work queue"
+                subtitle="Live tasks for the selected project."
+                action="Create new"
+                onAction={onCreateTask}
+              />
+              <select value={selectedProjectId} onChange={(event) => setSelectedProjectId(event.target.value)} aria-label="Select project task queue">
+                {remoteProjects.map((project) => <option value={project._id} key={project._id}>{project.name}</option>)}
+              </select>
+            </div>
+            <TaskFilters search={search} setSearch={setSearch} status={status} setStatus={setStatus} priority={priority} setPriority={setPriority} />
+            <TaskTable tasks={rows} onSelectTask={onSelectTask} />
+          </div>
+        ) : (
+          <div className="panel"><SectionHeader title="Project work queue" subtitle="Demo task data for the UI review." action="Create new" onAction={onCreateTask} /><TaskTable tasks={rows} onSelectTask={onSelectTask} /></div>
+        )}
       </div>
     )
   }
 
   if (page === 'Team') {
     const people = liveData.connected && liveData.members.length
-      ? liveData.members.map((member) => ({
-          initials: member.initials,
-          name: member.name,
-          tasks: member.activeTasks,
-          status: member.activeTasks <= 5 ? 'Light' : member.activeTasks <= 7 ? 'Balanced' : 'Busy',
-          tone: member.tone,
-        }))
-      : workload
+      ? liveData.members
+      : workload.map((member) => ({ ...member, email: 'demo@example.com', role: 'TEAM_MEMBER' }))
 
     return (
       <div className="page-stack">
         <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
-        <div className="panel"><SectionHeader title="Team capacity" subtitle={liveData.connected ? 'Live members from the current project.' : 'Mock data from the TeamFlow planning model.'} /><div className="team-grid">
-          {people.map((member) => <div className="team-card" key={member.name}><Avatar initials={member.initials} color={member.tone} size="lg" /><div><h3>{member.name}</h3><p>Product team</p></div><Badge color={member.tone}>{member.status}</Badge><span className="team-stat">{member.tasks} active tasks</span></div>)}
+        {liveData.connected ? <MemberManager projects={remoteProjects} membersByProject={liveData.membersByProject} onChanged={onMembersChanged} /> : null}
+        <div className="panel"><SectionHeader title="Team capacity" subtitle={liveData.connected ? 'Live members aggregated across your projects.' : 'Mock data from the TeamFlow planning model.'} /><div className="team-grid">
+          {people.map((member) => (
+            <div className="team-card" key={member.id || member.name}>
+              <Avatar initials={member.initials} color={member.tone} size="lg" />
+              <div><h3>{member.name}</h3><p>{member.email}</p></div>
+              <Badge color={member.activeTasks <= 5 ? 'blue' : member.activeTasks <= 7 ? 'green' : 'amber'}>{member.activeTasks <= 5 ? 'Light' : member.activeTasks <= 7 ? 'Balanced' : 'Busy'}</Badge>
+              <span className="team-stat">{member.activeTasks || 0} active tasks · {member.projectIds?.length || 0} project{(member.projectIds?.length || 0) === 1 ? '' : 's'}</span>
+            </div>
+          ))}
         </div></div>
       </div>
     )
@@ -80,9 +301,16 @@ export function GenericPage({ page, taskRows = tasks, onCreateTask, onCreateProj
 
   return (
     <div className="page-stack">
-      <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
+      <section className="page-title-block page-title-inline">
+        <div><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></div>
+        <button className="primary-button primary-button-dark" type="button" onClick={onCreateTask}>＋ Create task</button>
+      </section>
+      {liveData.connected ? <TaskFilters search={search} setSearch={setSearch} status={status} setStatus={setStatus} priority={priority} setPriority={setPriority} /> : null}
       <div className="panel">
-        <SectionHeader title="Your task queue" subtitle={liveData.connected ? 'Loaded from the TeamFlow API. Click a task for details.' : 'Demo task data for the UI review.'} action="Create new" onAction={onCreateTask} />
+        <SectionHeader
+          title={page === 'My Tasks' ? 'Your live task queue' : 'Task queue'}
+          subtitle={liveData.connected ? rows.length + ' matching task' + (rows.length === 1 ? '' : 's') + ' from the TeamFlow API.' : 'Demo task data for the UI review.'}
+        />
         <TaskTable tasks={rows} onSelectTask={onSelectTask} />
       </div>
     </div>
