@@ -3,7 +3,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api
 async function request(path, options = {}) {
   const token = localStorage.getItem('teamflow_token')
   const headers = {
-    'Content-Type': 'application/json',
+    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
     ...(token ? { Authorization: 'Bearer ' + token } : {}),
     ...(options.headers || {}),
   }
@@ -33,4 +33,9 @@ export const api = {
   listMembers: (projectId) => request('/projects/' + projectId + '/members'),
   addMember: (projectId, userId) => request('/projects/' + projectId + '/members', { method: 'POST', body: JSON.stringify({ userId }) }),
   dashboard: () => request('/dashboard/summary'),
+  listComments: (taskId) => request('/comments/tasks/' + taskId + '/comments'),
+  addComment: (taskId, message) => request('/comments/tasks/' + taskId + '/comments', { method: 'POST', body: JSON.stringify({ message }) }),
+  listActivity: () => request('/activity'),
+  listNotifications: () => request('/notifications'),
+  markNotificationRead: (notificationId) => request('/notifications/' + notificationId + '/read', { method: 'PATCH' }),
 }
