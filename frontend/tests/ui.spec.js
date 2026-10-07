@@ -111,7 +111,7 @@ async function seedLiveSession(page) {
 test('demo workspace navigation and task creation remain functional', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('button', { name: /Preview demo workspace/i }).click()
-  await expect(page.getByRole('heading', { name: /Good afternoon/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Good (morning|afternoon|evening), Swarnjeet/i })).toBeVisible()
 
   await page.getByRole('button', { name: 'My Tasks' }).click()
   await page.getByRole('button', { name: /Create task/i }).click()
@@ -126,7 +126,7 @@ test('live Projects view uses API data and task filters', async ({ page }) => {
   await routeApi(page)
   await page.goto('/')
 
-  await page.getByRole('button', { name: 'Projects' }).click()
+  await page.getByRole('button', { name: 'Projects', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible()
   await expect(page.getByText('TeamFlow Web App')).toBeVisible()
   await expect(page.getByText('50%')).toBeVisible()
@@ -147,7 +147,7 @@ test('live Team view can search and add a project member', async ({ page }) => {
   await routeApi(page)
   await page.goto('/')
 
-  await page.getByRole('button', { name: 'Team' }).click()
+  await page.getByRole('button', { name: 'Team', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Manage project members' })).toBeVisible()
 
   await page.getByPlaceholder(/Priya or priya@example.com/i).fill('Priya')
