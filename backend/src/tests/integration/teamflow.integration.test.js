@@ -69,6 +69,12 @@ describe('TeamFlow API end to end workflow', () => {
       role: 'TEAM_MEMBER',
     })
 
+    const candidate = await createUser({
+      name: 'Search Candidate',
+      email: 'candidate@test.teamflow',
+      role: 'TEAM_MEMBER',
+    })
+
     const token = await login(manager.email)
 
     const projectResponse = await request(app)
@@ -92,18 +98,26 @@ describe('TeamFlow API end to end workflow', () => {
 
     const candidateResponse = await request(app)
       .get('/api/v1/projects/' + projectId + '/members/candidates')
-      .query({ q: 'member@test' })
+      .query({ q: 'candidate' })
       .set('Authorization', 'Bearer ' + token)
 
     expect(candidateResponse.status).toBe(200)
-    expect(candidateResponse.body.data).toHaveLength(0)
+    expect(candidateResponse.body.data).toHaveLength(1)
+    expect(candidateResponse.body.data[0].email).toBe(candidate.email)
+
+    const candidateAddResponse = await request(app)
+      .post('/api/v1/projects/' + projectId + '/members')
+      .set('Authorization', 'Bearer ' + token)
+      .send({ userId: candidate._id })
+
+    expect(candidateAddResponse.status).toBe(201)
 
     const membersResponse = await request(app)
       .get('/api/v1/projects/' + projectId + '/members')
       .set('Authorization', 'Bearer ' + token)
 
     expect(membersResponse.status).toBe(200)
-    expect(membersResponse.body.data).toHaveLength(2)
+    expect(membersResponse.body.data).toHaveLength(3)
 
     const duplicateMemberResponse = await request(app)
       .post('/api/v1/projects/' + projectId + '/members')
