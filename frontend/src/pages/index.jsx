@@ -190,7 +190,7 @@ export function GenericPage({
   }, [remoteProjects, selectedProjectId])
 
   const allRows = liveData.connected ? liveData.tasks : taskRows
-  const myRows = page === 'My Tasks'
+  const myRows = page === 'My Tasks' && liveData.connected
     ? allRows.filter((task) => task.assigneeId && String(task.assigneeId) === String(currentUserId))
     : allRows
 
