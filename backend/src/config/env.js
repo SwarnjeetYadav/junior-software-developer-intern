@@ -12,6 +12,4 @@ export const env = {
   mongoUri,
   jwtSecret,
   clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
-  SEED_MANAGER_EMAIL: process.env.SEED_MANAGER_EMAIL || 'manager@example.com',
-  SEED_MANAGER_PASSWORD: process.env.SEED_MANAGER_PASSWORD || '123456'
 }
