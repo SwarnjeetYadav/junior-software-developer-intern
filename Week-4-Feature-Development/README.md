@@ -28,7 +28,9 @@ Create a comprehensive QA and testing strategy for the hypothetical TeamFlow app
 All metrics and performance benchmarks are proposed planning targets for the hypothetical MVP. They are not measured production results.
 
 ## Main Deliverable
-Week 4 Software Testing and QA Plan DOCX
+`Week_4_TeamFlow_Software_Testing_and_QA_Plan.docx`
+
+The document contains the complete Week 4 QA and testing plan with test lifecycle, sample test cases, performance benchmarks, security and usability plans, defect workflow, metrics, traceability, and release criteria.
 
 ## Status
 Completed
