@@ -235,3 +235,48 @@ test('new live user sees only real account data when workspace is empty', async 
   await page.getByRole('button', { name: 'Reports' }).click()
   await expect(page.getByText('No tasks available yet.')).toBeVisible()
 })
+
+test('live workspace navigation never drops to a blank page', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('teamflow_token', 'test-token')
+    localStorage.setItem('teamflow_user', JSON.stringify({
+      id: 'test-user',
+      name: 'test1',
+      email: 'test1@example.com',
+      role: 'TEAM_MEMBER',
+    }))
+  })
+
+  await page.route('**/api/v1/**', async (route) => {
+    const request = route.request()
+    const url = new URL(request.url())
+    const path = url.pathname.replace('/api/v1', '')
+    const json = async (status, data) => route.fulfill({
+      status,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true, data }),
+    })
+
+    if (request.method() === 'GET' && path === '/dashboard/summary') return json(200, { activeProjects: 0, openTasks: 0, completedTasks: 0, overdueTasks: 0 })
+    if (request.method() === 'GET' && path === '/projects') return json(200, [])
+    if (request.method() === 'GET' && path === '/activity') return json(200, [])
+    if (request.method() === 'GET' && path === '/notifications') return json(200, [])
+    if (request.method() === 'GET' && path === '/auth/me') return json(200, { id: 'test-user', name: 'test1', email: 'test1@example.com', role: 'TEAM_MEMBER', status: 'ACTIVE' })
+    return json(200, [])
+  })
+
+  await page.goto('/auth/login')
+  await expect(page.getByRole('heading', { name: /Good (morning|afternoon|evening), test1/i })).toBeVisible()
+  await expect(page).toHaveURL(/http:\/\/127\.0\.0\.1:4173\/$/)
+
+  for (const [label, heading] of [
+    ['Projects', 'Projects'],
+    ['My Tasks', 'My Tasks'],
+    ['Team', 'Team'],
+    ['Reports', 'Reports'],
+    ['Settings', 'Settings'],
+  ]) {
+    await page.getByRole('button', { name: label, exact: true }).click()
+    await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible()
+  }
+})
