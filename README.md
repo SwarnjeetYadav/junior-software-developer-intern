@@ -21,7 +21,7 @@ This repository records the weekly internship work, documentation, planning, imp
 |---|---|---|
 | Week 1 | Project Planning and Requirements Analysis | Completed |
 | Week 2 | Design Documentation and Architecture Planning | Completed |
-| Week 3 | Core Development | Planned |
+| Week 3 | Feature Development and Code Prototype Documentation | Completed |
 | Week 4 | Feature Development | Planned |
 | Week 5 | Integration and Refinement | Planned |
 | Week 6 | Testing and Final Review | Planned |
@@ -29,7 +29,7 @@ This repository records the weekly internship work, documentation, planning, imp
 ## Repository Structure
 - `Week-1-Project-Planning/` - planning and requirements
 - `Week-2-System-Design/` - architecture, data flow, modules, API planning and technology decisions
-- `Week-3-Core-Development/` - authentication and foundational modules
+- `Week-3-Core-Development/` - Week 3 feature prototype and development documentation
 - `Week-4-Feature-Development/` - project and task features
 - `Week-5-Integration-and-Refinement/` - dashboard, notifications and integration
 - `Week-6-Testing-and-Final-Review/` - testing, fixes, documentation and final review
