@@ -175,7 +175,9 @@ export function GenericPage({
   onSelectTask,
   liveData,
   currentUserId,
+  currentUser,
   onMembersChanged,
+  canManageProjects = false,
 }) {
   const copy = pageCopy[page] || pageCopy.Projects
   const remoteProjects = liveData.connected ? liveData.projects : []
