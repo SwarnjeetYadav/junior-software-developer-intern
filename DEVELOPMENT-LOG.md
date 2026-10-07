@@ -66,3 +66,22 @@ The source structure is implemented in the repository. The local environment sti
 4. Activity history and notifications UI
 5. Automated unit and integration tests
 6. Production deployment configuration
+
+## Milestone: Live Task Workflow
+
+### Completed
+- Create Task now supports live API submission for authenticated users.
+- Backend smart assignment runs when no explicit assignee is selected.
+- Project member workload is calculated from live task data for the first project.
+- Task rows open a reusable Task Details modal.
+- Live task status updates call PATCH /tasks/:taskId.
+- Task comments are persisted through the comment API.
+- User activity is loaded from the backend.
+- Assignment notifications are loaded and can be marked as read from the topbar.
+- Project creation remains API backed.
+
+### Current User Journey
+Login -> Workspace -> Projects -> Create Project -> Create Task -> Smart Assignment -> Task Details -> Status Update -> Comment -> Activity / Notification
+
+### Next Milestone
+Automated backend tests and stronger data-driven task/project views, followed by notification/activity refinements and production deployment configuration.
