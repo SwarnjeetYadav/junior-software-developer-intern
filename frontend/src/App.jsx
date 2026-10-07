@@ -7,9 +7,11 @@ import Overview from './pages/Overview'
 import Login from './pages/Login'
 import { GenericPage } from './pages'
 import { useAuth } from './auth/AuthProvider'
+import { useTeamflowData } from './hooks/useTeamflowData'
 
 export default function App() {
   const { user, logout, demoMode } = useAuth()
+  const liveData = useTeamflowData(Boolean(user) && !demoMode)
   const [page, setPage] = useState('Overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
@@ -41,12 +43,14 @@ export default function App() {
               onNavigate={navigate}
               onCreateTask={() => setTaskModalOpen(true)}
               onSuggestAssignee={() => setTaskModalOpen(true)}
+              liveData={demoMode ? { connected: false, error: '', summary: null, projects: [], tasks: [] } : liveData}
             />
           ) : (
             <GenericPage
               page={page}
-              taskRows={page === 'My Tasks' ? allTasks : initialTasks}
+              taskRows={demoMode ? allTasks : liveData.tasks.length ? liveData.tasks : initialTasks}
               onCreateTask={() => setTaskModalOpen(true)}
+              liveData={demoMode ? { connected: false, error: '', summary: null, projects: [], tasks: [] } : liveData}
             />
           )}
         </main>
