@@ -1,11 +1,13 @@
-import Icon from './Icon'
 import Avatar from './Avatar'
+import Icon from './Icon'
 import { useState } from 'react'
 import { currentUser } from '../data/teamflowMock'
 
-export default function Topbar({ page, onOpenMenu, onLogout, demoMode }) {
+export default function Topbar({ page, onOpenMenu, onLogout, demoMode, notifications = [], onMarkRead }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [notificationOpen, setNotificationOpen] = useState(false)
   const user = demoMode ? currentUser : JSON.parse(localStorage.getItem('teamflow_user') || 'null') || currentUser
+  const unreadCount = notifications.filter((item) => item.unread).length
 
   return (
     <header className="topbar">
@@ -15,13 +17,28 @@ export default function Topbar({ page, onOpenMenu, onLogout, demoMode }) {
       </div>
 
       <div className="topbar-actions">
-        <label className="search-box">
-          <Icon name="search" size={17} />
-          <input placeholder="Search tasks, projects..." aria-label="Search tasks and projects" />
-          <kbd>⌘ K</kbd>
-        </label>
+        <label className="search-box"><Icon name="search" size={17} /><input placeholder="Search tasks, projects..." aria-label="Search tasks and projects" /><kbd>⌘ K</kbd></label>
 
-        <button className="icon-button notification-button" type="button" aria-label="Notifications"><Icon name="bell" size={18} /><span className="notification-dot" /></button>
+        <div className="notification-wrap">
+          <button className="icon-button notification-button" type="button" onClick={() => setNotificationOpen((value) => !value)} aria-label="Notifications" aria-expanded={notificationOpen}>
+            <Icon name="bell" size={18} />
+            {unreadCount ? <span className="notification-count">{unreadCount > 9 ? '9+' : unreadCount}</span> : null}
+          </button>
+
+          {notificationOpen ? (
+            <div className="notification-popover">
+              <div className="notification-head"><strong>Notifications</strong><span>{unreadCount ? unreadCount + ' unread' : 'All caught up'}</span></div>
+              <div className="notification-list">
+                {notifications.length ? notifications.slice(0, 6).map((item) => (
+                  <button type="button" className={'notification-item ' + (item.unread ? 'notification-item-unread' : '')} key={item._id} onClick={() => item.unread && onMarkRead?.(item._id)}>
+                    <span className="notification-mark"><Icon name="bell" size={14} /></span>
+                    <span><strong>{item.type === 'TASK_ASSIGNED' ? 'Task assigned' : 'TeamFlow update'}</strong><small>{item.message}</small><em>{new Date(item.createdAt).toLocaleString('en-IN')}</em></span>
+                  </button>
+                )) : <div className="notification-empty">No notifications yet.</div>}
+              </div>
+            </div>
+          ) : null}
+        </div>
 
         <div className="profile-menu">
           <button className="user-chip" type="button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen}>
