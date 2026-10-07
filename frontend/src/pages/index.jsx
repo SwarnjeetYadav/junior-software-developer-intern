@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import SectionHeader from '../components/SectionHeader'
 import TaskTable from '../components/TaskTable'
 import Avatar from '../components/Avatar'
@@ -245,7 +245,7 @@ export function GenericPage({
             <TaskTable tasks={rows} onSelectTask={onSelectTask} />
           </div>
         ) : (
-          <div className="panel"><SectionHeader title="Project work queue" subtitle="Demo task data for the UI review." action="Create new" onAction={onCreateTask} /><TaskTable tasks={rows} onSelectTask={onSelectTask} /></div>
+          <div className="panel"><SectionHeader title="Project work queue" subtitle="Demo task data for the UI review." action="Create new" onAction={onCreateTask} /><TaskTable tasks={taskRows} onSelectTask={onSelectTask} /></div>
         )}
       </div>
     )
