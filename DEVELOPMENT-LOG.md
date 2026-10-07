@@ -81,3 +81,27 @@ Login -> Workspace -> Projects -> Create Project -> Create Task -> Smart Assignm
 4. Add notification and activity dedicated screens.
 5. Add task search and filtering.
 6. Prepare deployment configuration and staging environment.
+
+
+## Phase 4: API Integration Testing
+
+### Completed
+- Added a disposable MongoDB integration environment using mongodb-memory-server.
+- Added HTTP level API assertions using SuperTest.
+- Covered the end to end TeamFlow workflow from authentication through project creation member addition smart assignment comments notifications activity and persistence verification.
+- Added a negative authorization scenario for non-member project access.
+- Added a dedicated npm script for the integration suite.
+
+### Evidence Path
+```text
+API request
+   -> Express route
+   -> Authentication / Authorization
+   -> Service layer
+   -> MongoDB test database
+   -> Response
+   -> Persistence assertions
+```
+
+### Next Milestone
+Replace the remaining frontend demo surfaces with live member, project and task management screens and add browser level regression coverage.
