@@ -1,12 +1,32 @@
-import Icon from '../components/Icon'
 import SectionHeader from '../components/SectionHeader'
 import TaskTable from '../components/TaskTable'
 import Avatar from '../components/Avatar'
 import Badge from '../components/Badge'
-import { pageCopy, tasks, workload } from '../data/teamflowMock'
+import ProjectCard from '../components/ProjectCard'
+import { pageCopy, projects as mockProjects, tasks, workload } from '../data/teamflowMock'
 
-export function GenericPage({ page, taskRows = tasks, onCreateTask }) {
+export function GenericPage({ page, taskRows = tasks, onCreateTask, liveData }) {
   const copy = pageCopy[page] || pageCopy.Projects
+  const remoteProjects = liveData.connected ? liveData.projects : []
+  const rows = liveData.connected && liveData.tasks.length ? liveData.tasks : taskRows
+
+  if (page === 'Projects') {
+    const projectsToShow = remoteProjects.length ? remoteProjects.map((project, index) => ({
+      name: project.name,
+      meta: 'Live workspace · Project',
+      progress: 0,
+      tone: ['violet', 'blue', 'green'][index % 3],
+      due: project.dueDate ? new Date(project.dueDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) : 'No due date',
+      tasks: 'Live',
+    })) : mockProjects
+    return (
+      <div className="page-stack">
+        <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
+        <div className="project-grid">{projectsToShow.map((project, index) => <ProjectCard key={project.name + index} project={project} />)}</div>
+        <div className="panel"><SectionHeader title="Project work queue" subtitle="Tasks from the current project feed." action="Create new" onAction={onCreateTask} /><TaskTable tasks={rows} /></div>
+      </div>
+    )
+  }
 
   if (page === 'Team') {
     return (
@@ -44,8 +64,8 @@ export function GenericPage({ page, taskRows = tasks, onCreateTask }) {
     <div className="page-stack">
       <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
       <div className="panel">
-        <SectionHeader title={page === 'Projects' ? 'Your projects' : 'Your task queue'} subtitle="The visual foundation is ready for API integration." action="Create new" onAction={onCreateTask} />
-        <TaskTable tasks={taskRows} />
+        <SectionHeader title="Your task queue" subtitle={liveData.connected ? 'Loaded from the TeamFlow API.' : 'Demo task data for the UI review.'} action="Create new" onAction={onCreateTask} />
+        <TaskTable tasks={rows} />
       </div>
     </div>
   )
