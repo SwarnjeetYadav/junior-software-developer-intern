@@ -4,7 +4,7 @@ import { api } from '../lib/api'
 const statusLabel = { TODO: 'Todo', IN_PROGRESS: 'In Progress', REVIEW: 'Review', BLOCKED: 'Blocked', COMPLETED: 'Completed' }
 const priorityLabel = { LOW: 'Low', MEDIUM: 'Medium', HIGH: 'High', CRITICAL: 'Critical' }
 
-function initialsFor(name = 'TeamFlow') {
+function initialsFor(name = 'Anvaya') {
   return name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()
 }
 
@@ -33,7 +33,7 @@ function mapTask(task, project) {
 function mapActivity(item) {
   return {
     initials: initialsFor(item.userId?.name),
-    person: item.userId?.name || 'TeamFlow',
+    person: item.userId?.name || 'Anvaya',
     action: formatActivity(item),
     time: new Date(item.createdAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
     tone: 'violet',
