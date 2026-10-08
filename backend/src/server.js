@@ -7,11 +7,11 @@ async function start() {
   await connectDatabase()
 
   const server = app.listen(env.port, () => {
-    console.log(`TeamFlow API running on port ${env.port}`)
+    console.log(`Anvaya API running on port ${env.port}`)
   })
 
   const shutdown = async (signal) => {
-    console.log(`Received ${signal}; shutting down TeamFlow API`)
+    console.log(`Received ${signal}; shutting down Anvaya API`)
     server.close(async () => {
       await mongoose.disconnect()
       process.exit(0)
@@ -24,6 +24,6 @@ async function start() {
 }
 
 start().catch((error) => {
-  console.error('Unable to start TeamFlow API', error)
+  console.error('Unable to start Anvaya API', error)
   process.exit(1)
 })
