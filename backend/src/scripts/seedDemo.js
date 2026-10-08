@@ -45,7 +45,7 @@ async function seedDemo() {
 
   await ProjectMember.updateOne(
     { projectId: project._id, userId: manager._id },
-    { $setOnInsert: { projectId: project._id, userId: manager._id } },
+    { $setOnInsert: { projectId: project._id, userId: manager._id, projectRole: 'PROJECT_MANAGER' } },
     { upsert: true },
   )
 
