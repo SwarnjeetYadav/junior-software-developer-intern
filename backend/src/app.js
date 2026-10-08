@@ -56,7 +56,7 @@ app.get('/api/v1/health', (_req, res) => {
   res.json({
     success: true,
     data: {
-      service: 'teamflow-api',
+      service: 'anvaya-api',
       status: 'healthy',
       environment: env.nodeEnv,
       timestamp: new Date().toISOString(),
