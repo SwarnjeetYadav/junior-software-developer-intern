@@ -53,11 +53,11 @@ export default function Login() {
       <section className="login-card">
         <div className="login-brand">
           <span className="brand-mark">TF</span>
-          <div><strong>TeamFlow</strong><small>Smart project workspace</small></div>
+          <div><strong>Anvaya</strong><small>Smart project workspace</small></div>
         </div>
 
         <div className="login-copy">
-          <span className="eyebrow">{isRegister ? 'New to TeamFlow' : 'Welcome back'}</span>
+          <span className="eyebrow">{isRegister ? 'New to Anvaya' : 'Welcome back'}</span>
           <h1>{isRegister ? 'Create your workspace account.' : 'Work with clarity.'}</h1>
           <p>{isRegister ? 'Create an account to start managing tasks and projects.' : 'Sign in to manage projects, tasks, ownership, and team workload.'}</p>
         </div>
@@ -85,11 +85,11 @@ export default function Login() {
         <p className="login-note">
           {isRegister
             ? 'New accounts are created as Team Members. Project Manager/Admin access is controlled by the backend.'
-            : 'Demo mode uses local mock data. Sign in uses the TeamFlow API.'}
+            : 'Demo mode uses local mock data. Sign in uses the Anvaya API.'}
         </p>
       </section>
 
-      <div className="login-footer"><span>TeamFlow</span><span>Designed for focused team execution</span></div>
+      <div className="login-footer"><span>Anvaya</span><span>Designed for focused team execution</span></div>
     </div>
   )
 }
