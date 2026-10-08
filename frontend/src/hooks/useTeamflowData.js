@@ -108,9 +108,11 @@ export function useTeamflowData(enabled) {
                 .filter((item) => item.userId)
                 .map((item, memberIndex) => ({
                   id: item.userId._id,
+                  memberId: item._id,
                   name: item.userId.name,
                   email: item.userId.email,
                   role: item.userId.role,
+                  projectRole: item.projectRole || 'MEMBER',
                   status: item.userId.status,
                   initials: initialsFor(item.userId.name),
                   tone: ['violet', 'blue', 'green', 'amber', 'rose'][memberIndex % 5],
