@@ -21,16 +21,16 @@ export const stats = [
 ]
 
 export const projects = [
-  { name: 'TeamFlow Web App', meta: 'Product · 14 members', progress: 78, tone: 'violet', due: 'Oct 24', tasks: '18 / 23' },
+  { name: 'Anvaya Web App', meta: 'Product · 14 members', progress: 78, tone: 'violet', due: 'Oct 24', tasks: '18 / 23' },
   { name: 'Mobile Experience', meta: 'Product · 7 members', progress: 54, tone: 'blue', due: 'Nov 05', tasks: '11 / 20' },
   { name: 'Marketing Launch', meta: 'Growth · 6 members', progress: 82, tone: 'green', due: 'Oct 18', tasks: '22 / 27' },
 ]
 
 export const tasks = [
-  { id: 'TF-124', title: 'Implement task assignment API', project: 'TeamFlow Web App', assignee: 'AK', assigneeName: 'Ankit Kumar', priority: 'High', status: 'In Progress', due: 'Today' },
-  { id: 'TF-121', title: 'Review dashboard wireframes', project: 'TeamFlow Web App', assignee: 'PS', assigneeName: 'Priya Shah', priority: 'Medium', status: 'Review', due: 'Tomorrow' },
+  { id: 'TF-124', title: 'Implement task assignment API', project: 'Anvaya Web App', assignee: 'AK', assigneeName: 'Ankit Kumar', priority: 'High', status: 'In Progress', due: 'Today' },
+  { id: 'TF-121', title: 'Review dashboard wireframes', project: 'Anvaya Web App', assignee: 'PS', assigneeName: 'Priya Shah', priority: 'Medium', status: 'Review', due: 'Tomorrow' },
   { id: 'MK-084', title: 'Prepare launch content matrix', project: 'Marketing Launch', assignee: 'RM', assigneeName: 'Riya Mehta', priority: 'High', status: 'In Progress', due: 'Oct 12' },
-  { id: 'TF-118', title: 'Add notification preferences', project: 'TeamFlow Web App', assignee: 'NS', assigneeName: 'Neha Singh', priority: 'Low', status: 'Todo', due: 'Oct 15' },
+  { id: 'TF-118', title: 'Add notification preferences', project: 'Anvaya Web App', assignee: 'NS', assigneeName: 'Neha Singh', priority: 'Low', status: 'Todo', due: 'Oct 15' },
   { id: 'MB-031', title: 'Confirm mobile navigation states', project: 'Mobile Experience', assignee: 'VK', assigneeName: 'Vikash Kumar', priority: 'Medium', status: 'Todo', due: 'Oct 16' },
 ]
 
