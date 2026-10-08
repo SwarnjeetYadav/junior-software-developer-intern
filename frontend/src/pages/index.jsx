@@ -4,6 +4,7 @@ import TaskTable from '../components/TaskTable'
 import Avatar from '../components/Avatar'
 import Badge from '../components/Badge'
 import ProjectCard from '../components/ProjectCard'
+import TeamWorkspace from '../components/TeamWorkspace'
 import { api } from '../lib/api'
 import { pageCopy, projects as mockProjects, tasks, workload } from '../data/teamflowMock'
 
@@ -255,31 +256,43 @@ export function GenericPage({
   }
 
   if (page === 'Team') {
-    const people = liveData.connected ? liveData.members : workload
+    if (!liveData.connected) {
+      return (
+        <div className="page-stack">
+          <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
+          <div className="panel"><SectionHeader title="Team capacity" subtitle="Demo team data for the UI preview." /><div className="team-grid">{workload.map((member) => (
+            <div className="team-card" key={member.id || member.name}>
+              <Avatar initials={member.initials} color={member.tone} size="lg" />
+              <div><h3>{member.name}</h3><p>{member.email || 'Demo teammate'}</p></div>
+              <Badge color={member.activeTasks <= 5 ? 'blue' : member.activeTasks <= 7 ? 'green' : 'amber'}>{member.status}</Badge>
+              <span className="team-stat">{member.tasks} active tasks</span>
+            </div>
+          ))}</div></div>
+        </div>
+      )
+    }
 
     return (
       <div className="page-stack">
-        <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
-        {liveData.connected && (canManageProjects || remoteProjects.some((project) => String(project.ownerId) === String(currentUserId))) && remoteProjects.length ? (
-          <MemberManager projects={remoteProjects} membersByProject={liveData.membersByProject} onChanged={onMembersChanged} />
-        ) : null}
-        <div className="panel">
-          <SectionHeader title="Team capacity" subtitle={liveData.connected ? 'Live members aggregated across your projects.' : 'Mock data from the Anvaya planning model.'} />
-          {liveData.connected && !remoteProjects.length ? (
-            <div className="empty-state">No team members are visible because you are not assigned to any project yet.</div>
-          ) : people.length ? (
-            <div className="team-grid">
-              {people.map((member) => (
-                <div className="team-card" key={member.id || member.name}>
-                  <Avatar initials={member.initials} color={member.tone} size="lg" />
-                  <div><h3>{member.name}</h3><p>{member.email}</p></div>
-                  <Badge color={member.activeTasks <= 5 ? 'blue' : member.activeTasks <= 7 ? 'green' : 'amber'}>{member.activeTasks <= 5 ? 'Light' : member.activeTasks <= 7 ? 'Balanced' : 'Busy'}</Badge>
-                  <span className="team-stat">{member.activeTasks || 0} active tasks · {member.projectIds?.length || 0} project{(member.projectIds?.length || 0) === 1 ? '' : 's'}</span>
-                </div>
-              ))}
-            </div>
-          ) : <div className="empty-state">No team members have been added yet.</div>}
-        </div>
+        <section className="page-title-block">
+          <span className="eyebrow">{copy[0]}</span>
+          <h1>{copy[1]}</h1>
+          <p>{copy[2]}</p>
+        </section>
+        {remoteProjects.length ? (
+          <TeamWorkspace
+            projects={remoteProjects}
+            membersByProject={liveData.membersByProject}
+            currentUserId={currentUserId}
+            currentUser={currentUser}
+            onChanged={onMembersChanged}
+          />
+        ) : (
+          <div className="panel">
+            <SectionHeader title="Build your first team" subtitle="Create a project to start adding teammates, permissions, and chat." />
+            <div className="empty-state">No projects are available yet. Create your first project from Projects to unlock team management.</div>
+          </div>
+        )}
       </div>
     )
   }
