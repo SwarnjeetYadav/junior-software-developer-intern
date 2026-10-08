@@ -15,14 +15,14 @@
 - Added production-aware proxy handling.
 - Documented Vercel, Render and MongoDB Atlas deployment configuration.
 
-# TeamFlow Development Log
+# Anvaya Development Log
 
 This file records the actual application build after the six internship simulation documents.
 
 ## Foundation
 
 ### Phase 1 Frontend
-- Responsive TeamFlow workspace shell
+- Responsive Anvaya workspace shell
 - Reusable Sidebar, Topbar, Avatar, Badge, SectionHeader and card components
 - Overview dashboard
 - Project, task, team, reports and settings views
@@ -64,7 +64,7 @@ This file records the actual application build after the six internship simulati
 #### Completed
 - Added a disposable MongoDB integration environment using mongodb-memory-server.
 - Added HTTP level API assertions using SuperTest.
-- Covered the end to end TeamFlow workflow from authentication through project creation member addition smart assignment comments notifications activity and persistence verification.
+- Covered the end to end Anvaya workflow from authentication through project creation member addition smart assignment comments notifications activity and persistence verification.
 - Added a negative authorization scenario for non-member project access.
 - Added a dedicated npm script for the integration suite.
 
@@ -182,7 +182,7 @@ Login -> Workspace -> Projects -> Create Project -> Create Task -> Smart Assignm
 
 ## Current State
 
-The repository contains the six-week documentation, the TeamFlow application implementation, backend API integration tests, and browser regression coverage. Local execution still requires installing project dependencies and providing a MongoDB instance for the real backend.
+The repository contains the six-week documentation, the Anvaya application implementation, backend API integration tests, and browser regression coverage. Local execution still requires installing project dependencies and providing a MongoDB instance for the real backend.
 
 ## Next Build Milestones
 
