@@ -23,7 +23,7 @@ async function seedDemo() {
   const manager = await User.findOneAndUpdate(
     { email: email.toLowerCase().trim() },
     {
-      name: 'TeamFlow Demo Manager',
+      name: 'Anvaya Demo Manager',
       email: email.toLowerCase().trim(),
       passwordHash,
       role: 'PROJECT_MANAGER',
@@ -32,11 +32,11 @@ async function seedDemo() {
     { upsert: true, new: true, setDefaultsOnInsert: true },
   )
 
-  let project = await Project.findOne({ name: 'TeamFlow Web App', ownerId: manager._id })
+  let project = await Project.findOne({ name: 'Anvaya Web App', ownerId: manager._id })
 
   if (!project) {
     project = await Project.create({
-      name: 'TeamFlow Web App',
+      name: 'Anvaya Web App',
       description: 'Demo project created by the controlled local seed process.',
       ownerId: manager._id,
       status: 'ACTIVE',
