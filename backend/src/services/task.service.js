@@ -36,12 +36,15 @@ export async function createTask({ userId, role, projectId, payload }) {
   const dueDate = payload.dueDate ? new Date(payload.dueDate) : null
   if (payload.dueDate && Number.isNaN(dueDate.getTime())) throw new ApiError(400, 'Invalid due date')
 
-  const members = await ProjectMember.find({ projectId }).select('userId').lean()
-  const eligible = new Set(members.map((member) => String(member.userId)))
+  const members = await ProjectMember.find({ projectId }).select('userId projectRole').lean()
+  const memberRoles = new Map(members.map((member) => [String(member.userId), member.projectRole || 'MEMBER']))
   let assigneeId = payload.assigneeId || null
 
-  if (assigneeId && !eligible.has(String(assigneeId))) {
+  if (assigneeId && !memberRoles.has(String(assigneeId))) {
     throw new ApiError(422, 'Assignee is not a member of this project')
+  }
+  if (assigneeId && memberRoles.get(String(assigneeId)) === 'VIEWER') {
+    throw new ApiError(422, 'Viewers cannot be assigned tasks')
   }
 
   if (!assigneeId) assigneeId = await suggestAssignee(projectId)
@@ -107,6 +110,7 @@ export async function updateTask({ userId, role, taskId, payload }) {
   if (payload.assigneeId) {
     const member = await ProjectMember.findOne({ projectId: task.projectId, userId: payload.assigneeId }).lean()
     if (!member) throw new ApiError(422, 'Assignee is not a member of this project')
+    if (member.projectRole === 'VIEWER') throw new ApiError(422, 'Viewers cannot be assigned tasks')
   }
 
   if (payload.dueDate) {
