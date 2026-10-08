@@ -108,6 +108,7 @@ GitHub Actions validates backend unit tests, backend API integration tests, fron
 - Live task comments
 - Live project progress and member counts
 - Live team workload aggregation
+- Live project team management, member roles, removal, and project chat
 - Live project member search and add flow
 - Notifications
 - Activity feed
