@@ -127,7 +127,7 @@ function MemberManager({ projects, membersByProject, onChanged }) {
   return (
     <div className="member-manager">
       <div className="member-manager-head">
-        <div><span className="eyebrow">Live membership</span><h2>Manage project members</h2><p>Add active TeamFlow users to the selected project.</p></div>
+        <div><span className="eyebrow">Live membership</span><h2>Manage project members</h2><p>Add active Anvaya users to the selected project.</p></div>
         <select value={projectId} onChange={(event) => setProjectId(event.target.value)} aria-label="Project for member management">
           {projects.map((project) => <option key={project._id} value={project._id}>{project.name}</option>)}
         </select>
@@ -264,7 +264,7 @@ export function GenericPage({
           <MemberManager projects={remoteProjects} membersByProject={liveData.membersByProject} onChanged={onMembersChanged} />
         ) : null}
         <div className="panel">
-          <SectionHeader title="Team capacity" subtitle={liveData.connected ? 'Live members aggregated across your projects.' : 'Mock data from the TeamFlow planning model.'} />
+          <SectionHeader title="Team capacity" subtitle={liveData.connected ? 'Live members aggregated across your projects.' : 'Mock data from the Anvaya planning model.'} />
           {liveData.connected && !remoteProjects.length ? (
             <div className="empty-state">No team members are visible because you are not assigned to any project yet.</div>
           ) : people.length ? (
@@ -350,7 +350,7 @@ export function GenericPage({
           <div className="setting-row"><div><strong>Email</strong><p>{currentUser?.email || '—'}</p></div><span className="setting-value">Signed-in account</span></div>
           <div className="setting-row"><div><strong>Visible projects</strong><p>Projects currently available to your account.</p></div><span className="setting-value">{remoteProjects.length}</span></div>
           <div className="setting-row"><div><strong>Visible tasks</strong><p>Tasks currently available to your account.</p></div><span className="setting-value">{allRows.length}</span></div>
-          <div className="setting-row"><div><strong>Workspace connection</strong><p>Frontend data is loaded from the TeamFlow API.</p></div><span className="setting-value">Connected</span></div>
+          <div className="setting-row"><div><strong>Workspace connection</strong><p>Frontend data is loaded from the Anvaya API.</p></div><span className="setting-value">Connected</span></div>
         </div>
       </div>
     )
@@ -366,7 +366,7 @@ export function GenericPage({
       <div className="panel">
         <SectionHeader
           title={page === 'My Tasks' ? 'Your task queue' : 'Task queue'}
-          subtitle={liveData.connected ? rows.length + ' matching task' + (rows.length === 1 ? '' : 's') + ' from the TeamFlow API.' : 'Demo task data for the UI review.'}
+          subtitle={liveData.connected ? rows.length + ' matching task' + (rows.length === 1 ? '' : 's') + ' from the Anvaya API.' : 'Demo task data for the UI review.'}
         />
         <TaskTable tasks={rows} onSelectTask={onSelectTask} />
       </div>

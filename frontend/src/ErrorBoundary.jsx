@@ -23,8 +23,8 @@ export default class ErrorBoundary extends Component {
       return (
         <div className="runtime-error-screen">
           <div className="runtime-error-card">
-            <span className="brand-mark">TF</span>
-            <h1>TeamFlow couldn't load this page</h1>
+            <span className="brand-mark">AN</span>
+            <h1>Anvaya couldn't load this page</h1>
             <p>A UI error occurred. Your saved session can be cleared and the app restarted safely.</p>
             <button type="button" className="primary-button primary-button-dark" onClick={this.handleReset}>
               Return to sign in

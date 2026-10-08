@@ -52,7 +52,7 @@ export default function Login() {
 
       <section className="login-card">
         <div className="login-brand">
-          <span className="brand-mark">TF</span>
+          <span className="brand-mark">AN</span>
           <div><strong>Anvaya</strong><small>Smart project workspace</small></div>
         </div>
 

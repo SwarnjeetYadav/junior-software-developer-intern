@@ -78,7 +78,7 @@ export default function CreateTaskModal({
         await onCreate({
           id: 'TF-' + Math.floor(130 + Math.random() * 60),
           title: cleanTitle,
-          project: selectedProject?.name || 'TeamFlow Web App',
+          project: selectedProject?.name || 'Anvaya Web App',
           assignee: chosen?.initials || 'SY',
           assigneeName: chosen?.name || 'Swarnjeet Yadav',
           priority,

@@ -20,7 +20,7 @@ export default function Sidebar({ page, onNavigate, open, onClose, user, liveDat
     <aside className={'sidebar ' + (open ? 'sidebar-open' : '')}>
       <div className="sidebar-top">
         <button className="brand" type="button" onClick={() => onNavigate('Overview')} aria-label="Go to overview">
-          <span className="brand-mark">TF</span>
+          <span className="brand-mark">AN</span>
           <span><strong>Anvaya</strong><small>Smart workspace</small></span>
         </button>
         <button className="icon-button sidebar-close" type="button" onClick={onClose} aria-label="Close navigation">
@@ -67,7 +67,7 @@ export default function Sidebar({ page, onNavigate, open, onClose, user, liveDat
         </div>
 
         <div className="profile-mini">
-          <Avatar initials={displayUser.initials || displayUser.name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'TF'} color="violet" size="lg" />
+          <Avatar initials={displayUser.initials || displayUser.name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'AN'} color="violet" size="lg" />
           <span><strong>{displayUser.name || currentUser.name}</strong><small>{displayRole(displayUser.role || currentUser.role)}</small></span>
           <Icon name="settings" size={16} />
         </div>

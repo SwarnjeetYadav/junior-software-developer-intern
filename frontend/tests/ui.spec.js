@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test'
 
 const project = {
   _id: 'project-1',
-  name: 'TeamFlow Web App',
-  description: 'Core TeamFlow workspace',
+  name: 'Anvaya Web App',
+  description: 'Core Anvaya workspace',
   ownerId: 'user-1',
   dueDate: '2026-10-24T00:00:00.000Z',
   status: 'ACTIVE',
@@ -129,7 +129,7 @@ test('live Projects view uses API data and task filters', async ({ page }) => {
   await page.getByRole('button', { name: 'Projects', exact: true }).click()
   await expect(page).toHaveURL(/\/projects$/)
   await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible()
-  await expect(page.getByText('TeamFlow Web App')).toBeVisible()
+  await expect(page.getByText('Anvaya Web App')).toBeVisible()
   await expect(page.getByText('50%')).toBeVisible()
 
   await page.getByLabel('Filter task status').selectOption('TODO')
@@ -223,7 +223,7 @@ test('new live user sees only real account data when workspace is empty', async 
   await expect(page.getByRole('heading', { name: /Good (morning|afternoon|evening), test1/i })).toBeVisible()
   await expect(page.getByText('No projects yet.', { exact: false })).toBeVisible()
   await expect(page.getByText(/No team workload data yet/i)).toBeVisible()
-  await expect(page.getByText('TeamFlow Web App')).not.toBeVisible()
+  await expect(page.getByText('Anvaya Web App')).not.toBeVisible()
   await expect(page.getByText('Ankit Kumar')).not.toBeVisible()
   await expect(page.getByText('Swarnjeet')).not.toBeVisible()
 

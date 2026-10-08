@@ -29,8 +29,8 @@ function pageFromPath(pathname) {
 function LoadingScreen() {
   return (
     <div className="auth-loading-screen" role="status" aria-live="polite">
-      <span className="brand-mark">TF</span>
-      <strong>Loading TeamFlow…</strong>
+      <span className="brand-mark">AN</span>
+      <strong>Loading Anvaya…</strong>
       <small>Checking your session</small>
     </div>
   )
