@@ -72,7 +72,7 @@ export default function Overview({ onNavigate, onCreateTask, onSuggestAssignee, 
         <div className="hero-copy">
           <span className="hero-kicker">{remoteMode ? 'Live workspace' : 'Demo workspace'} · {today}</span>
           <h1>{greeting}, {firstName}</h1>
-          <p>{remoteMode ? 'Your dashboard is connected to the TeamFlow API.' : 'Here is what is happening across your demo workspace today.'}</p>
+          <p>{remoteMode ? 'Your dashboard is connected to the Anvaya API.' : 'Here is what is happening across your demo workspace today.'}</p>
           <div className="hero-actions">
             <button className="primary-button" onClick={() => onNavigate('My Tasks')}><Icon name="check" size={16} /> Review my tasks</button>
             <button className="ghost-button" onClick={onCreateTask}><Icon name="plus" size={16} /> Create task</button>
