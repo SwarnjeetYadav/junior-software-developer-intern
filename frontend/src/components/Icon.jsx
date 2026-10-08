@@ -12,6 +12,11 @@ const paths = {
   spark: '<path d="m12 3-1.8 5.2L5 10l5.2 1.8L12 17l1.8-5.2L19 10l-5.2-1.8L12 3Z"/><path d="m19 16-.8 2.2L16 19l2.2.8L19 22l.8-2.2L22 19l-2.2-.8L19 16Z"/>',
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   close: '<path d="m6 6 12 12M18 6 6 18"/>',
+  chat: '<path d="M20 15a4 4 0 0 1-4 4H9l-4 2v-5a7 7 0 1 1 15-1Z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/>',
+  refresh: '<path d="M20 11a8 8 0 0 0-13.4-5.9L5 6.7"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 13.4 5.9l1.6-1.6"/><path d="M20 20v-4h-4"/>',
+  expand: '<path d="M8 3H3v5M16 3h5v5M8 21H3v-5M21 16v5h-5"/><path d="m3 8 5-5M16 3l5 5M3 16l5 5M16 21l5-5"/>',
+  minimize: '<path d="m9 3-6 6M3 3v6h6M15 21l6-6M21 21v-6h-6M3 15l6 6M9 21H3v-6M21 9l-6-6M21 3h-6v6"/>',
+  send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
 }
 
 export default function Icon({ name, size = 18, stroke = 1.8 }) {
