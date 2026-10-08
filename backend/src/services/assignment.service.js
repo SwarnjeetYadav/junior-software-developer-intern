@@ -5,10 +5,10 @@ import Task from '../models/Task.js'
 export async function suggestAssignee(projectId) {
   if (!mongoose.isValidObjectId(projectId)) return null
 
-  const members = await ProjectMember.find({ projectId }).select('userId').lean()
+  const members = await ProjectMember.find({ projectId }).select('userId projectRole').lean()
   if (!members.length) return null
 
-  const memberIds = members.map((member) => member.userId)
+  const memberIds = members.filter((member) => member.projectRole !== 'VIEWER').map((member) => member.userId)
   const counts = await Task.aggregate([
     {
       $match: {
