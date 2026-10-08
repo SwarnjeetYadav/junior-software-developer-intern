@@ -41,7 +41,7 @@ export default function Topbar({ page, onOpenMenu, onLogout, onExitDemo, demoMod
                 {notifications.length ? notifications.slice(0, 6).map((item) => (
                   <button type="button" className={'notification-item ' + (item.unread ? 'notification-item-unread' : '')} key={item._id} onClick={() => item.unread && onMarkRead?.(item._id)}>
                     <span className="notification-mark"><Icon name="bell" size={14} /></span>
-                    <span><strong>{item.type === 'TASK_ASSIGNED' ? 'Task assigned' : 'TeamFlow update'}</strong><small>{item.message}</small><em>{new Date(item.createdAt).toLocaleString('en-IN')}</em></span>
+                    <span><strong>{item.type === 'TASK_ASSIGNED' ? 'Task assigned' : 'Anvaya update'}</strong><small>{item.message}</small><em>{new Date(item.createdAt).toLocaleString('en-IN')}</em></span>
                   </button>
                 )) : <div className="notification-empty">No notifications yet.</div>}
               </div>
