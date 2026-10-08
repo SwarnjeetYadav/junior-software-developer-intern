@@ -17,7 +17,69 @@ This repository records the weekly internship documentation and the actual TeamF
 
 ## Project Status
 
-**Documentation completed and application development in progress with live API integration and browser regression coverage.**
+**Six-week documentation completed; application implementation, testing, deployment configuration and production hardening are in progress.**
+
+## Deployment Architecture
+
+```text
+Browser
+   |
+   v
+Vercel / React Frontend
+   |
+   | HTTPS REST API
+   v
+Render / Node + Express Backend
+   |
+   v
+MongoDB Atlas
+```
+
+### Frontend deployment
+
+Use the `frontend` directory as the Vercel project root.
+
+Build command: `npm run build`
+
+Output directory: `dist`
+
+Set:
+`VITE_API_BASE_URL=https://<your-backend-domain>/api/v1`
+
+`frontend/vercel.json` provides the SPA fallback for client-side routes such as `/projects`, `/team`, `/reports` and `/settings`.
+
+### Backend deployment
+
+The repository includes `render.yaml` for a Render web service.
+
+Required production environment variables:
+
+- `NODE_ENV=production`
+- `MONGODB_URI=<MongoDB Atlas connection string>`
+- `JWT_SECRET=<random secret of at least 32 characters>`
+- `CLIENT_ORIGINS=https://<your-vercel-domain>`
+
+Never commit real credentials.
+
+## Production Hardening
+
+The backend now includes:
+
+- Helmet security headers.
+- Explicit CORS origin allow-listing.
+- Authentication rate limiting.
+- JSON request size limiting.
+- Disabled Express `X-Powered-By`.
+- Production proxy awareness.
+- Strong JWT secret validation in production.
+- Structured HTTP request timing logs.
+- Graceful SIGTERM/SIGINT shutdown.
+- Health endpoint with timestamp and process uptime.
+- Centralized safe error responses.
+
+## Testing
+
+GitHub Actions validates backend unit tests, backend API integration tests, frontend production build, and Chromium browser regression tests.
 
 ## Weekly Progress
 
@@ -34,63 +96,37 @@ This repository records the weekly internship documentation and the actual TeamF
 
 ### Frontend
 
-The React frontend is implemented under frontend.
-
 - Responsive TeamFlow workspace
 - Live authenticated workspace loading
 - Live project listing and creation
 - Project-aware live task creation
-- Live task filtering by status and priority
-- Live task updates for status, priority, assignee and due date
+- Live task filtering
+- Live task updates
 - Live task comments
 - Live project progress and member counts
 - Live team workload aggregation
 - Live project member search and add flow
-- Notification popover with mark-as-read
+- Notifications
 - Activity feed
-- Demo mode for UI review
-- Playwright browser regression suite
+- Demo mode
+- Playwright regression suite
 
 ### Backend
 
-The Express and MongoDB backend is implemented under backend.
-
-- Authentication and JWT
+- JWT authentication
 - Role based access
-- Projects
-- Project membership
-- Member candidate search
-- Tasks
-- Smart assignment
+- Projects and membership
+- Tasks and smart assignment
 - Activity logging
 - Notifications
 - Dashboard summary
-- Centralized error handling
+- Centralized errors
 - Vitest unit tests
 - Disposable MongoDB integration tests
+- Production security middleware
 
-## CI
+## Current User Journey
 
-GitHub Actions validates:
+Login -> Workspace -> Projects -> Create Project -> Create Task -> Smart Assignment -> Task Details -> Status/Priority/Assignee/Due Update -> Comment -> Activity -> Notification -> Team Member Management
 
-- Backend unit tests
-- Backend API integration tests
-- Frontend production build
-- Chromium browser regression tests
-
-## Repository Structure
-
-- Week-1-Project-Planning
-- Week-2-System-Design
-- Week-3-Core-Development
-- Week-4-Feature-Development
-- Week-5-Integration-and-Refinement
-- Week-6-Testing-and-Final-Review
-- frontend
-- backend
-
-## Actual Application Build
-
-The six-week documentation is now being used as the engineering blueprint for the TeamFlow application.
-
-See DEVELOPMENT-LOG.md for the implementation history and next milestones.
+See `DEVELOPMENT-LOG.md` for the implementation history.
