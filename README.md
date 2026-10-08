@@ -2,9 +2,9 @@
 
 ## Project
 
-**TeamFlow - Smart Task Management and Collaboration Platform**
+**Anvaya - Smart Task Management and Collaboration Platform**
 
-This repository records the weekly internship documentation and the actual TeamFlow project build.
+This repository records the weekly internship documentation and the actual Anvaya project build.
 
 ## Internship
 
@@ -96,7 +96,7 @@ GitHub Actions validates backend unit tests, backend API integration tests, fron
 
 ### Frontend
 
-- Responsive TeamFlow workspace
+- Responsive Anvaya workspace
 - Live authenticated workspace loading
 - Live project listing and creation
 - Project-aware live task creation
