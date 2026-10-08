@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: teamflow-api
+    name: anvaya-api
     runtime: node
     rootDir: backend
     buildCommand: npm install
