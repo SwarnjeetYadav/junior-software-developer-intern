@@ -22,7 +22,9 @@ async function ensureProjectAccess(projectId, userId, role) {
 }
 
 export async function createTask({ userId, role, projectId, payload }) {
-  const project = await ensureProjectAccess(projectId, userId, role)
+  const access = await ensureProjectAccess(projectId, userId, role)
+  const project = access.project
+  if (access.member?.projectRole === 'VIEWER') throw new ApiError(403, 'Viewers have read-only project access')
   const title = payload?.title?.trim()
 
   if (!title) throw new ApiError(400, 'Task title is required')
