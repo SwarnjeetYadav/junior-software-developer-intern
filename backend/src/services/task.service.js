@@ -14,11 +14,11 @@ async function ensureProjectAccess(projectId, userId, role) {
   const project = await Project.findById(projectId)
   if (!project) throw new ApiError(404, 'Project not found')
 
-  if (role === 'ADMINISTRATOR' || String(project.ownerId) === String(userId)) return project
+  if (role === 'ADMINISTRATOR' || String(project.ownerId) === String(userId)) return { project, member: null }
 
   const member = await ProjectMember.findOne({ projectId, userId }).lean()
   if (!member) throw new ApiError(403, 'You are not a member of this project')
-  return project
+  return { project, member }
 }
 
 export async function createTask({ userId, role, projectId, payload }) {
@@ -97,7 +97,8 @@ export async function updateTask({ userId, role, taskId, payload }) {
   const task = await Task.findById(taskId)
   if (!task) throw new ApiError(404, 'Task not found')
 
-  await ensureProjectAccess(task.projectId, userId, role)
+  const access = await ensureProjectAccess(task.projectId, userId, role)
+  if (access.member?.projectRole === 'VIEWER') throw new ApiError(403, 'Viewers have read-only project access')
 
   if (payload.status && !isValidStatus(payload.status)) throw new ApiError(400, 'Invalid task status')
   if (payload.priority && !isValidPriority(payload.priority)) throw new ApiError(400, 'Invalid task priority')
