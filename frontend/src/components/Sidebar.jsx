@@ -21,7 +21,7 @@ export default function Sidebar({ page, onNavigate, open, onClose, user, liveDat
       <div className="sidebar-top">
         <button className="brand" type="button" onClick={() => onNavigate('Overview')} aria-label="Go to overview">
           <span className="brand-mark">TF</span>
-          <span><strong>TeamFlow</strong><small>Smart workspace</small></span>
+          <span><strong>Anvaya</strong><small>Smart workspace</small></span>
         </button>
         <button className="icon-button sidebar-close" type="button" onClick={onClose} aria-label="Close navigation">
           <Icon name="close" size={19} />
