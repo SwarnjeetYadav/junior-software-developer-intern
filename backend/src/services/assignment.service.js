@@ -9,6 +9,8 @@ export async function suggestAssignee(projectId) {
   if (!members.length) return null
 
   const memberIds = members.filter((member) => member.projectRole !== 'VIEWER').map((member) => member.userId)
+  if (!memberIds.length) return null
+
   const counts = await Task.aggregate([
     {
       $match: {
