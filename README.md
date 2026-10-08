@@ -46,6 +46,9 @@ Output directory: `dist`
 Set:
 `VITE_API_BASE_URL=https://<your-backend-domain>/api/v1`
 
+Current frontend deployment:
+`https://anvaya-git-main-swarnjeets-projects.vercel.app/`
+
 `frontend/vercel.json` provides the SPA fallback for client-side routes such as `/projects`, `/team`, `/reports` and `/settings`.
 
 ### Backend deployment
@@ -57,7 +60,7 @@ Required production environment variables:
 - `NODE_ENV=production`
 - `MONGODB_URI=<MongoDB Atlas connection string>`
 - `JWT_SECRET=<random secret of at least 32 characters>`
-- `CLIENT_ORIGINS=https://<your-vercel-domain>`
+- `CLIENT_ORIGINS=https://anvaya-git-main-swarnjeets-projects.vercel.app`
 
 Never commit real credentials.
 
