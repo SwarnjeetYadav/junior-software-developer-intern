@@ -4,7 +4,7 @@ import Project from '../models/Project.js'
 import ProjectMember from '../models/ProjectMember.js'
 import Task from '../models/Task.js'
 import ActivityLog from '../models/ActivityLog.js'
-import Notification from '../models/Notification.js'
+import { createNotification } from './notification.service.js'
 import { ApiError } from '../utils/apiError.js'
 
 const PROJECT_ROLES = ['PROJECT_MANAGER', 'MEMBER', 'VIEWER']
@@ -97,7 +97,7 @@ export async function addMember(projectId, userId, role, memberUserId, projectRo
 
   await ProjectMember.create({ projectId: project._id, userId: memberUserId, projectRole: selectedRole })
 
-  await Notification.create({
+  await createNotification({
     userId: memberUserId,
     type: 'PROJECT_MEMBER_ADDED',
     message: 'You were added to the project "' + project.name + '" with ' + selectedRole.replaceAll('_', ' ').toLowerCase() + ' permissions.',
