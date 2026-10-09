@@ -53,7 +53,8 @@ export async function searchWorkspace({ userId, role, query = '', scope = 'works
     .limit(8)
     .lean()
 
-  const projectNameMap = new Map(projects.map((project) => [String(project._id), project.name]))
+  const accessibleProjects = await Project.find({ _id: { $in: projectIds } }).select('name').lean()
+  const projectNameMap = new Map(accessibleProjects.map((project) => [String(project._id), project.name]))
   return {
     projects,
     tasks: tasks.map((task) => ({ ...task, projectName: projectNameMap.get(String(task.projectId)) || 'Project' })),
