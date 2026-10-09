@@ -181,6 +181,8 @@ export default function App() {
         open={Boolean(selectedTask)}
         liveMode={!demoMode}
         projectMembers={!demoMode && selectedTask ? (activeData.membersByProject[selectedTask.projectId] || []) : []}
+        projectTasks={!demoMode && selectedTask ? activeData.tasks.filter((item) => String(item.projectId) === String(selectedTask.projectId)) : []}
+        canEditTask={demoMode || user.role === 'ADMINISTRATOR' || activeData.membersByProject?.[selectedTask?.projectId]?.find((item) => String(item.id) === String(user.id))?.projectRole !== 'VIEWER'}
         onClose={() => setSelectedTask(null)}
         onChanged={liveData.refresh}
       />
