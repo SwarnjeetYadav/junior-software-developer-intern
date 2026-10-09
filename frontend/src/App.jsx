@@ -126,6 +126,8 @@ export default function App() {
           notifications={activeData.notifications}
           onMarkRead={handleMarkNotificationRead}
           user={user}
+          onNavigate={navigate}
+          onSelectTask={setSelectedTask}
         />
 
         <main className="content">
