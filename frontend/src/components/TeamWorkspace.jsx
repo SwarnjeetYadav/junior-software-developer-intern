@@ -84,6 +84,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
   const [projectId, setProjectId] = useState(projects[0]?._id || '')
   const [query, setQuery] = useState('')
   const [projectRole, setProjectRole] = useState('MEMBER')
+  const [projectInvitations, setProjectInvitations] = useState([])
   const [candidates, setCandidates] = useState([])
   const [searching, setSearching] = useState(false)
   const [busyId, setBusyId] = useState('')
@@ -195,6 +196,23 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
   }, [projectId, loadChat])
 
   useEffect(() => {
+    if (!projectId || !canManage) {
+      setProjectInvitations([])
+      return undefined
+    }
+
+    let cancelled = false
+    api.listProjectInvitations(projectId)
+      .then((result) => {
+        if (!cancelled) setProjectInvitations(result.data || [])
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message)
+      })
+    return () => { cancelled = true }
+  }, [projectId, canManage])
+
+  useEffect(() => {
     if (!chatOpen || !projectId) return
     const latest = chat.length ? new Date(chat[chat.length - 1].createdAt).getTime() : Date.now()
     setStoredReadAt(projectId, latest)
@@ -230,6 +248,24 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
       setCandidates((items) => items.filter((item) => item._id !== member._id))
       setQuery('')
       onChanged?.()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusyId('')
+    }
+  }
+
+  const invite = async (member) => {
+    setBusyId(member._id)
+    setError('')
+    setMessage('')
+    try {
+      await api.createProjectInvitation(projectId, member._id, projectRole)
+      setMessage(member.name + ' was invited as ' + roleLabel(projectRole) + '.')
+      setCandidates((items) => items.filter((item) => item._id !== member._id))
+      setQuery('')
+      const result = await api.listProjectInvitations(projectId)
+      setProjectInvitations(result.data || [])
     } catch (err) {
       setError(err.message)
     } finally {
@@ -394,7 +430,10 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
                       <div className="team-candidate-row" key={member._id}>
                         <Avatar initials={initialsFor(member.name)} color="violet" size="sm" />
                         <div><strong>{member.name}</strong><small>{member.email} · {roleLabel(member.role)}</small></div>
-                        <button className="small-action-button" type="button" onClick={() => add(member)} disabled={busyId === member._id}>{busyId === member._id ? 'Adding...' : 'Add'}</button>
+                        <div className="candidate-actions">
+                          <button className="small-action-button" type="button" onClick={() => add(member)} disabled={busyId === member._id}>{busyId === member._id ? 'Adding...' : 'Add now'}</button>
+                          <button className="secondary-small-button" type="button" onClick={() => invite(member)} disabled={busyId === member._id}>Invite</button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -402,6 +441,15 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
                     <div><strong>Project Manager</strong><span>Manage members, roles, tasks, and project work.</span></div>
                     <div><strong>Team Member</strong><span>Create and update tasks, collaborate, and use chat.</span></div>
                     <div><strong>Viewer</strong><span>Read project work without changing tasks.</span></div>
+                  </div>
+                  <div className="pending-invitations-panel">
+                    <div className="workspace-section-head"><div><span className="eyebrow">Onboarding</span><h4>Pending invitations</h4><p>Invites expire after 7 days and never create duplicate memberships.</p></div><Badge color={projectInvitations.length ? 'violet' : 'neutral'}>{projectInvitations.length} pending</Badge></div>
+                    {projectInvitations.length ? projectInvitations.filter((item) => item.status === 'PENDING').map((item) => (
+                      <div className="pending-invitation-row" key={item._id}>
+                        <div><strong>{item.invitedUserId?.name || 'User'}</strong><small>{item.invitedUserId?.email || ''} · {roleLabel(item.projectRole)}</small></div>
+                        <span>Expires {new Date(item.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+                      </div>
+                    )) : <div className="detail-empty">No pending invitations for this project.</div>}
                   </div>
                 </>
               ) : (
