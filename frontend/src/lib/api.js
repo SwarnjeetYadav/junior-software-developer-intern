@@ -60,6 +60,8 @@ export const api = {
   createProjectInvitation: (projectId, invitedUserId, projectRole = 'MEMBER') => request('/projects/' + projectId + '/invitations', { method: 'POST', body: JSON.stringify({ invitedUserId, projectRole }) }),
   listMyInvitations: () => request('/invitations'),
   respondToInvitation: (invitationId, action) => request('/invitations/' + invitationId, { method: 'PATCH', body: JSON.stringify({ action }) }),
+  getPreferences: () => request('/settings/preferences'),
+  updatePreferences: (preferences) => request('/settings/preferences', { method: 'PATCH', body: JSON.stringify(preferences) }),
   dashboard: () => request('/dashboard/summary'),
   listComments: (taskId) => request('/comments/tasks/' + taskId + '/comments'),
   addComment: (taskId, message) => request('/comments/tasks/' + taskId + '/comments', { method: 'POST', body: JSON.stringify({ message }) }),
