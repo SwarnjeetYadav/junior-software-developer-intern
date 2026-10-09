@@ -5,7 +5,7 @@ vi.mock('../models/ProjectMember.js', () => ({
 }))
 
 vi.mock('../models/Task.js', () => ({
-  default: { aggregate: vi.fn() },
+  default: { find: vi.fn() },
 }))
 
 import ProjectMember from '../models/ProjectMember.js'
@@ -13,6 +13,14 @@ import Task from '../models/Task.js'
 import { suggestAssignee } from '../services/assignment.service.js'
 
 function memberQuery(value) {
+  return {
+    select: () => ({
+      lean: async () => value,
+    }),
+  }
+}
+
+function taskQuery(value) {
   return {
     select: () => ({
       lean: async () => value,
@@ -31,8 +39,15 @@ describe('suggestAssignee', () => {
   it('selects the least loaded eligible member', async () => {
     const first = '507f1f77bcf86cd799439011'
     const second = '507f1f77bcf86cd799439012'
-    ProjectMember.find.mockReturnValue(memberQuery([{ userId: first }, { userId: second }]))
-    Task.aggregate.mockResolvedValue([{ _id: first, activeTaskCount: 5 }])
+    ProjectMember.find.mockReturnValue(memberQuery([
+      { userId: first, projectRole: 'MEMBER' },
+      { userId: second, projectRole: 'MEMBER' },
+    ]))
+    Task.find.mockReturnValue(taskQuery([
+      { assigneeId: first, status: 'IN_PROGRESS', priority: 'MEDIUM', estimateMinutes: 60 },
+      { assigneeId: first, status: 'TODO', priority: 'LOW', estimateMinutes: 60 },
+      { assigneeId: first, status: 'REVIEW', priority: 'HIGH', estimateMinutes: 60 },
+    ]))
 
     expect(await suggestAssignee('507f1f77bcf86cd799439013')).toBe(second)
   })
