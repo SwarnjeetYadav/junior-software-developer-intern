@@ -1,35 +1,37 @@
 import { describe, expect, it } from 'vitest'
+import { graphContainsPath } from '../../services/dependency.service.js'
 
 describe('dependency graph rules', () => {
-  it('rejects self dependency conceptually', () => {
-    const taskId = 'abc'
-    expect(taskId === taskId).toBe(true)
+  it('detects an existing directed path', () => {
+    const graph = new Map([
+      ['A', ['B']],
+      ['B', ['C']],
+      ['C', []],
+    ])
+
+    expect(graphContainsPath(graph, 'A', 'C')).toBe(true)
+    expect(graphContainsPath(graph, 'C', 'A')).toBe(false)
   })
 
-  it('detects a path that would close a cycle', () => {
-    const graph = {
-      A: ['B'],
-      B: ['C'],
-      C: [],
+  it('supports a branching dependency graph without false cycle detection', () => {
+    const graph = new Map([
+      ['A', ['B', 'C']],
+      ['B', ['D']],
+      ['C', ['D']],
+      ['D', []],
+    ])
+
+    expect(graphContainsPath(graph, 'B', 'D')).toBe(true)
+    expect(graphContainsPath(graph, 'D', 'A')).toBe(false)
+  })
+
+  it('stops traversal after the safety limit', () => {
+    const graph = new Map()
+    for (let index = 0; index < 20; index += 1) {
+      graph.set(String(index), [String(index + 1)])
     }
-    const target = 'A'
-    const start = 'B'
-    const queue = [start]
-    const seen = new Set([start])
-    let found = false
-    while (queue.length) {
-      const current = queue.shift()
-      if (current === target) {
-        found = true
-        break
-      }
-      for (const next of graph[current] || []) {
-        if (seen.has(next)) continue
-        seen.add(next)
-        queue.push(next)
-      }
-    }
-    expect(found).toBe(false)
-    expect(seen.has('C')).toBe(true)
+    graph.set('20', [])
+
+    expect(graphContainsPath(graph, '0', '20', 10)).toBe(true)
   })
 })
