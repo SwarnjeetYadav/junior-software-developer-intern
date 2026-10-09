@@ -5,6 +5,7 @@ import Avatar from '../components/Avatar'
 import Badge from '../components/Badge'
 import ProjectCard from '../components/ProjectCard'
 import TeamWorkspace from '../components/TeamWorkspace'
+import ProjectWorkspace from '../components/ProjectWorkspace'
 import { api } from '../lib/api'
 import { pageCopy, projects as mockProjects, tasks, workload } from '../data/teamflowMock'
 
@@ -173,6 +174,8 @@ export function GenericPage({
   taskRows = tasks,
   onCreateTask,
   onCreateProject,
+  onCreateTaskForDate,
+  onOpenTeam,
   onSelectTask,
   liveData,
   currentUserId,
@@ -228,16 +231,17 @@ export function GenericPage({
             </div>
 
             {remoteProjects.length ? (
-              <div className="panel">
-                <div className="project-queue-head">
-                  <SectionHeader title="Project work queue" subtitle="Live tasks for the selected project." action="Create new" onAction={onCreateTask} />
-                  <select value={selectedProjectId} onChange={(event) => setSelectedProjectId(event.target.value)} aria-label="Select project task queue">
-                    {remoteProjects.map((project) => <option value={project._id} key={project._id}>{project.name}</option>)}
-                  </select>
-                </div>
-                <TaskFilters search={search} setSearch={setSearch} status={status} setStatus={setStatus} priority={priority} setPriority={setPriority} />
-                <TaskTable tasks={rows} onSelectTask={onSelectTask} />
-              </div>
+              <ProjectWorkspace
+                project={remoteProjects.find((project) => project._id === selectedProjectId) || remoteProjects[0]}
+                tasks={allRows.filter((task) => String(task.projectId) === String(selectedProjectId || remoteProjects[0]?._id))}
+                members={liveData.membersByProject?.[selectedProjectId || remoteProjects[0]?._id] || []}
+                currentUserId={currentUserId}
+                onSelectTask={onSelectTask}
+                onCreateTask={onCreateTask}
+                onCreateTaskForDate={onCreateTaskForDate}
+                onRefresh={liveData.refresh}
+                onOpenTeam={() => onOpenTeam?.()}
+              />
             ) : (
               <div className="panel">
                 <SectionHeader title="Project work queue" subtitle="There is no project to show yet." />
