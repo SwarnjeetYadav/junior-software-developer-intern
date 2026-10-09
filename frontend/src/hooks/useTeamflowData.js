@@ -84,6 +84,7 @@ export function useTeamflowData(enabled) {
     membersByProject: {},
     activity: [],
     notifications: [],
+    invitations: [],
   })
 
   const refresh = useCallback(() => setRefreshKey((value) => value + 1), [])
@@ -96,11 +97,12 @@ export function useTeamflowData(enabled) {
       setState((current) => ({ ...current, loading: true, error: '' }))
 
       try {
-        const [dashboardResult, projectsResult, activityResult, notificationResult] = await Promise.all([
+        const [dashboardResult, projectsResult, activityResult, notificationResult, invitationResult] = await Promise.all([
           api.dashboard(),
           api.listProjects(),
           api.listActivity(),
           api.listNotifications(),
+          api.listMyInvitations(),
         ])
 
         const projectList = projectsResult.data || []
@@ -178,6 +180,7 @@ export function useTeamflowData(enabled) {
             membersByProject: projectMembers,
             activity: (activityResult.data || []).map(mapActivity),
             notifications: (notificationResult.data || []).map((item) => ({ ...item, unread: !item.readAt })),
+            invitations: invitationResult.data || [],
           })
         }
       } catch (error) {
