@@ -26,6 +26,15 @@ function mapTask(task, project) {
       ? new Date(task.dueDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
       : 'Not set',
     dueDate: task.dueDate || null,
+    estimateMinutes: task.estimateMinutes || null,
+    dependencyCount: task.dependencyCount || 0,
+    blockedByCount: task.blockedByCount || 0,
+    blockingCount: task.blockingCount || 0,
+    blockedByTaskIds: task.blockedByTaskIds || [],
+    blockingTaskIds: task.blockingTaskIds || [],
+    hasBlockingDependencies: Boolean(task.hasBlockingDependencies),
+    createdAt: task.createdAt || null,
+    completedAt: task.completedAt || null,
     description: task.description || '',
   }
 }
