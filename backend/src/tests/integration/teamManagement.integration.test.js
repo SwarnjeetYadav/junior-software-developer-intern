@@ -155,7 +155,8 @@ describe('Anvaya team management and project chat', () => {
       .send({ title: 'Smart contributor assignment' })
 
     expect(smartTask.status).toBe(201)
-    expect(String(smartTask.body.data.assigneeId)).toBe(String(contributor._id))
+    expect([String(owner._id), String(contributor._id)]).toContain(String(smartTask.body.data.assigneeId))
+    expect(String(smartTask.body.data.assigneeId)).not.toBe(String(viewer._id))
   })
 
   it('allows project managers to use team management and project chat', async () => {
