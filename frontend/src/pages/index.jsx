@@ -9,6 +9,7 @@ import ProjectWorkspace from '../components/ProjectWorkspace'
 import InvitationInbox from '../components/InvitationInbox'
 import ReportsWorkspace from '../components/ReportsWorkspace'
 import SettingsWorkspace from '../components/SettingsWorkspace'
+import ErrorBoundary from '../ErrorBoundary'
 import { api } from '../lib/api'
 import { pageCopy, projects as mockProjects, tasks, workload } from '../data/teamflowMock'
 
@@ -172,6 +173,30 @@ function MemberManager({ projects, membersByProject, onChanged }) {
   )
 }
 
+function ProjectWorkspaceFallback({ project, tasks = [], onCreateTask, onSelectTask }) {
+  return (
+    <section className="project-workspace-fallback panel">
+      <div className="workspace-section-head">
+        <div>
+          <span className="eyebrow">Project workspace</span>
+          <h3>{project?.name || 'Project'}</h3>
+          <p>The advanced project surface hit a UI rendering error, so the core project work stays available below.</p>
+        </div>
+        <button className="primary-button primary-button-dark" type="button" onClick={onCreateTask}>＋ New task</button>
+      </div>
+      <div className="project-fallback-status">Core project data is still available. Refreshing the page is safe.</div>
+      <div className="project-fallback-list">
+        {tasks.length ? tasks.map((task) => (
+          <button type="button" key={task.apiId || task.id || task.title} onClick={() => onSelectTask?.(task)}>
+            <span><strong>{task.title || 'Untitled task'}</strong><small>{task.status || 'Todo'} · {task.priority || 'Medium'} · {task.assigneeName || 'Unassigned'}</small></span>
+            <span>Open →</span>
+          </button>
+        )) : <div className="empty-state">No tasks are available for this project yet.</div>}
+      </div>
+    </section>
+  )
+}
+
 export function GenericPage({
   page,
   taskRows = tasks,
@@ -234,19 +259,29 @@ export function GenericPage({
                 : <div className="empty-state">No projects yet. A Project Manager can create a project and add you to it.</div>}
             </div>
 
-            {remoteProjects.length ? (
-              <ProjectWorkspace
-                project={remoteProjects.find((project) => project._id === selectedProjectId) || remoteProjects[0]}
-                tasks={allRows.filter((task) => String(task.projectId) === String(selectedProjectId || remoteProjects[0]?._id))}
-                members={liveData.membersByProject?.[selectedProjectId || remoteProjects[0]?._id] || []}
-                currentUserId={currentUserId}
-                onSelectTask={onSelectTask}
-                onCreateTask={onCreateTask}
-                onCreateTaskForDate={onCreateTaskForDate}
-                onRefresh={liveData.refresh}
-                onOpenTeam={() => onOpenTeam?.()}
-              />
-            ) : (
+            {remoteProjects.length ? (() => {
+              const activeProject = remoteProjects.find((project) => project._id === selectedProjectId) || remoteProjects[0]
+              const activeProjectId = activeProject?._id
+              const activeProjectTasks = allRows.filter((task) => String(task.projectId) === String(activeProjectId))
+              return (
+                <ErrorBoundary
+                  key={activeProjectId || 'project'}
+                  fallback={<ProjectWorkspaceFallback project={activeProject} tasks={activeProjectTasks} onCreateTask={onCreateTask} onSelectTask={onSelectTask} />}
+                >
+                  <ProjectWorkspace
+                    project={activeProject}
+                    tasks={activeProjectTasks}
+                    members={liveData.membersByProject?.[activeProjectId] || []}
+                    currentUserId={currentUserId}
+                    onSelectTask={onSelectTask}
+                    onCreateTask={onCreateTask}
+                    onCreateTaskForDate={onCreateTaskForDate}
+                    onRefresh={liveData.refresh}
+                    onOpenTeam={() => onOpenTeam?.()}
+                  />
+                </ErrorBoundary>
+              )
+            })() : (
               <div className="panel">
                 <SectionHeader title="Project work queue" subtitle="There is no project to show yet." />
                 <div className="empty-state">Create a project first, then its tasks will appear here.</div>
