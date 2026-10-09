@@ -26,6 +26,26 @@ export async function ensureTaskAccess(taskId, userId, role) {
   return { task, project, member }
 }
 
+export function graphContainsPath(graph, start, target, limit = 1000) {
+  const queue = [String(start)]
+  const visited = new Set(queue)
+
+  while (queue.length) {
+    const current = queue.shift()
+    if (current === String(target)) return true
+
+    for (const next of graph.get(current) || []) {
+      const value = String(next)
+      if (visited.has(value)) continue
+      visited.add(value)
+      queue.push(value)
+      if (visited.size > limit) return true
+    }
+  }
+
+  return false
+}
+
 export async function wouldCreateCycle({ projectId, predecessorTaskId, successorTaskId }) {
   const dependencies = await TaskDependency.find({ projectId })
     .select('predecessorTaskId successorTaskId')
@@ -39,24 +59,7 @@ export async function wouldCreateCycle({ projectId, predecessorTaskId, successor
     graph.get(from).push(to)
   }
 
-  const start = String(successorTaskId)
-  const target = String(predecessorTaskId)
-  const queue = [start]
-  const visited = new Set([start])
-
-  while (queue.length) {
-    const current = queue.shift()
-    if (current === target) return true
-
-    for (const next of graph.get(current) || []) {
-      if (visited.has(next)) continue
-      visited.add(next)
-      queue.push(next)
-      if (visited.size > 1000) return true
-    }
-  }
-
-  return false
+  return graphContainsPath(graph, successorTaskId, predecessorTaskId)
 }
 
 export async function listDependencies({ taskId, userId, role }) {
