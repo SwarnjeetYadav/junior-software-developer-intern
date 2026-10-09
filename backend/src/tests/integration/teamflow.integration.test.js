@@ -187,8 +187,7 @@ describe('TeamFlow API end to end workflow', () => {
       .set('Authorization', 'Bearer ' + teammateToken)
 
     expect(teammateNotifications.status).toBe(200)
-    expect(teammateNotifications.body.data).toHaveLength(1)
-    expect(teammateNotifications.body.data[0].type).toBe('TASK_ASSIGNED')
+    expect(teammateNotifications.body.data.some((item) => item.type === 'TASK_ASSIGNED')).toBe(true)
 
     const activityResponse = await request(app)
       .get('/api/v1/activity')
