@@ -3,7 +3,7 @@ import Task from '../models/Task.js'
 import Project from '../models/Project.js'
 import ProjectMember from '../models/ProjectMember.js'
 import ActivityLog from '../models/ActivityLog.js'
-import Notification from '../models/Notification.js'
+import { createNotification } from './notification.service.js'
 import { ApiError } from '../utils/apiError.js'
 import { isValidPriority, isValidStatus } from '../utils/taskRules.js'
 import { suggestAssignee, suggestAssignees } from './assignment.service.js'
@@ -82,7 +82,7 @@ export async function createTask({ userId, role, projectId, payload }) {
   })
 
   if (assigneeId) {
-    await Notification.create({
+    await createNotification({
       userId: assigneeId,
       type: 'TASK_ASSIGNED',
       message: 'A new task was assigned to you: ' + task.title,
@@ -231,7 +231,7 @@ export async function updateTask({ userId, role, taskId, payload }) {
   }
 
   if (changes.assigneeId?.to) {
-    await Notification.create({
+    await createNotification({
       userId: changes.assigneeId.to,
       type: 'TASK_ASSIGNED',
       message: 'You are now assigned to: ' + task.title,
