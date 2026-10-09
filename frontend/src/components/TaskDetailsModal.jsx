@@ -114,16 +114,15 @@ export default function TaskDetailsModal({
       related.add(String(item.predecessorTaskId?._id))
       related.add(String(item.successorTaskId?._id))
     })
-    return projectTasks.filter((candidate) =>
-      String(candidate.apiId) !== currentId
-      && !related.has(String(candidate.apiId)) || (
-        String(candidate.apiId) !== currentId
-        && !dependencies.some((item) =>
-          String(item.predecessorTaskId?._id) === String(candidate.apiId)
-          && String(item.successorTaskId?._id) === currentId
-        )
-      ),
-    )
+    return projectTasks.filter((candidate) => {
+      if (String(candidate.apiId) === currentId) return false
+      const candidateId = String(candidate.apiId)
+      const alreadyLinked = dependencies.some((item) =>
+        (String(item.predecessorTaskId?._id) === candidateId && String(item.successorTaskId?._id) === currentId)
+        || (String(item.predecessorTaskId?._id) === currentId && String(item.successorTaskId?._id) === candidateId)
+      )
+      return !alreadyLinked
+    })
   }, [projectTasks, dependencies, task?.apiId])
 
   if (!open || !task) return null
