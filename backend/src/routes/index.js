@@ -8,6 +8,8 @@ import commentRoutes from './comment.routes.js'
 import activityRoutes from './activity.routes.js'
 import notificationRoutes from './notification.routes.js'
 import dashboardRoutes from './dashboard.routes.js'
+import searchRoutes from './search.routes.js'
+import invitationRoutes from './invitation.routes.js'
 
 const router = Router()
 router.use('/auth', authRoutes)
@@ -19,5 +21,7 @@ router.use('/comments', commentRoutes)
 router.use('/activity', activityRoutes)
 router.use('/notifications', notificationRoutes)
 router.use('/dashboard', dashboardRoutes)
+router.use('/search', searchRoutes)
+router.use('/invitations', invitationRoutes)
 
 export default router
