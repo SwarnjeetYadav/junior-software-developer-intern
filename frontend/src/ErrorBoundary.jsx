@@ -20,6 +20,7 @@ export default class ErrorBoundary extends Component {
 
   render() {
     if (this.state.error) {
+      if (this.props.fallback) return this.props.fallback
       return (
         <div className="runtime-error-screen">
           <div className="runtime-error-card">
