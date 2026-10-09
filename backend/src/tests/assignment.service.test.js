@@ -15,7 +15,9 @@ import { suggestAssignee } from '../services/assignment.service.js'
 function memberQuery(value) {
   return {
     select: () => ({
-      lean: async () => value,
+      populate: () => ({
+        lean: async () => value,
+      }),
     }),
   }
 }
