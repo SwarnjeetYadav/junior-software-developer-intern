@@ -53,6 +53,8 @@ export default function TaskDetailsModal({
   const [savingField, setSavingField] = useState('')
   const [suggestionLoading, setSuggestionLoading] = useState(false)
   const [error, setError] = useState('')
+  const [chatUpdate, setChatUpdate] = useState('')
+  const [chatUpdateBusy, setChatUpdateBusy] = useState(false)
 
   useEffect(() => {
     if (!open || !task) return undefined
@@ -171,6 +173,24 @@ export default function TaskDetailsModal({
       setError(err.message)
     } finally {
       setCommentBusy(false)
+    }
+  }
+
+  const shareTaskUpdate = async (event) => {
+    event.preventDefault()
+    const message = chatUpdate.trim()
+    if (!message || !liveMode || !task.apiId || !task.projectId || !canEditTask) return
+
+    setChatUpdateBusy(true)
+    setError('')
+    try {
+      await api.sendProjectChat(task.projectId, message, { taskId: task.apiId })
+      setChatUpdate('')
+      setError('')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setChatUpdateBusy(false)
     }
   }
 
@@ -332,6 +352,22 @@ export default function TaskDetailsModal({
             ) : <div className="detail-empty">No task history yet.</div>}
           </section>
         </div>
+
+        {liveMode && canEditTask ? (
+          <>
+            <div className="details-divider" />
+            <section className="task-share-update">
+              <div className="workspace-section-head">
+                <div><span className="eyebrow">Collaboration</span><h3>Share a task update</h3><p>Post directly to project chat with this task attached as context.</p></div>
+                <Icon name="send" size={18} />
+              </div>
+              <form onSubmit={shareTaskUpdate}>
+                <textarea value={chatUpdate} onChange={(event) => setChatUpdate(event.target.value)} placeholder="e.g. API integration is ready for review…" maxLength={2000} rows={3} />
+                <div className="task-share-actions"><small>Visible to project members in team chat.</small><button className="primary-button primary-button-dark" type="submit" disabled={chatUpdateBusy || !chatUpdate.trim()}><Icon name="send" size={14} /> {chatUpdateBusy ? 'Posting...' : 'Post update'}</button></div>
+              </form>
+            </section>
+          </>
+        ) : null}
 
         <div className="details-divider" />
 
