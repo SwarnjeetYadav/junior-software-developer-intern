@@ -8,6 +8,7 @@ import TeamWorkspace from '../components/TeamWorkspace'
 import ProjectWorkspace from '../components/ProjectWorkspace'
 import InvitationInbox from '../components/InvitationInbox'
 import ReportsWorkspace from '../components/ReportsWorkspace'
+import SettingsWorkspace from '../components/SettingsWorkspace'
 import { api } from '../lib/api'
 import { pageCopy, projects as mockProjects, tasks, workload } from '../data/teamflowMock'
 
@@ -337,13 +338,7 @@ export function GenericPage({
     return (
       <div className="page-stack">
         <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
-        <div className="panel settings-panel">
-          <div className="setting-row"><div><strong>Account name</strong><p>{currentUser?.name || '—'}</p></div><span className="setting-value">{currentUser?.role?.replaceAll('_', ' ') || '—'}</span></div>
-          <div className="setting-row"><div><strong>Email</strong><p>{currentUser?.email || '—'}</p></div><span className="setting-value">Signed-in account</span></div>
-          <div className="setting-row"><div><strong>Visible projects</strong><p>Projects currently available to your account.</p></div><span className="setting-value">{remoteProjects.length}</span></div>
-          <div className="setting-row"><div><strong>Visible tasks</strong><p>Tasks currently available to your account.</p></div><span className="setting-value">{allRows.length}</span></div>
-          <div className="setting-row"><div><strong>Workspace connection</strong><p>Frontend data is loaded from the Anvaya API.</p></div><span className="setting-value">Connected</span></div>
-        </div>
+        <SettingsWorkspace user={currentUser} projectCount={remoteProjects.length} taskCount={allRows.length} />
       </div>
     )
   }
