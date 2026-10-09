@@ -199,7 +199,7 @@ test('demo workspace navigation and task creation remain functional', async ({ p
   await page.getByRole('button', { name: /Preview demo workspace/i }).click()
   await expect(page.getByRole('heading', { name: /Good (morning|afternoon|evening), Swarnjeet/i })).toBeVisible()
 
-  await page.getByRole('button', { name: 'My Tasks', exact: true }).click()
+  await page.getByRole('button', { name: /My Tasks/ }).click()
   await page.getByRole('button', { name: /Create task/i }).click()
   await page.getByLabel('Task title').fill('Browser regression task')
   await page.getByRole('button', { name: 'Create task' }).click()
@@ -213,7 +213,7 @@ test('live project workspace exposes board, calendar, dependencies and insights'
 
   await page.getByRole('button', { name: 'Projects', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible()
-  await expect(page.getByText('Anvaya Web App')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Anvaya Web App' })).toBeVisible()
 
   await page.getByRole('tab', { name: 'Board' }).click()
   await expect(page.getByRole('heading', { name: /Build live task board/i })).toBeVisible()
@@ -238,7 +238,7 @@ test('live Team view supports member management, invitations and floating chat',
   await page.goto('/')
 
   await page.getByRole('button', { name: 'Team', exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'Manage project members' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Manage your project team' })).toBeVisible()
 
   await page.getByPlaceholder('Search name or email...').fill('Priya')
   await expect(page.getByText('Priya Shah')).toBeVisible()
