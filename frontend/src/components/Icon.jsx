@@ -17,6 +17,10 @@ const paths = {
   expand: '<path d="M8 3H3v5M16 3h5v5M8 21H3v-5M21 16v5h-5"/><path d="m3 8 5-5M16 3l5 5M3 16l5 5M16 21l5-5"/>',
   minimize: '<path d="m9 3-6 6M3 3v6h6M15 21l6-6M21 21v-6h-6M3 15l6 6M9 21H3v-6M21 9l-6-6M21 3h-6v6"/>',
   send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  link: '<path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/>',
+  calendar: '<rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M16 2v5M8 2v5M3 9h18"/>',
+  chevron: '<path d="m9 18 6-6-6-6"/>',
 }
 
 export default function Icon({ name, size = 18, stroke = 1.8 }) {
