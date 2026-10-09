@@ -22,6 +22,7 @@ export default function CreateTaskModal({
   initialDueDate = '',
 }) {
   const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [priority, setPriority] = useState('Medium')
   const [dueDate, setDueDate] = useState(initialDueDate || '')
   const [estimateMinutes, setEstimateMinutes] = useState('')
@@ -107,7 +108,7 @@ export default function CreateTaskModal({
           projectId: selectedProjectId,
           payload: {
             title: cleanTitle,
-            description: '',
+            description: description.trim(),
             priority: priorityValues[priority],
             dueDate: dueDate || null,
             estimateMinutes: estimateMinutes ? Number(estimateMinutes) : null,
@@ -129,6 +130,7 @@ export default function CreateTaskModal({
       }
 
       setTitle('')
+      setDescription('')
       setPriority('Medium')
       setDueDate('')
       setEstimateMinutes('')
@@ -164,6 +166,7 @@ export default function CreateTaskModal({
           ) : null}
 
           <label className="field"><span>Task title</span><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. Finalize sprint review report" maxLength={180} /></label>
+          <label className="field"><span>Description <small className="field-optional">Optional</small></span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Add context, expected outcome, or acceptance notes..." maxLength={4000} rows={3} /></label>
 
           <div className="field-grid">
             <label className="field"><span>Priority</span><select value={priority} onChange={(event) => setPriority(event.target.value)}><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></label>
