@@ -183,8 +183,6 @@ export function GenericPage({
   currentUserId,
   currentUser,
   onMembersChanged,
-  onCreateTaskForDate,
-  onOpenTeam,
   invitations = [],
   canCreateProjects = false,
   canManageProjects = false,
