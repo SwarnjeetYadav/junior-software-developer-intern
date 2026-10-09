@@ -1,6 +1,7 @@
 import Avatar from './Avatar'
 import Icon from './Icon'
 import { useState } from 'react'
+import CommandPalette from './CommandPalette'
 import { currentUser } from '../data/teamflowMock'
 
 function displayRole(role = '') {
@@ -11,7 +12,7 @@ function displayRole(role = '') {
 }
 
 
-export default function Topbar({ page, onOpenMenu, onLogout, onExitDemo, demoMode, notifications = [], onMarkRead, user: propUser }) {
+export default function Topbar({ page, onOpenMenu, onLogout, onExitDemo, demoMode, notifications = [], onMarkRead, user: propUser, onNavigate, onSelectTask }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState(false)
   const user = propUser || (demoMode ? currentUser : JSON.parse(localStorage.getItem('teamflow_user') || 'null') || currentUser)
@@ -26,7 +27,7 @@ export default function Topbar({ page, onOpenMenu, onLogout, onExitDemo, demoMod
       </div>
 
       <div className="topbar-actions">
-        <label className="search-box"><Icon name="search" size={17} /><input placeholder="Search tasks, projects..." aria-label="Search tasks and projects" /><kbd>⌘ K</kbd></label>
+        <CommandPalette onNavigate={onNavigate} onSelectTask={onSelectTask} />
 
         <div className="notification-wrap">
           <button className="icon-button notification-button" type="button" onClick={() => setNotificationOpen((value) => !value)} aria-label="Notifications" aria-expanded={notificationOpen}>
