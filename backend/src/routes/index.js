@@ -10,6 +10,7 @@ import notificationRoutes from './notification.routes.js'
 import dashboardRoutes from './dashboard.routes.js'
 import searchRoutes from './search.routes.js'
 import invitationRoutes from './invitation.routes.js'
+import settingsRoutes from './settings.routes.js'
 
 const router = Router()
 router.use('/auth', authRoutes)
@@ -23,5 +24,6 @@ router.use('/notifications', notificationRoutes)
 router.use('/dashboard', dashboardRoutes)
 router.use('/search', searchRoutes)
 router.use('/invitations', invitationRoutes)
+router.use('/settings', settingsRoutes)
 
 export default router
