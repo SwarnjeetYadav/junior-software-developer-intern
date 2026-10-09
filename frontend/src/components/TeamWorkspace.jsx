@@ -53,7 +53,7 @@ function unreadCountFor(messages, currentUserId, readAt) {
   }).length
 }
 
-function ChatMessages({ messages, currentUserId, loading }) {
+function ChatMessages({ messages, currentUserId, loading, onReply, onReact }) {
   if (loading && !messages.length) {
     return <div className="comment-empty team-chat-loading-state">Loading team conversation...</div>
   }
@@ -64,16 +64,33 @@ function ChatMessages({ messages, currentUserId, loading }) {
 
   return messages.map((item) => {
     const ownMessage = String(item.userId?._id) === String(currentUserId)
+    const reactionCounts = (item.reactions || []).reduce((map, reaction) => {
+      map[reaction.emoji] = (map[reaction.emoji] || 0) + 1
+      return map
+    }, {})
 
     return (
       <div className={'team-chat-message ' + (ownMessage ? 'team-chat-message-self' : '')} key={item._id}>
         <Avatar initials={initialsFor(item.userId?.name)} color={ownMessage ? 'violet' : 'blue'} size="sm" />
-        <div>
+        <div className="team-chat-message-body">
           <div className="team-chat-message-head">
             <strong>{item.userId?.name || 'Team member'}</strong>
             <span>{timeLabel(item.createdAt)}</span>
           </div>
+          {item.replyToId ? (
+            <div className="chat-reply-preview"><strong>Replying to {item.replyToId.userId?.name || 'team member'}</strong><span>{item.replyToId.message}</span></div>
+          ) : null}
+          {item.taskId ? (
+            <div className="chat-task-context"><Icon name="link" size={12} /><span>{item.taskId.title}</span></div>
+          ) : null}
           <p>{item.message}</p>
+          <div className="chat-message-actions">
+            <button type="button" onClick={() => onReply?.(item)} aria-label="Reply to message">Reply</button>
+            {['👍', '✅', '❤️'].map((emoji) => (
+              <button type="button" key={emoji} onClick={() => onReact?.(item, emoji)} aria-label={'React ' + emoji}>{emoji}{reactionCounts[emoji] ? ' ' + reactionCounts[emoji] : ''}</button>
+            ))}
+          </div>
+          {item.mentions?.length ? <small className="chat-mentions">Mentioned: {item.mentions.map((person) => '@' + person.name).join(', ')}</small> : null}
         </div>
       </div>
     )
@@ -98,6 +115,8 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
   const [chatOpen, setChatOpen] = useState(false)
   const [chatFullscreen, setChatFullscreen] = useState(false)
   const [chatUnread, setChatUnread] = useState(0)
+  const [chatReplyTo, setChatReplyTo] = useState(null)
+  const [mentionIds, setMentionIds] = useState([])
 
   useEffect(() => {
     if (!projectId && projects[0]?._id) setProjectId(projects[0]._id)
@@ -313,10 +332,16 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
     setChatSending(true)
     setError('')
     try {
-      const result = await api.sendProjectChat(projectId, clean)
+      const result = await api.sendProjectChat(projectId, clean, {
+        replyToId: chatReplyTo?._id || null,
+        taskId: null,
+        mentions: mentionIds,
+      })
       const nextMessage = result.data
       setChat((items) => [...items, nextMessage])
       setChatMessage('')
+      setChatReplyTo(null)
+      setMentionIds([])
       setStoredReadAt(projectId, new Date(nextMessage.createdAt).getTime())
       setChatUnread(0)
       onChanged?.()
@@ -326,6 +351,24 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
       setChatSending(false)
     }
   }
+
+  const reactChat = async (item, emoji) => {
+    try {
+      const result = await api.reactProjectChat(projectId, item._id, emoji)
+      setChat((items) => items.map((current) => current._id === item._id ? result.data : current))
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  const mentionCandidates = useMemo(() => {
+    const clean = chatMessage.match(/@([a-zA-Z0-9_ ]{0,30})$/)?.[1]?.trim().toLowerCase()
+    if (clean === undefined) return []
+    return currentMembers.filter((member) =>
+      String(member.id) !== String(currentUserId)
+      && member.name.toLowerCase().includes(clean),
+    ).slice(0, 5)
+  }, [chatMessage, currentMembers, currentUserId])
 
   const openChat = () => {
     setChatOpen(true)
@@ -525,14 +568,38 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
               </div>
 
               <div className="team-chat-drawer-messages">
-                <ChatMessages messages={chat} currentUserId={currentUserId} loading={chatLoading} />
+                <ChatMessages messages={chat} currentUserId={currentUserId} loading={chatLoading} onReply={(item) => setChatReplyTo(item)} onReact={reactChat} />
               </div>
 
+              {chatReplyTo ? (
+                <div className="chat-reply-composer">
+                  <div><strong>Replying to {chatReplyTo.userId?.name || 'team member'}</strong><span>{chatReplyTo.message}</span></div>
+                  <button type="button" className="team-chat-icon-button" onClick={() => setChatReplyTo(null)} aria-label="Cancel reply"><Icon name="close" size={14} /></button>
+                </div>
+              ) : null}
+              {mentionCandidates.length ? (
+                <div className="chat-mention-menu">
+                  {mentionCandidates.map((member) => (
+                    <button type="button" key={member.id} onClick={() => {
+                      const clean = chatMessage.replace(/@([a-zA-Z0-9_ ]{0,30})$/, '').trimEnd()
+                      setChatMessage(clean + ' @' + member.name + ' ')
+                      setMentionIds((ids) => ids.includes(member.id) ? ids : [...ids, member.id])
+                    }}>
+                      <Avatar initials={member.initials} color={member.tone} size="sm" />
+                      <span><strong>{member.name}</strong><small>{roleLabel(member.projectRole)}</small></span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               <form className="team-chat-drawer-form" onSubmit={sendChat}>
                 <input
                   value={chatMessage}
-                  onChange={(event) => setChatMessage(event.target.value)}
-                  placeholder="Message your project team..."
+                  onChange={(event) => {
+                    const next = event.target.value
+                    setChatMessage(next)
+                    if (!next.includes('@')) setMentionIds([])
+                  }}
+                  placeholder={chatReplyTo ? 'Write a reply...' : 'Message your project team...'}
                   maxLength={2000}
                   aria-label="Team chat message"
                 />
