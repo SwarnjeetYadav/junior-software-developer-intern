@@ -55,7 +55,10 @@ export async function suggestAssignees({ projectId, priority = 'MEDIUM', dueDate
     .select('assigneeId dueDate priority estimateMinutes status')
     .lean()
 
-  const maxLoad = Math.max(...members.map((member) => activeTasks.filter((task) => String(task.assigneeId) === String(member.userId)).length), 0)
+  const maxLoad = Math.max(...members.map((member) => {
+    const memberUserId = member.userId?._id || member.userId
+    return activeTasks.filter((task) => String(task.assigneeId) === String(memberUserId)).length
+  }), 0)
   const scored = members.map((member) => {
     const memberUserId = member.userId?._id || member.userId
     const mine = activeTasks.filter((task) => String(task.assigneeId) === String(memberUserId))
