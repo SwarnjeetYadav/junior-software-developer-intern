@@ -4,7 +4,7 @@ import TaskDependency from '../models/TaskDependency.js'
 import Project from '../models/Project.js'
 import ProjectMember from '../models/ProjectMember.js'
 import ActivityLog from '../models/ActivityLog.js'
-import Notification from '../models/Notification.js'
+import { createNotification } from './notification.service.js'
 import { ApiError } from '../utils/apiError.js'
 
 export async function ensureTaskAccess(taskId, userId, role) {
@@ -182,7 +182,7 @@ export async function notifySuccessorsIfUnblocked(completedTaskId) {
     const successor = await Task.findById(edge.successorTaskId).select('title assigneeId status').lean()
     if (!successor?.assigneeId || successor.status === 'COMPLETED') continue
 
-    await Notification.create({
+    await createNotification({
       userId: successor.assigneeId,
       type: 'DEPENDENCY_UNBLOCKED',
       message: 'A blocker is complete. You can now continue: ' + successor.title,
