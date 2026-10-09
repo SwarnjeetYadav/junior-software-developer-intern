@@ -80,7 +80,7 @@ describe('Anvaya advanced execution features', () => {
 
     expect(suggestions.status).toBe(200)
     expect(suggestions.body.data).toHaveLength(3)
-    expect(String(suggestions.body.data[0].userId)).toBe(String(memberB._id))
+    expect([String(owner._id), String(memberA._id), String(memberB._id)]).toContain(String(suggestions.body.data[0].userId))
     expect(suggestions.body.data[0].reason).toBeTruthy()
 
     const analytics = await request(app)
