@@ -3,7 +3,7 @@ import Invitation from '../models/Invitation.js'
 import Project from '../models/Project.js'
 import ProjectMember from '../models/ProjectMember.js'
 import User from '../models/User.js'
-import Notification from '../models/Notification.js'
+import { createNotification } from './notification.service.js'
 import ActivityLog from '../models/ActivityLog.js'
 import { ApiError } from '../utils/apiError.js'
 
@@ -65,7 +65,7 @@ export async function createInvitation({ projectId, userId, role, invitedUserId,
     invitedBy: userId,
   })
 
-  await Notification.create({
+  await createNotification({
     userId: invitedUserId,
     type: 'PROJECT_INVITATION',
     message: 'You were invited to join "' + project.name + '" as ' + selectedRole.replaceAll('_', ' ').toLowerCase() + '.',
@@ -161,7 +161,7 @@ export async function respondToInvitation({ invitationId, userId, action }) {
     metadata: { invitationId: invitation._id, projectRole: invitation.projectRole },
   })
 
-  await Notification.create({
+  await createNotification({
     userId: invitation.invitedBy,
     type: 'PROJECT_INVITATION_ACCEPTED',
     message: 'Your project invitation was accepted.',
