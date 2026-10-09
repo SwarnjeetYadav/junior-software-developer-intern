@@ -7,6 +7,7 @@ import ProjectCard from '../components/ProjectCard'
 import TeamWorkspace from '../components/TeamWorkspace'
 import ProjectWorkspace from '../components/ProjectWorkspace'
 import InvitationInbox from '../components/InvitationInbox'
+import ReportsWorkspace from '../components/ReportsWorkspace'
 import { api } from '../lib/api'
 import { pageCopy, projects as mockProjects, tasks, workload } from '../data/teamflowMock'
 
@@ -312,43 +313,14 @@ export function GenericPage({
         <div className="page-stack">
           <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
           <div className="reports-grid">
-            <div className="panel report-big"><SectionHeader title="Project health" subtitle="Portfolio distribution for the demo workspace." /><div className="donut-wrap"><div className="donut" style={{ background: 'conic-gradient(#6f5cf5 0 68%, #ececf5 68%)' }}><span>68%</span></div><div><strong>Healthy</strong><p>Demo portfolio data.</p><Badge color="green">+9% this month</Badge></div></div></div>
+            <div className="panel report-big"><SectionHeader title="Project health" subtitle="Demo portfolio distribution for the UI preview." /><div className="donut-wrap"><div className="donut" style={{ background: 'conic-gradient(#6f5cf5 0 68%, #ececf5 68%)' }}><span>68%</span></div><div><strong>Healthy</strong><p>Demo portfolio data.</p><Badge color="green">+9% this month</Badge></div></div></div>
             <div className="panel report-big"><SectionHeader title="Delivery velocity" subtitle="Demo completed tasks per week." /><div className="mini-bars">{[38,52,47,67,60,78,83].map((v, i) => <span key={i} style={{ height: v + '%' }} />)}</div><div className="report-metric"><strong>24.6</strong><span>avg tasks / week</span></div></div>
           </div>
         </div>
       )
     }
 
-    const summary = liveData.summary || { activeProjects: 0, openTasks: 0, completedTasks: 0, overdueTasks: 0 }
-    const totalTasks = summary.openTasks + summary.completedTasks
-    const completion = totalTasks ? Math.round((summary.completedTasks / totalTasks) * 100) : 0
-    const statusValues = ['TODO', 'IN_PROGRESS', 'REVIEW', 'BLOCKED', 'COMPLETED']
-    const statusCounts = statusValues.map((value) => liveData.tasks.filter((task) => task.statusValue === value).length)
-    const maxStatusCount = Math.max(...statusCounts, 1)
-
-    return (
-      <div className="page-stack">
-        <section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section>
-        <div className="reports-grid">
-          <div className="panel report-big">
-            <SectionHeader title="Project health" subtitle="Completion based on tasks visible to your account." />
-            <div className="donut-wrap">
-              <div className="donut" style={{ background: 'conic-gradient(#6f5cf5 0 ' + completion + '%, #ececf5 ' + completion + '%)' }}><span>{completion}%</span></div>
-              <div><strong>Live progress</strong><p>{summary.activeProjects} active project{summary.activeProjects === 1 ? '' : 's'} · {totalTasks} tracked task{totalTasks === 1 ? '' : 's'}</p><Badge color={summary.completedTasks ? 'green' : 'neutral'}>{summary.completedTasks} complete</Badge></div>
-            </div>
-          </div>
-          <div className="panel report-big">
-            <SectionHeader title="Task status mix" subtitle="Current task counts by workflow status." />
-            {totalTasks ? (
-              <>
-                <div className="mini-bars">{statusCounts.map((value, index) => <span key={statusValues[index]} style={{ height: Math.max(12, (value / maxStatusCount) * 100) + '%' }} />)}</div>
-                <div className="report-metric"><strong>{totalTasks}</strong><span>tracked tasks</span></div>
-              </>
-            ) : <div className="empty-state">No tasks available yet.</div>}
-          </div>
-        </div>
-      </div>
-    )
+    return <div className="page-stack"><section className="page-title-block"><span className="eyebrow">{copy[0]}</span><h1>{copy[1]}</h1><p>{copy[2]}</p></section><ReportsWorkspace projects={remoteProjects} tasks={allRows} onSelectTask={onSelectTask} /></div>
   }
 
   if (page === 'Settings') {
