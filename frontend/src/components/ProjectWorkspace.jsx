@@ -363,8 +363,8 @@ export default function ProjectWorkspace({
             <div className="calendar-toolbar-actions">
               <div className="segmented-control"><button type="button" className={calendarMode === 'month' ? 'active' : ''} onClick={() => setCalendarMode('month')}>Month</button><button type="button" className={calendarMode === 'week' ? 'active' : ''} onClick={() => setCalendarMode('week')}>Week</button></div>
               <button className="icon-button" type="button" onClick={() => setCalendarCursor(new Date())} aria-label="Jump to today">Today</button>
-              <button className="icon-button" type="button" onClick={() => { const value = new Date(calendarCursor); value.setMonth(value.getMonth() - 1); setCalendarCursor(value) }} aria-label="Previous period">‹</button>
-              <button className="icon-button" type="button" onClick={() => { const value = new Date(calendarCursor); value.setMonth(value.getMonth() + 1); setCalendarCursor(value) }} aria-label="Next period">›</button>
+              <button className="icon-button" type="button" onClick={() => { const value = new Date(calendarCursor); if (calendarMode === 'week') value.setDate(value.getDate() - 7); else value.setMonth(value.getMonth() - 1); setCalendarCursor(value) }} aria-label="Previous period">‹</button>
+              <button className="icon-button" type="button" onClick={() => { const value = new Date(calendarCursor); if (calendarMode === 'week') value.setDate(value.getDate() + 7); else value.setMonth(value.getMonth() + 1); setCalendarCursor(value) }} aria-label="Next period">›</button>
             </div>
           </div>
           <div className={'project-calendar ' + (calendarMode === 'week' ? 'project-calendar-week' : '')}>
