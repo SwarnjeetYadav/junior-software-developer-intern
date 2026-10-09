@@ -3,17 +3,25 @@ import Badge from './Badge'
 import Icon from './Icon'
 import { api } from '../lib/api'
 
+const insightTone = (severity) => severity === 'HIGH' ? 'rose' : severity === 'MEDIUM' ? 'amber' : 'green'
+
+function percent(value) {
+  return Number.isFinite(Number(value)) ? Math.max(0, Math.min(100, Number(value))) : 0
+}
+
 export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTask }) {
-  const [projectId, setProjectId] = useState(projects[0]?._id || '')
+  const safeProjects = Array.isArray(projects) ? projects.filter(Boolean) : []
+  const safeTasks = Array.isArray(tasks) ? tasks.filter(Boolean) : []
+  const [projectId, setProjectId] = useState(safeProjects[0]?._id || '')
   const [analytics, setAnalytics] = useState(null)
   const [insights, setInsights] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!projectId && projects[0]?._id) setProjectId(projects[0]._id)
-    if (projectId && !projects.some((project) => project._id === projectId)) setProjectId(projects[0]?._id || '')
-  }, [projects, projectId])
+    if (!projectId && safeProjects[0]?._id) setProjectId(safeProjects[0]._id)
+    if (projectId && !safeProjects.some((project) => project._id === projectId)) setProjectId(safeProjects[0]?._id || '')
+  }, [safeProjects, projectId])
 
   useEffect(() => {
     if (!projectId) {
@@ -26,99 +34,150 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
     setLoading(true)
     setError('')
 
-    Promise.all([api.listProjectAnalytics(projectId), api.listProjectInsights(projectId)])
-      .then(([analyticsResult, insightsResult]) => {
-        if (cancelled) return
-        setAnalytics(analyticsResult.data || null)
-        setInsights(insightsResult.data || [])
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err.message)
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
+    Promise.allSettled([
+      api.listProjectAnalytics(projectId),
+      api.listProjectInsights(projectId),
+    ]).then((results) => {
+      if (cancelled) return
+      const [analyticsResult, insightsResult] = results
+      setAnalytics(analyticsResult.status === 'fulfilled' ? analyticsResult.value?.data || null : null)
+      setInsights(insightsResult.status === 'fulfilled' && Array.isArray(insightsResult.value?.data) ? insightsResult.value.data : [])
+      if (results.some((result) => result.status === 'rejected')) {
+        setError('Some analytics signals are temporarily unavailable. Core project data remains available.')
+      }
+    }).finally(() => {
+      if (!cancelled) setLoading(false)
+    })
 
     return () => { cancelled = true }
   }, [projectId])
 
-  const selectedProject = projects.find((project) => project._id === projectId)
-  const projectTasks = tasks.filter((task) => String(task.projectId) === String(projectId))
-  const maxThroughput = Math.max(...(analytics?.throughput || []).map((item) => item.completed), 1)
-  const completionRate = analytics?.completionRate || 0
-  const riskCount = analytics ? analytics.overdueTasks + analytics.blockedTasks : 0
+  const selectedProject = safeProjects.find((project) => project._id === projectId)
+  const projectTasks = safeTasks.filter((task) => String(task.projectId) === String(projectId))
+  const projectTaskMap = useMemo(() => new Map(projectTasks.map((task) => [String(task.apiId || task._id), task])), [projectTasks])
 
-  const projectTaskMap = useMemo(() => new Map(projectTasks.map((task) => [String(task.apiId), task])), [projectTasks])
+  const throughput = Array.isArray(analytics?.throughput) ? analytics.throughput : []
+  const maxThroughput = Math.max(...throughput.map((item) => Number(item.completed || 0)), 1)
+  const workload = Array.isArray(analytics?.workload) ? analytics.workload : []
+  const maxWorkload = Math.max(...workload.map((item) => Number(item.activeTasks || 0)), 1)
+  const riskCount = Number(analytics?.overdueTasks || 0) + Number(analytics?.blockedTasks || 0)
 
   return (
     <section className="reports-workspace">
-      <div className="reports-workspace-toolbar">
-        <div><span className="eyebrow">Execution intelligence</span><h2>Project analytics</h2><p>Measure delivery health using the same live task data that powers the project workspace.</p></div>
-        <select value={projectId} onChange={(event) => setProjectId(event.target.value)} aria-label="Select analytics project">
-          {projects.map((project) => <option value={project._id} key={project._id}>{project.name}</option>)}
-        </select>
-      </div>
+      <header className="reports-hero">
+        <div>
+          <span className="eyebrow">Execution intelligence</span>
+          <h2>Project performance</h2>
+          <p>Understand delivery health, workload distribution and emerging risks without leaving the project context.</p>
+        </div>
+        <div className="reports-hero-actions">
+          <label className="reports-project-select">
+            <span>Project</span>
+            <select value={projectId} onChange={(event) => setProjectId(event.target.value)} aria-label="Select analytics project">
+              {safeProjects.map((project) => <option value={project._id} key={project._id}>{project.name}</option>)}
+            </select>
+          </label>
+          {selectedProject?.status ? <Badge color="violet">{String(selectedProject.status).replaceAll('_', ' ')}</Badge> : null}
+        </div>
+      </header>
 
-      {loading ? <div className="workspace-inline-status">Refreshing analytics...</div> : null}
+      {loading ? <div className="workspace-inline-status"><span className="status-spinner" />Updating live project metrics…</div> : null}
       {error ? <div className="workspace-error-banner">{error}</div> : null}
 
       {selectedProject ? (
         <>
-          <div className="analytics-kpi-grid">
-            <div className="analytics-kpi"><span>Completion rate</span><strong>{completionRate}%</strong><small>{analytics?.completedTasks || 0} of {analytics?.totalTasks || 0} tasks complete</small></div>
-            <div className="analytics-kpi"><span>Overdue</span><strong>{analytics?.overdueTasks || 0}</strong><small>{analytics?.overdueRate || 0}% of tracked work</small></div>
-            <div className="analytics-kpi"><span>Blocked</span><strong>{analytics?.blockedTasks || 0}</strong><small>{analytics?.dependencyCount || 0} dependency links</small></div>
-            <div className="analytics-kpi"><span>Median cycle</span><strong>{analytics?.medianCycleTimeHours || 0}h</strong><small>from start to completion</small></div>
+          <div className="reports-kpi-grid">
+            <article className="reports-kpi reports-kpi-primary">
+              <div className="reports-kpi-label"><span>Completion</span><Icon name="chart" size={15} /></div>
+              <strong>{percent(analytics?.completionRate)}%</strong>
+              <div className="reports-progress"><i style={{ width: percent(analytics?.completionRate) + '%' }} /></div>
+              <small>{analytics?.completedTasks || 0} of {analytics?.totalTasks || 0} tracked tasks complete</small>
+            </article>
+            <article className="reports-kpi">
+              <div className="reports-kpi-label"><span>Overdue</span><Icon name="calendar" size={15} /></div>
+              <strong>{analytics?.overdueTasks || 0}</strong>
+              <small>{analytics?.overdueRate || 0}% of tracked work is overdue</small>
+            </article>
+            <article className="reports-kpi">
+              <div className="reports-kpi-label"><span>Blocked</span><Icon name="alert" size={15} /></div>
+              <strong>{analytics?.blockedTasks || 0}</strong>
+              <small>{analytics?.dependencyCount || 0} dependency relationships</small>
+            </article>
+            <article className="reports-kpi">
+              <div className="reports-kpi-label"><span>Cycle time</span><Icon name="activity" size={15} /></div>
+              <strong>{analytics?.medianCycleTimeHours || 0}<em>h</em></strong>
+              <small>Median time from start to completion</small>
+            </article>
           </div>
 
-          <div className="reports-advanced-grid">
-            <section className="panel">
-              <div className="workspace-section-head"><div><span className="eyebrow">Throughput</span><h3>Completed work over 8 weeks</h3><p>Weekly completion counts help identify delivery rhythm.</p></div></div>
-              <div className="throughput-chart">
-                {(analytics?.throughput || []).map((item) => (
-                  <div className="throughput-column" key={item.week}>
-                    <strong>{item.completed}</strong>
-                    <span><i style={{ height: Math.max(8, (item.completed / maxThroughput) * 100) + '%' }} /></span>
-                    <small>{new Date(item.week).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</small>
-                  </div>
-                ))}
+          <div className="reports-main-grid">
+            <section className="report-surface">
+              <div className="report-surface-head">
+                <div><span className="section-kicker">Throughput</span><h3>Delivery rhythm</h3><p>Completed tasks over the most recent eight-week window.</p></div>
+                <span className="surface-caption">8 weeks</span>
               </div>
-            </section>
-
-            <section className="panel">
-              <div className="workspace-section-head"><div><span className="eyebrow">Workload</span><h3>Active task distribution</h3><p>Use the spread as a prompt for redistribution.</p></div><Badge color={analytics?.workloadSpread >= 3 ? 'amber' : 'green'}>{analytics?.workloadSpread || 0} spread</Badge></div>
-              <div className="analytics-workload-list">
-                {(analytics?.workload || []).map((item) => {
-                  const taskCount = item.activeTasks || 0
-                  const max = Math.max(...(analytics?.workload || []).map((candidate) => candidate.activeTasks), 1)
-                  const member = projectTasks.find((task) => String(task.assigneeId) === String(item.userId))
-                  return <div key={item.userId}><div><strong>{member?.assigneeName || 'Team member'}</strong><span>{taskCount} active tasks</span></div><div className="analytics-workload-track"><i style={{ width: Math.round((taskCount / max) * 100) + '%' }} /></div></div>
+              <div className="throughput-chart throughput-chart-refined">
+                {throughput.map((item) => {
+                  const value = Number(item.completed || 0)
+                  return (
+                    <div className="throughput-column" key={item.week}>
+                      <strong>{value}</strong>
+                      <span><i style={{ height: Math.max(7, (value / maxThroughput) * 100) + '%' }} /></span>
+                      <small>{item.week ? new Date(item.week).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}</small>
+                    </div>
+                  )
                 })}
-                {!analytics?.workload?.length ? <div className="detail-empty">No assigned active tasks yet.</div> : null}
+              </div>
+            </section>
+
+            <section className="report-surface">
+              <div className="report-surface-head">
+                <div><span className="section-kicker">Capacity</span><h3>Workload balance</h3><p>Active task distribution across the project team.</p></div>
+                <Badge color={analytics?.workloadSpread >= 3 ? 'amber' : 'green'}>{analytics?.workloadSpread || 0} spread</Badge>
+              </div>
+              <div className="report-workload-list">
+                {workload.map((item) => {
+                  const member = projectTasks.find((task) => String(task.assigneeId) === String(item.userId))
+                  const load = Number(item.activeTasks || 0)
+                  return (
+                    <div className="report-workload-row" key={String(item.userId)}>
+                      <div><strong>{member?.assigneeName || 'Team member'}</strong><span>{load} active task{load === 1 ? '' : 's'}</span></div>
+                      <div className="report-workload-bar"><i style={{ width: Math.round((load / maxWorkload) * 100) + '%' }} /></div>
+                    </div>
+                  )
+                })}
+                {!workload.length ? <div className="detail-empty">No active assigned work yet.</div> : null}
               </div>
             </section>
           </div>
 
-          <section className="panel">
-            <div className="workspace-section-head"><div><span className="eyebrow">Anvaya Insights</span><h3>Signals that need attention</h3><p>Each signal explains why it appeared and what to do next.</p></div><Badge color={riskCount ? 'amber' : 'green'}>{riskCount ? riskCount + ' risk signals' : 'Healthy'}</Badge></div>
-            <div className="reports-insights-grid">
-              {insights.map((insight) => (
-                <button className="report-insight-card" type="button" key={insight.type} onClick={() => {
-                  const task = insight.entityIds?.map((id) => projectTaskMap.get(String(id))).find(Boolean)
+          <section className="report-surface">
+            <div className="report-surface-head">
+              <div><span className="section-kicker">Anvaya Insights</span><h3>What deserves attention</h3><p>Each signal explains the condition and the next useful action.</p></div>
+              <Badge color={riskCount ? 'amber' : 'green'}>{riskCount ? riskCount + ' risk items' : 'Healthy'}</Badge>
+            </div>
+            <div className="reports-insights-grid reports-insights-refined">
+              {insights.map((insight, index) => (
+                <button className="report-insight-card" type="button" key={insight.type || 'insight-' + index} onClick={() => {
+                  const task = (insight.entityIds || []).map((id) => projectTaskMap.get(String(id))).find(Boolean)
                   if (task) onSelectTask?.(task)
                 }}>
-                  <div><Badge color={insight.severity === 'HIGH' ? 'rose' : insight.severity === 'MEDIUM' ? 'amber' : 'green'}>{insight.severity}</Badge><Icon name="chevron" size={15} /></div>
-                  <strong>{insight.signal}</strong>
-                  <p>{insight.reason}</p>
-                  <span>{insight.action}</span>
+                  <div className="report-insight-top"><Badge color={insightTone(insight.severity)}>{insight.severity || 'LOW'}</Badge><Icon name="chevron" size={15} /></div>
+                  <strong>{insight.signal || 'Signal'}</strong>
+                  <p>{insight.reason || 'No additional explanation is available for this signal.'}</p>
+                  <span>{insight.action || 'Review the affected work.'}</span>
                 </button>
               ))}
-              {!insights.length ? <div className="empty-state">No actionable signals for this project right now.</div> : null}
+              {!insights.length ? <div className="empty-state">No actionable signals are active for this project.</div> : null}
             </div>
           </section>
         </>
       ) : (
-        <div className="panel"><div className="empty-state">Create a project to unlock live analytics.</div></div>
+        <section className="report-empty">
+          <div className="report-empty-icon"><Icon name="chart" size={22} /></div>
+          <h3>No project selected</h3>
+          <p>Create or join a project to unlock live delivery analytics.</p>
+        </section>
       )}
     </section>
   )
