@@ -6,6 +6,7 @@ import Badge from '../components/Badge'
 import ProjectCard from '../components/ProjectCard'
 import TeamWorkspace from '../components/TeamWorkspace'
 import ProjectWorkspace from '../components/ProjectWorkspace'
+import InvitationInbox from '../components/InvitationInbox'
 import { api } from '../lib/api'
 import { pageCopy, projects as mockProjects, tasks, workload } from '../data/teamflowMock'
 
@@ -181,6 +182,9 @@ export function GenericPage({
   currentUserId,
   currentUser,
   onMembersChanged,
+  onCreateTaskForDate,
+  onOpenTeam,
+  invitations = [],
   canCreateProjects = false,
   canManageProjects = false,
 }) {
@@ -283,6 +287,7 @@ export function GenericPage({
           <h1>{copy[1]}</h1>
           <p>{copy[2]}</p>
         </section>
+        <InvitationInbox invitations={invitations} onChanged={onMembersChanged} />
         {remoteProjects.length ? (
           <TeamWorkspace
             projects={remoteProjects}
