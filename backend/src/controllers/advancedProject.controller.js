@@ -46,7 +46,7 @@ export const activity = asyncHandler(async (req, res) => {
   res.json({ success: true, data })
 })
 
-export const listInvitations = asyncHandler(async (req, res) =>
+export const listInvitations = asyncHandler(async (req, res) => {
   const data = await listProjectInvitations({
     projectId: req.params.projectId,
     userId: req.user.id,
