@@ -260,7 +260,7 @@ test('global command palette and reports use live project intelligence', async (
   await page.goto('/')
 
   await page.keyboard.press('Control+k')
-  await expect(page.getByRole('dialog', { name: /Search and command/i }).or(page.locator('.command-palette'))).toBeVisible()
+  await expect(page.locator('.command-palette')).toBeVisible()
   await page.getByRole('textbox', { name: 'Global search' }).fill('board')
   await expect(page.getByText('Build live task board')).toBeVisible()
 
