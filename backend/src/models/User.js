@@ -11,6 +11,18 @@ const userSchema = new mongoose.Schema(
       default: 'TEAM_MEMBER',
     },
     status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' },
+    preferences: {
+      notifications: {
+        taskAssignment: { type: Boolean, default: true },
+        projectInvitation: { type: Boolean, default: true },
+        chatMention: { type: Boolean, default: true },
+        dependencyUnblocked: { type: Boolean, default: true },
+        teamUpdates: { type: Boolean, default: true },
+      },
+      display: {
+        compactMode: { type: Boolean, default: false },
+      },
+    },
   },
   { timestamps: true },
 )
