@@ -44,6 +44,7 @@ export default function App() {
   const [taskModalOpen, setTaskModalOpen] = useState(false)
   const [projectModalOpen, setProjectModalOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState(null)
+  const [taskPrefillDueDate, setTaskPrefillDueDate] = useState('')
 
   useEffect(() => {
     const handlePopState = () => setPage(pageFromPath(window.location.pathname))
@@ -74,6 +75,11 @@ export default function App() {
     ? { connected: false, loading: false, error: '', summary: null, projects: [], tasks: [], members: [], membersByProject: {}, activity: [], notifications: [], refresh: () => {} }
     : liveData
 
+  const openTaskCreator = (dueDate = '') => {
+    setTaskPrefillDueDate(dueDate || '')
+    setTaskModalOpen(true)
+  }
+
   const navigate = (nextPage) => {
     const nextPath = ROUTES[nextPage] || '/'
     if (window.location.pathname !== nextPath) {
@@ -81,6 +87,7 @@ export default function App() {
     }
     setPage(nextPage)
     setSelectedTask(null)
+    setTaskPrefillDueDate('')
     setSidebarOpen(false)
   }
 
@@ -125,8 +132,8 @@ export default function App() {
           {page === 'Overview' ? (
             <Overview
               onNavigate={navigate}
-              onCreateTask={() => setTaskModalOpen(true)}
-              onSuggestAssignee={() => setTaskModalOpen(true)}
+              onCreateTask={() => openTaskCreator()}
+              onSuggestAssignee={() => openTaskCreator()}
               onSelectTask={setSelectedTask}
               liveData={activeData}
               user={user}
@@ -134,7 +141,9 @@ export default function App() {
           ) : (
             <GenericPage
               page={page}
-              onCreateTask={() => setTaskModalOpen(true)}
+              onCreateTask={() => openTaskCreator()}
+              onCreateTaskForDate={(date) => openTaskCreator(date)}
+              onOpenTeam={() => navigate('Team')}
               onCreateProject={() => setProjectModalOpen(true)}
               onSelectTask={setSelectedTask}
               liveData={activeData}
@@ -142,6 +151,7 @@ export default function App() {
               currentUser={user}
               canCreateProjects={!demoMode}
               onMembersChanged={liveData.refresh}
+              invitations={activeData.invitations || []}
             />
           )}
         </main>
@@ -157,6 +167,7 @@ export default function App() {
         projects={!demoMode ? activeData.projects : []}
         membersByProject={!demoMode ? activeData.membersByProject : {}}
         demoProject={demoProjects[0]}
+        initialDueDate={taskPrefillDueDate}
       />
 
       <CreateProjectModal
