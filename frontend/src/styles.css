@@ -630,3 +630,7 @@ html[data-density='compact'] .team-member-row{padding:8px 0}
   .reports-insights-grid{grid-template-columns:1fr}
   .settings-profile{align-items:flex-start}.settings-profile>.badge{margin-left:auto}
 }
+
+.field-optional{font-size:10px!important;color:#a0a5b0!important;font-weight:600!important}
+.field textarea{width:100%;resize:vertical;min-height:82px;border:1px solid #dfe2ea;border-radius:9px;padding:10px 11px;background:#fff;color:#30343e;font:500 13px/1.45 inherit;outline:0}
+.field textarea:focus{border-color:#a89eff;box-shadow:0 0 0 3px rgba(111,92,245,.08)}
