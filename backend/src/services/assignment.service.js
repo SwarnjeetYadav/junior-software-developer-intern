@@ -41,11 +41,12 @@ export async function suggestAssignees({ projectId, priority = 'MEDIUM', dueDate
 
   const members = await ProjectMember.find({ projectId, projectRole: { $ne: 'VIEWER' } })
     .select('userId projectRole')
+    .populate('userId', 'name email role')
     .lean()
 
   if (!members.length) return []
 
-  const memberIds = members.map((member) => member.userId)
+  const memberIds = members.map((member) => member.userId?._id || member.userId)
   const activeTasks = await Task.find({
     projectId,
     assigneeId: { $in: memberIds },
@@ -56,7 +57,8 @@ export async function suggestAssignees({ projectId, priority = 'MEDIUM', dueDate
 
   const maxLoad = Math.max(...members.map((member) => activeTasks.filter((task) => String(task.assigneeId) === String(member.userId)).length), 0)
   const scored = members.map((member) => {
-    const mine = activeTasks.filter((task) => String(task.assigneeId) === String(member.userId))
+    const memberUserId = member.userId?._id || member.userId
+    const mine = activeTasks.filter((task) => String(task.assigneeId) === String(memberUserId))
     const activeCount = mine.length
     const totalMinutes = mine.reduce((sum, task) => sum + (task.estimateMinutes || 60), 0)
     const workloadFit = maxLoad === 0 ? 1 : clamp(1 - (activeCount / Math.max(maxLoad, 1)))
@@ -80,7 +82,8 @@ export async function suggestAssignees({ projectId, priority = 'MEDIUM', dueDate
     )
 
     const result = {
-      userId: member.userId,
+      userId: memberUserId,
+      user: member.userId?.name ? { name: member.userId.name, email: member.userId.email, role: member.userId.role } : null,
       projectRole: member.projectRole,
       activeTaskCount: activeCount,
       activeMinutes: totalMinutes,
