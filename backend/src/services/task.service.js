@@ -7,6 +7,7 @@ import Notification from '../models/Notification.js'
 import { ApiError } from '../utils/apiError.js'
 import { isValidPriority, isValidStatus } from '../utils/taskRules.js'
 import { suggestAssignee, suggestAssignees } from './assignment.service.js'
+import TaskDependency from '../models/TaskDependency.js'
 import { getBlockingPredecessors, notifySuccessorsIfUnblocked } from './dependency.service.js'
 
 export async function ensureProjectAccess(projectId, userId, role) {
@@ -119,7 +120,7 @@ export async function listTasks({ userId, role, projectId, query = {} }) {
       .sort({ dueDate: 1, createdAt: -1 })
       .populate('assigneeId', 'name email role')
       .lean(),
-    mongoose.model('TaskDependency').find({ projectId }).select('predecessorTaskId successorTaskId').lean(),
+    TaskDependency.find({ projectId }).select('predecessorTaskId successorTaskId').lean(),
   ])
 
   const dependencyMap = new Map()
