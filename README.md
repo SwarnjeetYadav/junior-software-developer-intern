@@ -17,7 +17,7 @@ This repository records the weekly internship documentation and the actual Anvay
 
 ## Project Status
 
-**Six-week documentation completed; application implementation, testing, deployment configuration and production hardening are in progress.**
+**Six-week documentation completed; advanced workspace implementation, testing, deployment configuration and production hardening are in place.**
 
 ## Deployment Architecture
 
@@ -108,9 +108,9 @@ GitHub Actions validates backend unit tests, backend API integration tests, fron
 - Live task comments
 - Live project progress and member counts
 - Live team workload aggregation
-- Live project team management, member roles, removal, and project chat
+- Live project team management, member roles, removal, invitations, and project chat
 - Live project member search and add flow
-- Notifications
+- Notifications with user preferences
 - Activity feed
 - Demo mode
 - Playwright regression suite
@@ -120,7 +120,12 @@ GitHub Actions validates backend unit tests, backend API integration tests, fron
 - JWT authentication
 - Role based access
 - Projects and membership
-- Tasks and smart assignment
+- Tasks and explainable Smart Assignment 2.0
+- Kanban board, list, calendar and timeline views
+- Task dependencies with cycle prevention and blocker notifications
+- Project analytics and Anvaya Insights
+- Permission-aware global search / Ctrl+K command palette
+- Project invitations and onboarding
 - Activity logging
 - Notifications
 - Dashboard summary
@@ -134,3 +139,20 @@ GitHub Actions validates backend unit tests, backend API integration tests, fron
 Login -> Workspace -> Projects -> Create Project -> Create Task -> Smart Assignment -> Task Details -> Status/Priority/Assignee/Due Update -> Comment -> Activity -> Notification -> Team Member Management
 
 See `DEVELOPMENT-LOG.md` for the implementation history.
+
+
+## Advanced Workspace
+
+The current Anvaya workspace follows the advanced product specification:
+
+- **Project views:** Overview, Board, List, Calendar, Timeline, Activity.
+- **Smart Assignment 2.0:** top-three explainable recommendations based on workload, due-date fit, project role, priority load and availability.
+- **Dependencies:** predecessor/successor links, circular-chain prevention, blocker enforcement and dependency-unblocked notifications.
+- **Collaboration:** floating project chat with unread state, fullscreen mode, replies, mentions, reactions and task context support.
+- **Team administration:** project-scoped Project Manager, Team Member and Viewer permissions, member add/remove/role changes and seven-day invitations.
+- **Intelligence:** live completion, overdue, blocked, cycle-time, throughput and workload analytics plus rule-based project health signals.
+- **Search:** permission-aware global search with Ctrl/Cmd+K command palette.
+- **Settings:** notification preferences and workspace display density.
+- **Quality:** unit/integration coverage and Playwright regression coverage for the advanced workspace.
+
+The advanced implementation intentionally keeps secondary features inside project/work surfaces so the global navigation remains focused.
