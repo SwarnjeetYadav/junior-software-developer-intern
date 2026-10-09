@@ -17,7 +17,7 @@ function validateProjectId(projectId) {
   if (!mongoose.isValidObjectId(projectId)) throw new ApiError(400, 'Invalid project id')
 }
 
-async function ensureProjectAccess(projectId, userId, role) {
+export async function ensureProjectAccess(projectId, userId, role) {
   validateProjectId(projectId)
 
   const project = await Project.findById(projectId).lean()
