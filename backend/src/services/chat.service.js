@@ -4,7 +4,7 @@ import ProjectMember from '../models/ProjectMember.js'
 import ProjectMessage from '../models/ProjectMessage.js'
 import Task from '../models/Task.js'
 import ActivityLog from '../models/ActivityLog.js'
-import Notification from '../models/Notification.js'
+import { createNotification } from './notification.service.js'
 import { ApiError } from '../utils/apiError.js'
 
 async function ensureProjectMember(projectId, userId, role) {
@@ -89,7 +89,7 @@ export async function sendProjectMessage({ projectId, userId, role, message, rep
   if (validMentions.length) {
     const recipients = validMentions.filter((id) => String(id) !== String(userId))
     if (recipients.length) {
-      await Notification.insertMany(recipients.map((recipientId) => ({
+      await Promise.all(recipients.map((recipientId) => createNotification({
         userId: recipientId,
         type: 'PROJECT_CHAT_MENTION',
         message: 'You were mentioned in ' + project.name + ' team chat.',
