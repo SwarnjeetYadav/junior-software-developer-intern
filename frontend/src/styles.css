@@ -2761,3 +2761,59 @@ html[data-density='compact'] .task-table td{padding:10px 9px}
   .reports-project-select select{width:100%}
   .report-insight-availability{font-size:10px}
 }
+
+
+/* Mobile Reports finishing pass — keep badges compact and cards breathable */
+.reports-workspace > .report-surface > .report-surface-head > .badge{
+  flex:0 0 auto;
+  white-space:nowrap;
+  word-break:normal;
+  overflow-wrap:normal;
+  max-width:max-content;
+}
+@media (max-width:640px){
+  .reports-workspace > .report-surface > .report-surface-head{
+    align-items:flex-start;
+  }
+  .reports-workspace > .report-surface > .report-surface-head > div{
+    min-width:0;
+    flex:1 1 auto;
+  }
+  .reports-workspace > .report-surface > .report-surface-head > .badge{
+    flex:0 0 auto;
+    margin-left:8px;
+    padding:0 9px;
+    font-size:10px;
+    line-height:1.25;
+  }
+  .reports-insights-refined{
+    grid-template-columns:minmax(0,1fr);
+    gap:10px;
+  }
+  .reports-insights-refined .report-insight-card{
+    min-width:0;
+    padding:14px;
+    border-radius:12px;
+  }
+  .reports-insights-refined .report-insight-card p,
+  .reports-insights-refined .report-insight-card>span{
+    overflow-wrap:anywhere;
+  }
+  .reports-insights-refined .report-insight-card strong{
+    line-height:1.35;
+  }
+}
+
+
+/* Keep Reports summary badges on one line in narrow desktop panels too */
+.reports-workspace .report-surface-head > .badge{
+  flex:0 0 auto;
+  width:max-content;
+  min-width:max-content;
+  white-space:nowrap;
+  word-break:keep-all;
+  overflow-wrap:normal;
+}
+.reports-workspace .report-surface-head > div{
+  min-width:0;
+}

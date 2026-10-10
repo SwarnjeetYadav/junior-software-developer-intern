@@ -73,6 +73,7 @@ export default function App() {
   const [projectModalOpen, setProjectModalOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState(null)
   const [taskPrefillDueDate, setTaskPrefillDueDate] = useState('')
+  const [demoTasks, setDemoTasks] = useState([])
 
   useEffect(() => {
     const handlePopState = () => setPage(pageFromPath(window.location.pathname))
@@ -100,7 +101,7 @@ export default function App() {
   if (!user) return <Login />
 
   const activeData = demoMode
-    ? { connected: false, loading: false, error: '', summary: null, projects: [], tasks: [], members: [], membersByProject: {}, activity: [], notifications: [], refresh: () => {} }
+    ? { connected: false, loading: false, error: '', summary: null, projects: demoProjects, tasks: demoTasks, members: [], membersByProject: {}, activity: [], notifications: [], refresh: () => {} }
     : liveData
 
   const openTaskCreator = (dueDate = '') => {
@@ -120,7 +121,12 @@ export default function App() {
   }
 
   const handleCreateTask = async (payload) => {
-    if (demoMode) return
+    if (demoMode) {
+      setDemoTasks((items) => [{ ...payload, id: payload.id || 'AN-' + Date.now() }, ...items])
+      setTaskModalOpen(false)
+      navigate('My Tasks')
+      return
+    }
     await api.createTask(payload.projectId, payload.payload)
     setTaskModalOpen(false)
     navigate('My Tasks')
