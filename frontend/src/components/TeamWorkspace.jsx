@@ -28,6 +28,29 @@ function chatReadKey(projectId) {
   return 'anvaya_chat_read_' + projectId
 }
 
+function chatCacheKey(projectId) {
+  return 'anvaya_chat_cache_' + projectId
+}
+
+function readChatCache(projectId) {
+  try {
+    const raw = localStorage.getItem(chatCacheKey(projectId))
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed.slice(-60) : []
+  } catch {
+    return []
+  }
+}
+
+function writeChatCache(projectId, messages) {
+  try {
+    localStorage.setItem(chatCacheKey(projectId), JSON.stringify((messages || []).filter((item) => !item.pending).slice(-60)))
+  } catch {
+    // Cache is an optimization only.
+  }
+}
+
 function getStoredReadAt(projectId) {
   try {
     return Number(localStorage.getItem(chatReadKey(projectId)) || 0)
@@ -180,7 +203,9 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
       setChat((current) => {
         const pending = current.filter((item) => item.pending)
         const incoming = messages.filter((item) => !pending.some((item2) => item2._id === item._id))
-        return [...incoming, ...pending]
+        const next = [...incoming, ...pending]
+        writeChatCache(projectId, next)
+        return next
       })
 
       const latestTime = messages.length
@@ -207,7 +232,9 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
 
   useEffect(() => {
     if (!projectId) return undefined
-    loadChat({ preserveUnread: true })
+    const cached = readChatCache(projectId)
+    setChat(cached)
+    loadChat({ preserveUnread: true, silent: cached.length > 0 })
 
     const interval = window.setInterval(() => {
       loadChat({ preserveUnread: true, silent: true })
@@ -355,7 +382,11 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
       pending: true,
     }
 
-    setChat((items) => [...items, optimisticMessage])
+    setChat((items) => {
+      const next = [...items, optimisticMessage]
+      writeChatCache(projectId, next)
+      return next
+    })
     setChatMessage('')
     setChatReplyTo(null)
     setMentionIds([])
@@ -377,7 +408,11 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
         userId: result.data?.userId?.name ? result.data.userId : optimisticMessage.userId,
         replyToId: result.data?.replyToId || optimisticMessage.replyToId,
       }
-      setChat((items) => items.map((item) => item._id === tempId ? nextMessage : item))
+      setChat((items) => {
+        const next = items.map((item) => item._id === tempId ? nextMessage : item)
+        writeChatCache(projectId, next)
+        return next
+      })
     } catch (err) {
       setChat((items) => items.filter((item) => item._id !== tempId))
       setChatMessage(clean)
