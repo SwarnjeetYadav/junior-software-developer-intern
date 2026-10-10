@@ -66,8 +66,8 @@ function WorkspaceSkeleton() {
 
 export default function App() {
   const { user, logout, demoMode, authLoading } = useAuth()
-  const liveData = useTeamflowData(Boolean(user) && !demoMode, user?.id)
   const [page, setPage] = useState(() => pageFromPath(window.location.pathname))
+  const liveData = useTeamflowData(Boolean(user) && !demoMode, user?.id, page)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
   const [projectModalOpen, setProjectModalOpen] = useState(false)
