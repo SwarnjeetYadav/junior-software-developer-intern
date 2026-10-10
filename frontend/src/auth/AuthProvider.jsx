@@ -7,6 +7,7 @@ function clearStoredSession() {
   localStorage.removeItem('teamflow_token')
   localStorage.removeItem('teamflow_user')
   localStorage.removeItem('teamflow_demo')
+  Object.keys(localStorage).filter((key) => key.startsWith('anvaya_workspace_cache_v4:')).forEach((key) => localStorage.removeItem(key))
 }
 
 function readStoredUser() {
