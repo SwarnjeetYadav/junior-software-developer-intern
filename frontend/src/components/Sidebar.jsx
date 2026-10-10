@@ -14,7 +14,7 @@ export default function Sidebar({ page, onNavigate, open, onClose, user, liveDat
   const displayUser = user || currentUser
   const openTaskCount = liveData?.connected
     ? liveData.tasks.filter((task) => task.assigneeId && String(task.assigneeId) === String(displayUser.id) && task.statusValue !== 'COMPLETED').length
-    : 12
+    : '…'
 
   return (
     <aside className={'sidebar ' + (open ? 'sidebar-open' : '')}>
