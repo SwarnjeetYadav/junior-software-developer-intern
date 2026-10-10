@@ -31,34 +31,39 @@ export function AuthProvider({ children }) {
   const [authLoading, setAuthLoading] = useState(false)
 
   useEffect(() => {
-    let cancelled = false
-    const token = localStorage.getItem('teamflow_token')
-
-    if (!token) {
+    const handleExpired = () => {
+      clearStoredSession()
+      setUser(null)
+      setDemoMode(false)
       setAuthLoading(false)
-      return undefined
     }
 
-    api.me()
-      .then((result) => {
-        if (cancelled) return
-        const liveUser = result.data
-        localStorage.setItem('teamflow_user', JSON.stringify(liveUser))
-        localStorage.removeItem('teamflow_demo')
-        setUser(liveUser)
-        setDemoMode(false)
-      })
-      .catch(() => {
-        if (cancelled) return
-        clearStoredSession()
-        setUser(null)
-        setDemoMode(false)
-      })
-      .finally(() => {
-        if (!cancelled) setAuthLoading(false)
-      })
+    window.addEventListener('anvaya:auth-expired', handleExpired)
 
-    return () => { cancelled = true }
+    // Cached credentials render the app immediately. Authentication is revalidated
+    // lazily after the first paint so a sleeping API cannot block the UI.
+    const token = localStorage.getItem('teamflow_token')
+    if (token) {
+      const timer = window.setTimeout(async () => {
+        try {
+          const result = await api.me()
+          const liveUser = result.data
+          localStorage.setItem('teamflow_user', JSON.stringify(liveUser))
+          localStorage.removeItem('teamflow_demo')
+          setUser(liveUser)
+          setDemoMode(false)
+        } catch {
+          // A normal API request will emit the auth-expired event when needed.
+        }
+      }, 4000)
+
+      return () => {
+        window.clearTimeout(timer)
+        window.removeEventListener('anvaya:auth-expired', handleExpired)
+      }
+    }
+
+    return () => window.removeEventListener('anvaya:auth-expired', handleExpired)
   }, [])
 
   const login = async (credentials) => {
