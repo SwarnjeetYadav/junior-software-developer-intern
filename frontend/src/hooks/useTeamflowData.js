@@ -56,12 +56,12 @@ function formatActivity(item) {
   return item.action.replaceAll('_', ' ').toLowerCase()
 }
 
-const WORKSPACE_CACHE_KEY = 'anvaya_workspace_cache_v3'
+const WORKSPACE_CACHE_BASE = 'anvaya_workspace_cache_v4'
 const WORKSPACE_CACHE_TTL = 1000 * 60 * 30
 
-function readWorkspaceCache() {
+function readWorkspaceCache(userId) {
   try {
-    const raw = localStorage.getItem(WORKSPACE_CACHE_KEY)
+    const raw = localStorage.getItem(WORKSPACE_CACHE_BASE + ':' + String(userId || 'guest'))
     if (!raw) return null
     const cached = JSON.parse(raw)
     if (!cached?.savedAt || Date.now() - cached.savedAt > WORKSPACE_CACHE_TTL) return null
@@ -71,9 +71,9 @@ function readWorkspaceCache() {
   }
 }
 
-function writeWorkspaceCache(state) {
+function writeWorkspaceCache(userId, state) {
   try {
-    localStorage.setItem(WORKSPACE_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), state }))
+    localStorage.setItem(WORKSPACE_CACHE_BASE + ':' + String(userId || 'guest'), JSON.stringify({ savedAt: Date.now(), state }))
   } catch {
     // Cache is an optimization only.
   }
@@ -94,7 +94,7 @@ function mapProject(project, projectTasks, projectMembers, index) {
   }
 }
 
-export function useTeamflowData(enabled) {
+export function useTeamflowData(enabled, userId) {
   const [refreshKey, setRefreshKey] = useState(0)
   const [state, setState] = useState(() => ({
     loading: false,
@@ -108,7 +108,7 @@ export function useTeamflowData(enabled) {
     activity: [],
     notifications: [],
     invitations: [],
-    ...(readWorkspaceCache() || {}),
+    ...(readWorkspaceCache(userId) || {}),
     loading: false,
   }))
 
@@ -208,7 +208,7 @@ export function useTeamflowData(enabled) {
             invitations: invitationResult.data || [],
           }
           setState(nextState)
-          writeWorkspaceCache(nextState)
+          writeWorkspaceCache(userId, nextState)
         }
       } catch (error) {
         if (!cancelled) {
@@ -219,7 +219,7 @@ export function useTeamflowData(enabled) {
 
     load()
     return () => { cancelled = true }
-  }, [enabled, refreshKey])
+  }, [enabled, refreshKey, userId])
 
   return { ...state, refresh }
 }
