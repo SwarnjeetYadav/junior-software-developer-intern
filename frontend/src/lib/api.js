@@ -12,6 +12,7 @@ async function request(path, options = {}) {
   const payload = await response.json().catch(() => ({}))
 
   if (!response.ok) {
+    if (response.status === 401) window.dispatchEvent(new Event('anvaya:auth-expired'))
     const error = new Error(payload.message || 'Request failed')
     error.status = response.status
     throw error
