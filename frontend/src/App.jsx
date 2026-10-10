@@ -38,7 +38,7 @@ function LoadingScreen() {
 
 export default function App() {
   const { user, logout, demoMode, authLoading } = useAuth()
-  const liveData = useTeamflowData(Boolean(user) && !demoMode)
+  const liveData = useTeamflowData(Boolean(user) && !demoMode, user?.id)
   const [page, setPage] = useState(() => pageFromPath(window.location.pathname))
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [taskModalOpen, setTaskModalOpen] = useState(false)
