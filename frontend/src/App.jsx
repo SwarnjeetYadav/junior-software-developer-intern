@@ -29,9 +29,37 @@ function pageFromPath(pathname) {
 function LoadingScreen() {
   return (
     <div className="auth-loading-screen" role="status" aria-live="polite">
-      <span className="brand-mark">AN</span>
-      <strong>Loading Anvaya…</strong>
-      <small>Checking your session</small>
+      <div className="youtube-skeleton-brand"><span>AN</span></div>
+      <div className="youtube-skeleton-title" />
+      <div className="youtube-skeleton-subtitle" />
+    </div>
+  )
+}
+
+function WorkspaceSkeleton() {
+  return (
+    <div className="youtube-workspace-skeleton" aria-busy="true" aria-label="Loading workspace">
+      <div className="youtube-skeleton-heading">
+        <span />
+        <i />
+        <i />
+      </div>
+      <div className="youtube-skeleton-cards">
+        {[1, 2, 3, 4].map((item) => (
+          <div className="youtube-skeleton-card" key={item}>
+            <span />
+            <i />
+            <b />
+            <em />
+          </div>
+        ))}
+      </div>
+      <div className="youtube-skeleton-large">
+        <div className="youtube-skeleton-large-head"><span /><i /></div>
+        <div className="youtube-skeleton-large-body">
+          {[1, 2, 3, 4, 5, 6].map((item) => <div key={item}><span /><i /><b /><em /></div>)}
+        </div>
+      </div>
     </div>
   )
 }
@@ -131,7 +159,9 @@ export default function App() {
         />
 
         <main className="content">
-          {page === 'Overview' ? (
+          {!demoMode && liveData.loading && !liveData.connected ? (
+            <WorkspaceSkeleton />
+          ) : page === 'Overview' ? (
             <Overview
               onNavigate={navigate}
               onCreateTask={() => openTaskCreator()}
