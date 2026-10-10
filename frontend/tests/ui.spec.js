@@ -105,6 +105,12 @@ function routeApi(page) {
     if (method === 'DELETE' && /^\/projects\/project-1\/members\//.test(path)) return json(200, {})
 
     if (method === 'GET' && path === '/tasks/project/project-1') return json(200, state.tasks)
+    if (method === 'POST' && path === '/tasks/project/project-1') {
+      const body = JSON.parse(request.postData() || '{}')
+      const task = { _id: 'task-' + (state.tasks.length + 1), projectId: project._id, status: 'TODO', priority: 'MEDIUM', ...body, assigneeId: body.assigneeId ? users.owner : users.owner, dependencyCount: 0, blockedByCount: 0, blockingCount: 0, blockedByTaskIds: [], blockingTaskIds: [], hasBlockingDependencies: false, createdAt: new Date().toISOString() }
+      state.tasks.push(task)
+      return json(201, task)
+    }
     if (method === 'PATCH' && /^\/tasks\/task-/.test(path)) {
       const taskId = path.split('/').pop()
       const body = JSON.parse(request.postData() || '{}')
@@ -165,7 +171,12 @@ function routeApi(page) {
     }
 
     if (method === 'GET' && path === '/projects/project-1/invitations') return json(200, state.invitations)
-    if (method === 'POST' && path === '/projects/project-1/invitations') return json(201, { _id: 'invite-1', status: 'PENDING' })
+    if (method === 'POST' && path === '/projects/project-1/invitations') {
+      const body = JSON.parse(request.postData() || '{}')
+      const invitation = { _id: 'invite-' + (state.invitations.length + 1), projectId: project._id, invitedUserId: users.candidate, projectRole: body.projectRole || 'MEMBER', status: 'PENDING' }
+      state.invitations.push(invitation)
+      return json(201, invitation)
+    }
     if (method === 'GET' && path === '/invitations') return json(200, [])
     if (method === 'PATCH' && /^\/invitations\//.test(path)) return json(200, {})
 
@@ -218,7 +229,7 @@ test('live project workspace exposes board, calendar, dependencies and insights'
   await page.getByRole('tab', { name: 'Board' }).click()
   await expect(page.getByRole('heading', { name: /Build live task board/i })).toBeVisible()
   await page.getByText('Build live task board').click()
-  await expect(page.getByRole('heading', { name: 'Build live task board' })).toBeVisible()
+  await expect(page.locator('.task-details-modal').getByRole('heading', { name: 'Build live task board' })).toBeVisible()
   await expect(page.getByText('Smart Assignment 2.0')).toBeVisible()
   await page.locator('.task-details-modal').getByLabel('Status').selectOption('IN_PROGRESS')
 
