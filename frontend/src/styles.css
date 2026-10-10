@@ -2724,3 +2724,40 @@ html[data-density='compact'] .task-table td{padding:10px 9px}
   .reports-kpi:hover,
   .report-insight-card:hover{transform:none}
 }
+
+
+/* Final Reports interaction and data-state refinements */
+.report-insight-card:disabled{
+  cursor:default;
+  opacity:.88;
+}
+.report-insight-card:disabled:hover{
+  transform:none;
+  box-shadow:none;
+}
+.report-insight-availability{
+  display:block;
+  margin-top:3px;
+  color:#8b90a0;
+  font-size:10px;
+  font-weight:600;
+}
+.report-insight-card:not(:disabled) .report-insight-availability{
+  color:#6b5be7;
+}
+.report-chart-empty{
+  min-height:150px;
+  flex:1 1 100%;
+}
+.throughput-chart-refined .throughput-column>span{
+  background:#f1f0f8;
+}
+.throughput-chart-refined .throughput-column i{
+  min-height:4px;
+}
+@media (max-width:640px){
+  .reports-hero-actions{width:100%}
+  .reports-project-select{flex:1 1 100%}
+  .reports-project-select select{width:100%}
+  .report-insight-availability{font-size:10px}
+}
