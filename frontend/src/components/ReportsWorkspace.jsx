@@ -164,17 +164,21 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
               <Badge color={riskCount ? 'amber' : 'green'}>{riskCount ? riskCount + ' risk items' : 'Healthy'}</Badge>
             </div>
             <div className="reports-insights-grid reports-insights-refined">
-              {insights.map((insight, index) => (
-                <button className="report-insight-card" type="button" key={insight.type || 'insight-' + index} onClick={() => {
-                  const task = (insight.entityIds || []).map((id) => projectTaskMap.get(String(id))).find(Boolean)
-                  if (task) onSelectTask?.(task)
+              {insights.map((insight, index) => {
+                const relatedTask = (insight.entityIds || []).map((id) => projectTaskMap.get(String(id))).find(Boolean)
+                const canOpenTask = Boolean(relatedTask && onSelectTask)
+                return (
+                <button className="report-insight-card" type="button" key={insight.type || 'insight-' + index} disabled={!canOpenTask} aria-label={canOpenTask ? 'Open task for ' + (insight.signal || 'insight') : (insight.signal || 'Insight') + ': no linked task available'} onClick={() => {
+                  if (canOpenTask) onSelectTask(relatedTask)
                 }}>
                   <div className="report-insight-top"><Badge color={insightTone(insight.severity)}>{insight.severity || 'LOW'}</Badge><Icon name="chevron" size={15} /></div>
                   <strong>{insight.signal || 'Signal'}</strong>
                   <p>{insight.reason || 'No additional explanation is available for this signal.'}</p>
                   <span>{insight.action || 'Review the affected work.'}</span>
+                  <small className="report-insight-availability">{canOpenTask ? 'Open related task' : 'No linked task'}</small>
                 </button>
-              ))}
+                )
+              })}
               {!insights.length ? <div className="report-insights-empty"><Icon name="check-circle" size={18} /><strong>No active signals</strong><span>There are no actionable issues to highlight for this project right now.</span></div> : null}
             </div>
           </section>
