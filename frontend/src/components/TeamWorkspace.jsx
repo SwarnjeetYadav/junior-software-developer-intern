@@ -378,7 +378,6 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
         replyToId: result.data?.replyToId || optimisticMessage.replyToId,
       }
       setChat((items) => items.map((item) => item._id === tempId ? nextMessage : item))
-      onChanged?.()
     } catch (err) {
       setChat((items) => items.filter((item) => item._id !== tempId))
       setChatMessage(clean)
