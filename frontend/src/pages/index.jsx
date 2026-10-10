@@ -235,6 +235,16 @@ export function GenericPage({
     : myRows
   const rows = filterRows(page === 'Projects' && selectedProjectId ? projectRows : myRows, search, status, priority)
 
+  if (liveData.loading && !liveData.connected && page !== 'Overview') {
+    return (
+      <div className="page-stack page-skeleton" aria-busy="true" aria-label="Loading workspace">
+        <div className="skeleton-title"><span /><i /><i /></div>
+        <div className="skeleton-card-row">{[1,2,3].map((item) => <div className="skeleton-card" key={item}><span /><i /><i /><b /></div>)}</div>
+        <div className="skeleton-panel"><div className="skeleton-line skeleton-line-wide" /><div className="skeleton-line" /><div className="skeleton-line skeleton-line-short" /><div className="skeleton-table">{[1,2,3,4,5].map((item) => <div key={item}><span /><i /><i /><b /></div>)}</div></div>
+      </div>
+    )
+  }
+
   if (page === 'Projects') {
     const projectsToShow = liveData.connected
       ? remoteProjects.map((project) => projectCard(project, liveData))
