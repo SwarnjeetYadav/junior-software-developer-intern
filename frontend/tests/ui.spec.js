@@ -233,14 +233,16 @@ test('live project workspace exposes board, calendar, dependencies and insights'
   await expect(page.getByText('Smart Assignment 2.0')).toBeVisible()
   await page.locator('.task-details-modal').getByLabel('Status').selectOption('IN_PROGRESS')
 
+  await page.locator('.task-details-modal .dependency-form select').selectOption('task-2')
   await page.locator('.task-details-modal').getByRole('button', { name: /Add blocker/i }).click()
-  await expect(page.getByText(/No dependencies yet|API Integration|Predecessor/i).first()).toBeVisible()
+  await expect(page.locator('.task-details-modal .dependency-row').first()).toBeVisible()
+  await expect(page.locator('.task-details-modal .dependency-row')).toContainText('Review API contract')
   await page.getByRole('button', { name: /Close details/i }).click()
 
   await page.getByRole('tab', { name: 'Calendar' }).click()
   await expect(page.getByText(/Calendar/i).first()).toBeVisible()
   await page.getByRole('tab', { name: 'Activity' }).click()
-  await expect(page.getByText(/Project history/i)).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Project activity' })).toBeVisible()
 })
 
 test('live Team view supports member management, invitations and floating chat', async ({ page }) => {
@@ -254,7 +256,7 @@ test('live Team view supports member management, invitations and floating chat',
   await page.getByLabel('Search users to add').fill('Priya')
   await expect(page.getByText('Priya Shah')).toBeVisible()
   await page.getByRole('button', { name: 'Invite', exact: true }).click()
-  await expect(page.getByText(/Priya Shah was invited/i)).toBeVisible()
+  await expect(page.getByText(/Priya Shah was invited as/i)).toBeVisible()
 
   await page.getByRole('button', { name: /Open Anvaya Web App team chat/i }).click()
   await expect(page.getByRole('complementary', { name: 'Team chat' })).toBeVisible()

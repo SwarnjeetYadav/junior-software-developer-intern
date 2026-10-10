@@ -309,11 +309,11 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
     setMessage('')
     try {
       await api.createProjectInvitation(projectId, member._id, projectRole)
-      setMessage(member.name + ' was invited as ' + roleLabel(projectRole) + '.')
       setCandidates((items) => items.filter((item) => item._id !== member._id))
       setQuery('')
       const result = await api.listProjectInvitations(projectId)
       setProjectInvitations(result.data || [])
+      setMessage(member.name + ' was invited as ' + roleLabel(projectRole) + '.')
     } catch (err) {
       setError(err.message)
     } finally {

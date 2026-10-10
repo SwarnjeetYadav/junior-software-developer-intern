@@ -179,6 +179,7 @@ export default function App() {
           ) : (
             <GenericPage
               page={page}
+              taskRows={activeData.tasks}
               onCreateTask={() => openTaskCreator()}
               onCreateTaskForDate={(date) => openTaskCreator(date)}
               onOpenTeam={() => navigate('Team')}
