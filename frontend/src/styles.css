@@ -2459,3 +2459,144 @@ html[data-density='compact'] .task-table td{padding:10px 9px}
   .skeleton-title i{width:85%!important}
   .skeleton-card-row{grid-template-columns:1fr}
 }
+
+
+/* Fast-load skeleton: large, airy and intentionally stable while API wakes up */
+.youtube-workspace-skeleton{
+  min-height:calc(100vh - 130px);
+  display:grid;
+  align-content:start;
+  gap:20px;
+  padding-top:4px;
+  animation:skeleton-enter .18s ease-out;
+}
+.youtube-skeleton-heading{
+  display:grid;
+  gap:10px;
+  width:min(620px,72%);
+}
+.youtube-skeleton-heading span,
+.youtube-skeleton-heading i,
+.youtube-skeleton-card span,
+.youtube-skeleton-card i,
+.youtube-skeleton-card b,
+.youtube-skeleton-card em,
+.youtube-skeleton-large-head span,
+.youtube-skeleton-large-head i,
+.youtube-skeleton-large-body span,
+.youtube-skeleton-large-body i,
+.youtube-skeleton-large-body b,
+.youtube-skeleton-large-body em{
+  display:block;
+  border-radius:8px;
+  background:linear-gradient(90deg,#eceef4 0%,#f7f8fa 46%,#eceef4 100%);
+  background-size:220% 100%;
+  animation:skeleton-shimmer 1.35s ease-in-out infinite;
+}
+.youtube-skeleton-heading span{height:30px;width:230px}
+.youtube-skeleton-heading i{height:11px;width:470px}
+.youtube-skeleton-heading i:last-child{width:320px}
+.youtube-skeleton-cards{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+.youtube-skeleton-card{
+  min-height:148px;
+  padding:17px;
+  border:1px solid #e6e8ee;
+  border-radius:15px;
+  background:#fff;
+  box-shadow:var(--shadow-sm);
+}
+.youtube-skeleton-card span{height:11px;width:33%}
+.youtube-skeleton-card i{height:25px;width:45%;margin-top:17px}
+.youtube-skeleton-card b{height:8px;width:77%;margin-top:11px}
+.youtube-skeleton-card em{height:7px;width:94%;margin-top:25px}
+.youtube-skeleton-large{
+  min-height:390px;
+  padding:20px;
+  border:1px solid #e6e8ee;
+  border-radius:16px;
+  background:#fff;
+  box-shadow:var(--shadow-sm);
+}
+.youtube-skeleton-large-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  padding-bottom:16px;
+  border-bottom:1px solid #eef0f4;
+}
+.youtube-skeleton-large-head span{height:15px;width:220px}
+.youtube-skeleton-large-head i{height:10px;width:95px}
+.youtube-skeleton-large-body{
+  display:grid;
+  gap:11px;
+  padding-top:14px;
+}
+.youtube-skeleton-large-body>div{
+  display:grid;
+  grid-template-columns:1.3fr .55fr .45fr .25fr;
+  align-items:center;
+  gap:15px;
+  padding:11px 0;
+}
+.youtube-skeleton-large-body span{height:11px;width:82%}
+.youtube-skeleton-large-body i{height:10px;width:72%}
+.youtube-skeleton-large-body b{height:10px;width:65%}
+.youtube-skeleton-large-body em{height:10px;width:46%}
+.youtube-skeleton-brand{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:linear-gradient(145deg,#7e6cf3,#5c48de);
+  color:#fff;
+  font:700 11px 'Space Grotesk';
+}
+.youtube-skeleton-title{
+  width:220px;
+  height:18px;
+  border-radius:7px;
+  background:linear-gradient(90deg,#eceef4 0%,#f7f8fa 46%,#eceef4 100%);
+  background-size:220% 100%;
+  animation:skeleton-shimmer 1.35s ease-in-out infinite;
+}
+.youtube-skeleton-subtitle{
+  width:150px;
+  height:10px;
+  border-radius:7px;
+  background:linear-gradient(90deg,#eceef4 0%,#f7f8fa 46%,#eceef4 100%);
+  background-size:220% 100%;
+  animation:skeleton-shimmer 1.35s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer{
+  0%{background-position:220% 0}
+  100%{background-position:-220% 0}
+}
+@keyframes skeleton-enter{
+  from{opacity:.5;transform:translateY(3px)}
+  to{opacity:1;transform:none}
+}
+.auth-loading-screen{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:9px;
+  background:#f7f8fc;
+}
+@media (max-width:1000px){
+  .youtube-skeleton-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .youtube-workspace-skeleton{gap:14px}
+  .youtube-skeleton-heading{width:90%}
+  .youtube-skeleton-heading i{width:90%}
+  .youtube-skeleton-cards{grid-template-columns:1fr}
+  .youtube-skeleton-large-body>div{grid-template-columns:1.4fr .7fr}
+  .youtube-skeleton-large-body b,.youtube-skeleton-large-body em{display:none}
+}
