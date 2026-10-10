@@ -170,14 +170,18 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
     }
   }, [query, projectId, canManage])
 
-  const loadChat = useCallback(async ({ preserveUnread = false } = {}) => {
+  const loadChat = useCallback(async ({ preserveUnread = false, silent = false } = {}) => {
     if (!projectId) return
 
-    setChatLoading(true)
+    if (!silent) setChatLoading(true)
     try {
       const result = await api.listProjectChat(projectId)
-      const messages = result.data || []
-      setChat(messages)
+      const messages = Array.isArray(result.data) ? result.data : []
+      setChat((current) => {
+        const pending = current.filter((item) => item.pending)
+        const incoming = messages.filter((item) => !pending.some((item2) => item2._id === item._id))
+        return [...incoming, ...pending]
+      })
 
       const latestTime = messages.length
         ? new Date(messages[messages.length - 1].createdAt).getTime()
@@ -188,18 +192,16 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
         const readAt = Math.max(storedReadAt, latestTime)
         setStoredReadAt(projectId, readAt)
         setChatUnread(0)
+      } else if (!storedReadAt && latestTime) {
+        setStoredReadAt(projectId, latestTime)
+        setChatUnread(0)
       } else {
-        if (!storedReadAt && latestTime) {
-          setStoredReadAt(projectId, latestTime)
-          setChatUnread(0)
-        } else {
-          setChatUnread(unreadCountFor(messages, currentUserId, storedReadAt))
-        }
+        setChatUnread(unreadCountFor(messages, currentUserId, storedReadAt))
       }
     } catch (err) {
-      setError(err.message)
+      if (!silent) setError(err.message)
     } finally {
-      setChatLoading(false)
+      if (!silent) setChatLoading(false)
     }
   }, [projectId, currentUserId, chatOpen])
 
@@ -208,8 +210,8 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
     loadChat({ preserveUnread: true })
 
     const interval = window.setInterval(() => {
-      loadChat({ preserveUnread: true })
-    }, 8000)
+      loadChat({ preserveUnread: true, silent: true })
+    }, 12000)
 
     return () => window.clearInterval(interval)
   }, [projectId, loadChat])
@@ -327,25 +329,59 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
   const sendChat = async (event) => {
     event.preventDefault()
     const clean = chatMessage.trim()
-    if (!clean || !projectId) return
+    if (!clean || !projectId || chatSending) return
 
+    const tempId = 'pending-' + Date.now()
+    const replyContext = chatReplyTo
+    const optimisticMessage = {
+      _id: tempId,
+      projectId,
+      userId: {
+        _id: currentUserId,
+        name: currentUser?.name || 'You',
+        email: currentUser?.email || '',
+        role: currentUser?.role || 'TEAM_MEMBER',
+      },
+      message: clean,
+      createdAt: new Date().toISOString(),
+      replyToId: replyContext ? {
+        _id: replyContext._id,
+        userId: replyContext.userId,
+        message: replyContext.message,
+        createdAt: replyContext.createdAt,
+      } : null,
+      mentions: [],
+      reactions: [],
+      pending: true,
+    }
+
+    setChat((items) => [...items, optimisticMessage])
+    setChatMessage('')
+    setChatReplyTo(null)
+    setMentionIds([])
+    setStoredReadAt(projectId, Date.now())
+    setChatUnread(0)
     setChatSending(true)
     setError('')
+
     try {
       const result = await api.sendProjectChat(projectId, clean, {
-        replyToId: chatReplyTo?._id || null,
+        replyToId: replyContext?._id || null,
         taskId: null,
         mentions: mentionIds,
       })
-      const nextMessage = result.data
-      setChat((items) => [...items, nextMessage])
-      setChatMessage('')
-      setChatReplyTo(null)
-      setMentionIds([])
-      setStoredReadAt(projectId, new Date(nextMessage.createdAt).getTime())
-      setChatUnread(0)
+      const nextMessage = {
+        ...(result.data || {}),
+        _id: result.data?._id || tempId,
+        pending: false,
+        userId: result.data?.userId?.name ? result.data.userId : optimisticMessage.userId,
+        replyToId: result.data?.replyToId || optimisticMessage.replyToId,
+      }
+      setChat((items) => items.map((item) => item._id === tempId ? nextMessage : item))
       onChanged?.()
     } catch (err) {
+      setChat((items) => items.filter((item) => item._id !== tempId))
+      setChatMessage(clean)
       setError(err.message)
     } finally {
       setChatSending(false)
