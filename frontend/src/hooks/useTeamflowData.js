@@ -94,7 +94,7 @@ function mapProject(project, projectTasks, projectMembers, index) {
   }
 }
 
-export function useTeamflowData(enabled, userId) {
+export function useTeamflowData(enabled, userId, scope = 'Overview') {
   const [refreshKey, setRefreshKey] = useState(0)
   const [state, setState] = useState(() => ({
     loading: false,
@@ -122,20 +122,27 @@ export function useTeamflowData(enabled, userId) {
       setState((current) => ({ ...current, loading: true, error: '' }))
 
       try {
-        const [dashboardResult, projectsResult, activityResult, notificationResult, invitationResult] = await Promise.all([
-          api.dashboard(),
+        // Load the smallest useful dataset for the current page. This avoids
+        // fetching every project's tasks and members just to open /team.
+        const needsTasks = ['Overview', 'Projects', 'My Tasks', 'Reports'].includes(scope)
+        const needsMembers = ['Overview', 'Projects', 'Team'].includes(scope)
+        const needsActivity = scope === 'Overview'
+        const needsDashboard = scope === 'Overview'
+
+        const [projectsResult, notificationResult, dashboardResult, activityResult, invitationResult] = await Promise.all([
           api.listProjects(),
-          api.listActivity(),
           api.listNotifications(),
-          api.listMyInvitations(),
+          needsDashboard ? api.dashboard() : Promise.resolve({ data: null }),
+          needsActivity ? api.listActivity() : Promise.resolve({ data: [] }),
+          scope === 'Team' ? api.listMyInvitations() : Promise.resolve({ data: [] }),
         ])
 
         const projectList = projectsResult.data || []
         const projectResults = await Promise.all(
           projectList.map(async (project) => {
             const [taskResult, memberResult] = await Promise.all([
-              api.listTasks(project._id),
-              api.listMembers(project._id),
+              needsTasks ? api.listTasks(project._id) : Promise.resolve({ data: [] }),
+              needsMembers ? api.listMembers(project._id) : Promise.resolve({ data: [] }),
             ])
             return {
               project,
@@ -159,7 +166,6 @@ export function useTeamflowData(enabled, userId) {
 
         const allTasks = projectResults.flatMap((item) => item.tasks)
         const projectMembers = {}
-
         projectResults.forEach((item) => {
           projectMembers[item.project._id] = item.members
         })
@@ -172,7 +178,6 @@ export function useTeamflowData(enabled, userId) {
               loadMap.set(String(task.assigneeId), (loadMap.get(String(task.assigneeId)) || 0) + 1)
             }
           }
-
           item.members.forEach((member) => {
             const key = String(member.id)
             const existing = memberMap.get(key)
@@ -180,32 +185,28 @@ export function useTeamflowData(enabled, userId) {
               existing.activeTasks += loadMap.get(key) || 0
               if (!existing.projectIds.includes(item.project._id)) existing.projectIds.push(item.project._id)
             } else {
-              memberMap.set(key, {
-                ...member,
-                activeTasks: loadMap.get(key) || 0,
-                projectIds: [item.project._id],
-              })
+              memberMap.set(key, { ...member, activeTasks: loadMap.get(key) || 0, projectIds: [item.project._id] })
             }
           })
         })
 
-        const projects = projectResults.map((item, index) =>
-          mapProject(item.project, item.tasks, item.members, index),
-        )
+        const projects = projectResults.map((item, index) => mapProject(item.project, item.tasks, item.members, index))
 
         if (!cancelled) {
+          const cached = readWorkspaceCache(userId)
           const nextState = {
+            ...(cached || {}),
             loading: false,
             connected: true,
             error: '',
-            summary: dashboardResult.data,
+            summary: dashboardResult.data ?? cached?.summary ?? null,
             projects,
-            tasks: allTasks,
-            members: [...memberMap.values()],
-            membersByProject: projectMembers,
-            activity: (activityResult.data || []).map(mapActivity),
+            tasks: needsTasks ? allTasks : (cached?.tasks || []),
+            members: needsMembers ? [...memberMap.values()] : (cached?.members || []),
+            membersByProject: needsMembers ? projectMembers : (cached?.membersByProject || {}),
+            activity: needsActivity ? (activityResult.data || []).map(mapActivity) : (cached?.activity || []),
             notifications: (notificationResult.data || []).map((item) => ({ ...item, unread: !item.readAt })),
-            invitations: invitationResult.data || [],
+            invitations: scope === 'Team' ? (invitationResult.data || []) : (cached?.invitations || []),
           }
           setState(nextState)
           writeWorkspaceCache(userId, nextState)
@@ -219,7 +220,7 @@ export function useTeamflowData(enabled, userId) {
 
     load()
     return () => { cancelled = true }
-  }, [enabled, refreshKey, userId])
+  }, [enabled, refreshKey, userId, scope])
 
   return { ...state, refresh }
 }
