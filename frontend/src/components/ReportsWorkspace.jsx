@@ -57,6 +57,7 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
   const projectTaskMap = useMemo(() => new Map(projectTasks.map((task) => [String(task.apiId || task._id), task])), [projectTasks])
 
   const throughput = Array.isArray(analytics?.throughput) ? analytics.throughput : []
+  const hasThroughputActivity = throughput.some((item) => Number(item.completed || 0) > 0)
   const maxThroughput = Math.max(...throughput.map((item) => Number(item.completed || 0)), 1)
   const workload = Array.isArray(analytics?.workload) ? analytics.workload : []
   const maxWorkload = Math.max(...workload.map((item) => Number(item.activeTasks || 0)), 1)
@@ -81,14 +82,14 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
         </div>
       </header>
 
-      {loading ? <div className="workspace-inline-status"><span className="status-spinner" />Updating live project metrics…</div> : null}
+      {loading ? <div className="workspace-inline-status" role="status" aria-live="polite"><span className="status-spinner" aria-hidden="true" />Updating live project metrics…</div> : null}
       {error ? <div className="workspace-error-banner">{error}</div> : null}
 
       {selectedProject ? (
         <>
           <div className="reports-kpi-grid">
             <article className="reports-kpi reports-kpi-primary">
-              <div className="reports-kpi-label"><span>Completion</span><Icon name="chart" size={15} /></div>
+              <div className="reports-kpi-label"><span>Completion rate</span><Icon name="chart" size={15} /></div>
               <strong>{percent(analytics?.completionRate)}%</strong>
               <div className="reports-progress"><i style={{ width: percent(analytics?.completionRate) + '%' }} /></div>
               <small>{analytics?.completedTasks || 0} of {analytics?.totalTasks || 0} tracked tasks complete</small>
@@ -116,8 +117,14 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
                 <div><span className="section-kicker">Throughput</span><h3>Delivery rhythm</h3><p>Completed tasks over the most recent eight-week window.</p></div>
                 <span className="surface-caption">8 weeks</span>
               </div>
-              <div className="throughput-chart throughput-chart-refined">
-                {throughput.map((item) => {
+              <div className="throughput-chart throughput-chart-refined" role="img" aria-label="Completed tasks over the most recent eight weeks">
+                {!hasThroughputActivity ? (
+                  <div className="report-chart-empty">
+                    <Icon name="chart" size={18} />
+                    <strong>{throughput.length ? 'No completed tasks in this period' : 'No delivery history yet'}</strong>
+                    <span>{throughput.length ? 'The chart will fill in when the team completes tasks.' : 'Completed tasks will appear here as work ships.'}</span>
+                  </div>
+                ) : throughput.map((item) => {
                   const value = Number(item.completed || 0)
                   return (
                     <div className="throughput-column" key={item.week}>
@@ -157,18 +164,22 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
               <Badge color={riskCount ? 'amber' : 'green'}>{riskCount ? riskCount + ' risk items' : 'Healthy'}</Badge>
             </div>
             <div className="reports-insights-grid reports-insights-refined">
-              {insights.map((insight, index) => (
-                <button className="report-insight-card" type="button" key={insight.type || 'insight-' + index} onClick={() => {
-                  const task = (insight.entityIds || []).map((id) => projectTaskMap.get(String(id))).find(Boolean)
-                  if (task) onSelectTask?.(task)
+              {insights.map((insight, index) => {
+                const relatedTask = (insight.entityIds || []).map((id) => projectTaskMap.get(String(id))).find(Boolean)
+                const canOpenTask = Boolean(relatedTask && onSelectTask)
+                return (
+                <button className="report-insight-card" type="button" key={insight.type || 'insight-' + index} disabled={!canOpenTask} aria-label={canOpenTask ? 'Open task for ' + (insight.signal || 'insight') : (insight.signal || 'Insight') + ': no linked task available'} onClick={() => {
+                  if (canOpenTask) onSelectTask(relatedTask)
                 }}>
                   <div className="report-insight-top"><Badge color={insightTone(insight.severity)}>{insight.severity || 'LOW'}</Badge><Icon name="chevron" size={15} /></div>
                   <strong>{insight.signal || 'Signal'}</strong>
                   <p>{insight.reason || 'No additional explanation is available for this signal.'}</p>
                   <span>{insight.action || 'Review the affected work.'}</span>
+                  <small className="report-insight-availability">{canOpenTask ? 'Open related task' : 'No linked task'}</small>
                 </button>
-              ))}
-              {!insights.length ? <div className="empty-state">No actionable signals are active for this project.</div> : null}
+                )
+              })}
+              {!insights.length ? <div className="report-insights-empty"><Icon name="check-circle" size={18} /><strong>No active signals</strong><span>There are no actionable issues to highlight for this project right now.</span></div> : null}
             </div>
           </section>
         </>
