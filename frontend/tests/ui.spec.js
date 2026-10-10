@@ -235,7 +235,8 @@ test('live project workspace exposes board, calendar, dependencies and insights'
 
   await page.locator('.task-details-modal .dependency-form select').selectOption('task-2')
   await page.locator('.task-details-modal').getByRole('button', { name: /Add blocker/i }).click()
-  await expect(page.getByText(/No dependencies yet|API Integration|Predecessor/i).first()).toBeVisible()
+  await expect(page.locator('.task-details-modal .dependency-row').first()).toBeVisible()
+  await expect(page.locator('.task-details-modal .dependency-row')).toContainText('Review API contract')
   await page.getByRole('button', { name: /Close details/i }).click()
 
   await page.getByRole('tab', { name: 'Calendar' }).click()
