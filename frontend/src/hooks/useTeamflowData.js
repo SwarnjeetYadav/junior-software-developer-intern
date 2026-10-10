@@ -97,7 +97,6 @@ function mapProject(project, projectTasks, projectMembers, index) {
 export function useTeamflowData(enabled) {
   const [refreshKey, setRefreshKey] = useState(0)
   const [state, setState] = useState(() => ({
-    ...(readWorkspaceCache() || {}),
     loading: false,
     connected: false,
     error: '',
@@ -109,6 +108,8 @@ export function useTeamflowData(enabled) {
     activity: [],
     notifications: [],
     invitations: [],
+    ...(readWorkspaceCache() || {}),
+    loading: false,
   }))
 
   const refresh = useCallback(() => setRefreshKey((value) => value + 1), [])
