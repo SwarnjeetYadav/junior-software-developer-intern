@@ -242,7 +242,7 @@ test('live project workspace exposes board, calendar, dependencies and insights'
   await page.getByRole('tab', { name: 'Calendar' }).click()
   await expect(page.getByText(/Calendar/i).first()).toBeVisible()
   await page.getByRole('tab', { name: 'Activity' }).click()
-  await expect(page.getByText(/Project history/i)).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Project activity' })).toBeVisible()
 })
 
 test('live Team view supports member management, invitations and floating chat', async ({ page }) => {
