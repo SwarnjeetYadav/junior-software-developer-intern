@@ -57,6 +57,7 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
   const projectTaskMap = useMemo(() => new Map(projectTasks.map((task) => [String(task.apiId || task._id), task])), [projectTasks])
 
   const throughput = Array.isArray(analytics?.throughput) ? analytics.throughput : []
+  const hasThroughputActivity = throughput.some((item) => Number(item.completed || 0) > 0)
   const maxThroughput = Math.max(...throughput.map((item) => Number(item.completed || 0)), 1)
   const workload = Array.isArray(analytics?.workload) ? analytics.workload : []
   const maxWorkload = Math.max(...workload.map((item) => Number(item.activeTasks || 0)), 1)
@@ -117,8 +118,13 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
                 <span className="surface-caption">8 weeks</span>
               </div>
               <div className="throughput-chart throughput-chart-refined" role="img" aria-label="Completed tasks over the most recent eight weeks">
-                {!throughput.length ? <div className="report-chart-empty"><Icon name="chart" size={18} /><strong>No delivery history yet</strong><span>Completed tasks will appear here as work ships.</span></div> : null}
-                {throughput.map((item) => {
+                {!hasThroughputActivity ? (
+                  <div className="report-chart-empty">
+                    <Icon name="chart" size={18} />
+                    <strong>{throughput.length ? 'No completed tasks in this period' : 'No delivery history yet'}</strong>
+                    <span>{throughput.length ? 'The chart will fill in when the team completes tasks.' : 'Completed tasks will appear here as work ships.'}</span>
+                  </div>
+                ) : throughput.map((item) => {
                   const value = Number(item.completed || 0)
                   return (
                     <div className="throughput-column" key={item.week}>
