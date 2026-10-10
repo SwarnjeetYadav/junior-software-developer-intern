@@ -26,7 +26,8 @@ function readStoredUser() {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(readStoredUser)
   const [demoMode, setDemoMode] = useState(false)
-  const [authLoading, setAuthLoading] = useState(() => Boolean(localStorage.getItem('teamflow_token')))
+  // A valid cached profile is enough to render the shell immediately. /auth/me revalidates in the background.
+  const [authLoading, setAuthLoading] = useState(false)
 
   useEffect(() => {
     let cancelled = false
