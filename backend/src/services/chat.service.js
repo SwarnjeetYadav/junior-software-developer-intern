@@ -49,11 +49,12 @@ async function validateContext({ projectId, userId, replyToId, taskId, mentions 
   return validMentionIds
 }
 
-export async function listProjectMessages({ projectId, userId, role, limit = 100 }) {
+export async function listProjectMessages({ projectId, userId, role, limit = 60 }) {
   await ensureProjectMember(projectId, userId, role)
-  const safeLimit = Math.min(Math.max(Number(limit) || 100, 1), 100)
+  const safeLimit = Math.min(Math.max(Number(limit) || 60, 1), 60)
 
   return ProjectMessage.find({ projectId })
+    .select('projectId userId message createdAt replyToId taskId mentions reactions')
     .sort({ createdAt: -1 })
     .limit(safeLimit)
     .populate('userId', 'name email role')
