@@ -81,7 +81,7 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
         </div>
       </header>
 
-      {loading ? <div className="workspace-inline-status"><span className="status-spinner" />Updating live project metrics…</div> : null}
+      {loading ? <div className="workspace-inline-status" role="status" aria-live="polite"><span className="status-spinner" aria-hidden="true" />Updating live project metrics…</div> : null}
       {error ? <div className="workspace-error-banner">{error}</div> : null}
 
       {selectedProject ? (
@@ -116,7 +116,8 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
                 <div><span className="section-kicker">Throughput</span><h3>Delivery rhythm</h3><p>Completed tasks over the most recent eight-week window.</p></div>
                 <span className="surface-caption">8 weeks</span>
               </div>
-              <div className="throughput-chart throughput-chart-refined">
+              <div className="throughput-chart throughput-chart-refined" role="img" aria-label="Completed tasks over the most recent eight weeks">
+                {!throughput.length ? <div className="report-chart-empty"><Icon name="chart" size={18} /><strong>No delivery history yet</strong><span>Completed tasks will appear here as work ships.</span></div> : null}
                 {throughput.map((item) => {
                   const value = Number(item.completed || 0)
                   return (
@@ -168,7 +169,7 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
                   <span>{insight.action || 'Review the affected work.'}</span>
                 </button>
               ))}
-              {!insights.length ? <div className="empty-state">No actionable signals are active for this project.</div> : null}
+              {!insights.length ? <div className="report-insights-empty"><Icon name="check-circle" size={18} /><strong>No active signals</strong><span>There are no actionable issues to highlight for this project right now.</span></div> : null}
             </div>
           </section>
         </>
