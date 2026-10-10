@@ -202,7 +202,7 @@ test('demo workspace navigation and task creation remain functional', async ({ p
   await page.getByRole('button', { name: /My Tasks/ }).click()
   await page.getByRole('button', { name: /Create task/i }).click()
   await page.getByLabel('Task title').fill('Browser regression task')
-  await page.getByRole('button', { name: 'Create task' }).click()
+  await page.getByRole('button', { name: 'Create task', exact: true }).click()
   await expect(page.getByText('Browser regression task')).toBeVisible()
 })
 
@@ -213,7 +213,7 @@ test('live project workspace exposes board, calendar, dependencies and insights'
 
   await page.getByRole('button', { name: 'Projects', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Anvaya Web App' })).toBeVisible()
+  await expect(page.locator('.project-workspace').getByRole('heading', { name: 'Anvaya Web App' })).toBeVisible()
 
   await page.getByRole('tab', { name: 'Board' }).click()
   await expect(page.getByRole('heading', { name: /Build live task board/i })).toBeVisible()
@@ -240,7 +240,7 @@ test('live Team view supports member management, invitations and floating chat',
   await page.getByRole('button', { name: 'Team', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Manage your project team' })).toBeVisible()
 
-  await page.getByPlaceholder('Search name or email...').fill('Priya')
+  await page.getByLabel('Search users to add').fill('Priya')
   await expect(page.getByText('Priya Shah')).toBeVisible()
   await page.getByRole('button', { name: 'Invite', exact: true }).click()
   await expect(page.getByText(/Priya Shah was invited/i)).toBeVisible()
@@ -267,7 +267,7 @@ test('global command palette and reports use live project intelligence', async (
   await page.keyboard.press('Escape')
   await page.getByRole('button', { name: 'Reports', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Reports' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Project analytics' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Project performance' })).toBeVisible()
   await expect(page.getByText('Completion rate')).toBeVisible()
   await expect(page.getByText('50%')).toBeVisible()
 })
