@@ -56,6 +56,29 @@ function formatActivity(item) {
   return item.action.replaceAll('_', ' ').toLowerCase()
 }
 
+const WORKSPACE_CACHE_KEY = 'anvaya_workspace_cache_v3'
+const WORKSPACE_CACHE_TTL = 1000 * 60 * 30
+
+function readWorkspaceCache() {
+  try {
+    const raw = localStorage.getItem(WORKSPACE_CACHE_KEY)
+    if (!raw) return null
+    const cached = JSON.parse(raw)
+    if (!cached?.savedAt || Date.now() - cached.savedAt > WORKSPACE_CACHE_TTL) return null
+    return cached.state || null
+  } catch {
+    return null
+  }
+}
+
+function writeWorkspaceCache(state) {
+  try {
+    localStorage.setItem(WORKSPACE_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), state }))
+  } catch {
+    // Cache is an optimization only.
+  }
+}
+
 function mapProject(project, projectTasks, projectMembers, index) {
   const totalTasks = projectTasks.length
   const completedTasks = projectTasks.filter((task) => task.statusValue === 'COMPLETED').length
@@ -73,7 +96,8 @@ function mapProject(project, projectTasks, projectMembers, index) {
 
 export function useTeamflowData(enabled) {
   const [refreshKey, setRefreshKey] = useState(0)
-  const [state, setState] = useState({
+  const [state, setState] = useState(() => ({
+    ...(readWorkspaceCache() || {}),
     loading: false,
     connected: false,
     error: '',
@@ -85,7 +109,7 @@ export function useTeamflowData(enabled) {
     activity: [],
     notifications: [],
     invitations: [],
-  })
+  }))
 
   const refresh = useCallback(() => setRefreshKey((value) => value + 1), [])
 
@@ -169,7 +193,7 @@ export function useTeamflowData(enabled) {
         )
 
         if (!cancelled) {
-          setState({
+          const nextState = {
             loading: false,
             connected: true,
             error: '',
@@ -181,11 +205,13 @@ export function useTeamflowData(enabled) {
             activity: (activityResult.data || []).map(mapActivity),
             notifications: (notificationResult.data || []).map((item) => ({ ...item, unread: !item.readAt })),
             invitations: invitationResult.data || [],
-          })
+          }
+          setState(nextState)
+          writeWorkspaceCache(nextState)
         }
       } catch (error) {
         if (!cancelled) {
-          setState((current) => ({ ...current, loading: false, connected: false, error: error.message }))
+          setState((current) => ({ ...current, loading: false, error: current.connected ? '' : error.message }))
         }
       }
     }
