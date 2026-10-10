@@ -88,7 +88,7 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
         <>
           <div className="reports-kpi-grid">
             <article className="reports-kpi reports-kpi-primary">
-              <div className="reports-kpi-label"><span>Completion</span><Icon name="chart" size={15} /></div>
+              <div className="reports-kpi-label"><span>Completion rate</span><Icon name="chart" size={15} /></div>
               <strong>{percent(analytics?.completionRate)}%</strong>
               <div className="reports-progress"><i style={{ width: percent(analytics?.completionRate) + '%' }} /></div>
               <small>{analytics?.completedTasks || 0} of {analytics?.totalTasks || 0} tracked tasks complete</small>
