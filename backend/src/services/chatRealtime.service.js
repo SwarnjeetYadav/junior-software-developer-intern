@@ -14,7 +14,7 @@ export function subscribeProjectChat(projectId, response) {
 export function publishProjectChatMessage(projectId, messageId) {
   const clients = clientsByProject.get(String(projectId))
   if (!clients?.size) return
-  const payload = 'event: chat-message\\ndata: ' + JSON.stringify({ projectId: String(projectId), messageId: String(messageId) }) + '\\n\\n'
+  const payload = 'event: chat-message\ndata: ' + JSON.stringify({ projectId: String(projectId), messageId: String(messageId) }) + '\n\n'
   for (const response of clients) {
     if (response.destroyed || response.writableEnded) {
       clients.delete(response)
