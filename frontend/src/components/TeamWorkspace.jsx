@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Avatar from './Avatar'
 import Badge from './Badge'
 import Icon from './Icon'
@@ -132,6 +132,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
   const [message, setMessage] = useState('')
 
   const [chat, setChat] = useState([])
+  const chatMessagesRef = useRef(null)
   const [chatLoading, setChatLoading] = useState(false)
   const [chatMessage, setChatMessage] = useState('')
   const [chatSending, setChatSending] = useState(false)
@@ -237,11 +238,19 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
     loadChat({ preserveUnread: true, silent: cached.length > 0 })
 
     const interval = window.setInterval(() => {
-      loadChat({ preserveUnread: true, silent: true })
-    }, 12000)
+      if (document.visibilityState === 'visible') {
+        loadChat({ preserveUnread: true, silent: true })
+      }
+    }, chatOpen ? 2500 : 6000)
 
     return () => window.clearInterval(interval)
-  }, [projectId, loadChat])
+  }, [projectId, loadChat, chatOpen])
+
+  useEffect(() => {
+    const container = chatMessagesRef.current
+    if (!container) return
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+  }, [chat.length, chatOpen, chatFullscreen])
 
   useEffect(() => {
     if (!projectId || !canManage) {
@@ -683,7 +692,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
                   <Icon name="send" size={16} />
                 </button>
               </form>
-              <div className="team-chat-drawer-footer">Press Esc to minimize · Auto-refresh every 8 seconds</div>
+              <div className="team-chat-drawer-footer">Press Esc to minimize · Checks for new messages every 2.5 seconds</div>
             </aside>
           )}
         </>
