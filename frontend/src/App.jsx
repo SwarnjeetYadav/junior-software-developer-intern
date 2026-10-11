@@ -85,7 +85,7 @@ export default function App() {
 
   useEffect(() => {
     const currentPath = window.location.pathname
-    if (currentPath === '/privacy-policy' || currentPath === '/terms-and-conditions' || currentPath === '/404') return
+    if (currentPath === '/privacy-policy' || currentPath === '/terms-and-conditions' || currentPath === '/404' || (currentPath !== '/auth/login' && !Object.values(ROUTES).includes(currentPath))) return
     if (authLoading) return
 
     if (!user) {
