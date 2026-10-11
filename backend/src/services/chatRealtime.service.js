@@ -17,7 +17,6 @@ export function configureChatRealtime(httpServer) {
       credentials: false,
     },
     transports: ['websocket', 'polling'],
-    connectionStateRecovery: { maxDisconnectionDuration: 2 * 60 * 1000 },
   })
 
   io.use(async (socket, next) => {
