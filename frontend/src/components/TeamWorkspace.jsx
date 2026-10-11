@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Avatar from './Avatar'
 import Badge from './Badge'
 import Icon from './Icon'
-import { api } from '../lib/api'
+import { api, CHAT_SOCKET_URL } from '../lib/api'
+import { io } from 'socket.io-client'
 
 const ROLE_OPTIONS = [
   ['PROJECT_MANAGER', 'Project Manager'],
@@ -133,6 +134,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
 
   const [chat, setChat] = useState([])
   const chatMessagesRef = useRef(null)
+  const chatIdsRef = useRef(new Set())
   const [chatLoading, setChatLoading] = useState(false)
   const [chatMessage, setChatMessage] = useState('')
   const [chatSending, setChatSending] = useState(false)
@@ -233,55 +235,103 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
 
   useEffect(() => {
     if (!projectId) return undefined
+
     const cached = readChatCache(projectId)
+    chatIdsRef.current = new Set(cached.map((item) => String(item._id)))
     setChat(cached)
     loadChat({ preserveUnread: true, silent: cached.length > 0 })
 
-    let cancelled = false
-    let controller
-    let retryTimer
-    const connect = async () => {
-      controller = new AbortController()
-      try {
-        const token = localStorage.getItem('teamflow_token')
-        const response = await fetch(api.projectChatEventsUrl(projectId), {
-          headers: token ? { Authorization: 'Bearer ' + token } : {},
-          signal: controller.signal,
-        })
-        if (!response.ok || !response.body) throw new Error('Chat connection unavailable')
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
-        let buffer = ''
-        while (!cancelled) {
-          const { value, done } = await reader.read()
-          if (done) break
-          buffer += decoder.decode(value, { stream: true })
-          const frames = buffer.split('\n\n')
-          buffer = frames.pop() || ''
-          for (const frame of frames) {
-            if (frame.includes('event: chat-message')) {
-              loadChat({ preserveUnread: true, silent: true })
-            }
+    const token = localStorage.getItem('teamflow_token')
+    if (!token) return undefined
+
+    const socket = io(CHAT_SOCKET_URL, {
+      auth: { token },
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 5000,
+      timeout: 10000,
+    })
+
+    const joinProject = () => {
+      socket.emit('project:join', { projectId }, (result) => {
+        if (!result?.ok) setError(result?.message || 'Unable to connect to project chat')
+      })
+    }
+
+    const receiveMessage = (incoming) => {
+      if (!incoming?._id) return
+      const id = String(incoming._id)
+      const isNew = !chatIdsRef.current.has(id)
+      chatIdsRef.current.add(id)
+
+      setChat((current) => {
+        const existingIndex = current.findIndex((item) => String(item._id) === id)
+        let next
+        if (existingIndex >= 0) {
+          next = current.map((item) => String(item._id) === id ? { ...item, ...incoming, pending: false } : item)
+        } else {
+          const pendingIndex = current.findIndex((item) =>
+            item.pending
+            && String(item.userId?._id) === String(incoming.userId?._id)
+            && item.message === incoming.message,
+          )
+          if (pendingIndex >= 0) {
+            next = current.map((item, index) => index === pendingIndex ? { ...incoming, pending: false } : item)
+          } else {
+            next = [...current, incoming]
           }
         }
-      } catch (error) {
-        if (!cancelled && error.name !== 'AbortError') console.warn('Team chat live connection reconnecting')
-      } finally {
-        if (!cancelled) retryTimer = window.setTimeout(connect, 1500)
+        next.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+        writeChatCache(projectId, next)
+        return next
+      })
+
+      if (isNew && String(incoming.userId?._id) !== String(currentUserId)) {
+        if (chatOpen) {
+          setStoredReadAt(projectId, new Date(incoming.createdAt).getTime())
+          setChatUnread(0)
+        } else {
+          setChatUnread((count) => count + 1)
+        }
       }
     }
-    connect()
-    return () => {
-      cancelled = true
-      controller?.abort()
-      window.clearTimeout(retryTimer)
+
+    const receiveReaction = (incoming) => {
+      if (!incoming?._id) return
+      setChat((current) => {
+        const next = current.map((item) => String(item._id) === String(incoming._id) ? { ...item, ...incoming } : item)
+        writeChatCache(projectId, next)
+        return next
+      })
     }
-  }, [projectId, loadChat])
+
+    socket.on('connect', joinProject)
+    socket.on('chat:message', receiveMessage)
+    socket.on('chat:reaction', receiveReaction)
+    socket.on('connect_error', (connectionError) => {
+      console.warn('Team chat realtime connection unavailable:', connectionError.message)
+    })
+
+    return () => {
+      socket.emit('project:leave', { projectId })
+      socket.off('connect', joinProject)
+      socket.off('chat:message', receiveMessage)
+      socket.off('chat:reaction', receiveReaction)
+      socket.disconnect()
+    }
+  }, [projectId, loadChat, currentUserId, chatOpen])
+
+
 
   useEffect(() => {
-    const container = chatMessagesRef.current
-    if (!container) return
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+    const frame = window.requestAnimationFrame(() => {
+      const container = chatMessagesRef.current
+      if (!container) return
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+    })
+    return () => window.cancelAnimationFrame(frame)
   }, [chat.length, chatOpen, chatFullscreen])
 
   useEffect(() => {
@@ -678,7 +728,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
                 <small>Messages are shared with this project team.</small>
               </div>
 
-              <div className="team-chat-drawer-messages">
+              <div className="team-chat-drawer-messages" ref={chatMessagesRef}>
                 <ChatMessages messages={chat} currentUserId={currentUserId} loading={chatLoading} onReply={(item) => setChatReplyTo(item)} onReact={reactChat} />
               </div>
 
@@ -724,7 +774,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
                   <Icon name="send" size={16} />
                 </button>
               </form>
-              <div className="team-chat-drawer-footer">Press Esc to minimize · Checks for new messages every 2.5 seconds</div>
+              <div className="team-chat-drawer-footer">Press Esc to minimize · Live updates enabled</div>
             </aside>
           )}
         </>
