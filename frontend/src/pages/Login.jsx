@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Icon from '../components/Icon'
 import { useAuth } from '../auth/AuthProvider'
+import CookieConsent from '../components/CookieConsent'
 
 export default function Login() {
   const { login, register, enterDemo } = useAuth()
@@ -64,10 +65,10 @@ export default function Login() {
 
         <form className="login-form" onSubmit={submit}>
           {isRegister ? (
-            <label className="field"><span>Full name</span><input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" autoComplete="name" required /></label>
+            <label className="field"><span>Full name</span><input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" autoComplete="name" minLength="2" maxLength="100" required /></label>
           ) : null}
-          <label className="field"><span>Email</span><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" required /></label>
-          <label className="field"><span>Password</span><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete={isRegister ? 'new-password' : 'current-password'} minLength="8" required /></label>
+          <label className="field"><span>Email</span><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" maxLength="254" required /></label>
+          <label className="field"><span>Password</span><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete={isRegister ? 'new-password' : 'current-password'} minLength="8" maxLength="128" required /></label>
           {isRegister ? (
             <label className="field"><span>Confirm password</span><input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter your password" autoComplete="new-password" minLength="8" required /></label>
           ) : null}
@@ -89,7 +90,8 @@ export default function Login() {
         </p>
       </section>
 
-      <div className="login-footer"><span>Anvaya</span><span>Designed for focused team execution</span></div>
+      <div className="login-footer"><span>Anvaya</span><span>Designed for focused team execution</span><nav className="login-legal-links" aria-label="Legal"><a href="/privacy-policy">Privacy Policy</a><a href="/terms-and-conditions">Terms &amp; Conditions</a></nav></div>
+      <CookieConsent />
     </div>
   )
 }
