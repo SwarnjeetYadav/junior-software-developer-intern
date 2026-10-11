@@ -324,9 +324,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
       socket.off('chat:reaction', receiveReaction)
       socket.disconnect()
     }
-  }, [projectId, currentUserId, chatOpen]
-
-
+  }, [projectId, currentUserId, chatOpen])
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
