@@ -11,6 +11,8 @@ import { GenericPage } from './pages'
 import { useAuth } from './auth/AuthProvider'
 import { useTeamflowData } from './hooks/useTeamflowData'
 import { api } from './lib/api'
+import LegalPage from './pages/LegalPage'
+import CookieConsent from './components/CookieConsent'
 
 const ROUTES = {
   Overview: '/',
@@ -82,6 +84,8 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    const currentPath = window.location.pathname
+    if (currentPath === '/privacy-policy' || currentPath === '/terms-and-conditions' || currentPath === '/404') return
     if (authLoading) return
 
     if (!user) {
@@ -91,12 +95,18 @@ export default function App() {
       return
     }
 
-    if (window.location.pathname === '/auth/login' || !Object.values(ROUTES).includes(window.location.pathname)) {
+    if (window.location.pathname === '/auth/login') {
       window.history.replaceState({}, '', ROUTES[page] || '/')
       setPage((current) => Object.prototype.hasOwnProperty.call(ROUTES, current) ? current : 'Overview')
     }
   }, [user, authLoading, page])
 
+  const currentPath = window.location.pathname
+  if (currentPath === '/privacy-policy') return <LegalPage type="privacy" />
+  if (currentPath === '/terms-and-conditions') return <LegalPage type="terms" />
+  if (currentPath === '/404' || (currentPath !== '/auth/login' && !Object.values(ROUTES).includes(currentPath))) {
+    return <div className="not-found-page"><span className="eyebrow">ANVAYA · 404</span><h1>That page has wandered off.</h1><p>The link may be outdated, or the page may have moved.</p><a className="primary-button primary-button-dark" href="/">Return to Anvaya</a><CookieConsent /></div>
+  }
   if (authLoading) return <LoadingScreen />
   if (!user) return <Login />
 
@@ -148,6 +158,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <CookieConsent />
       <Sidebar page={page} onNavigate={navigate} open={sidebarOpen} onClose={() => setSidebarOpen(false)} user={user} liveData={activeData} />
 
       <div className="app-main">
