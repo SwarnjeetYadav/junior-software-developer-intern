@@ -46,11 +46,11 @@ export default function CreateProjectModal({ open, onClose, onCreate }) {
         </div>
 
         <form onSubmit={submit}>
-          <label className="field"><span>Project name</span><input autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Product launch" /></label>
-          <label className="field"><span>Description</span><textarea className="project-textarea" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="What is this project about?" rows="3" /></label>
+          <label className="field"><span>Project name</span><input autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Product launch" minLength="2" maxLength="120" required /></label>
+          <label className="field"><span>Description</span><textarea className="project-textarea" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="What is this project about?" rows="3" maxLength="4000" /></label>
           <div className="field-grid">
-            <label className="field"><span>Start date</span><input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label>
-            <label className="field"><span>Due date</span><input type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} /></label>
+            <label className="field"><span>Start date</span><input type="date" value={startDate} max={dueDate || undefined} onChange={(event) => setStartDate(event.target.value)} /></label>
+            <label className="field"><span>Due date</span><input type="date" value={dueDate} min={startDate || undefined} onChange={(event) => setDueDate(event.target.value)} /></label>
           </div>
           {error ? <div className="login-error">{error}</div> : null}
           <div className="modal-actions"><button type="button" className="ghost-dark-button" onClick={onClose}>Cancel</button><button type="submit" className="primary-button primary-button-dark"><Icon name="plus" size={15} /> Create project</button></div>
