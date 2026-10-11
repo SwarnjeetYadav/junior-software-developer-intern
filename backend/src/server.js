@@ -22,7 +22,6 @@ async function start() {
     const forceExit = setTimeout(() => process.exit(1), 10_000)
     forceExit.unref()
     await closeChatRealtime()
-    await new Promise((resolve) => server.close(resolve))
     await mongoose.disconnect()
     clearTimeout(forceExit)
     process.exit(0)
