@@ -237,14 +237,46 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
     setChat(cached)
     loadChat({ preserveUnread: true, silent: cached.length > 0 })
 
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        loadChat({ preserveUnread: true, silent: true })
+    let cancelled = false
+    let controller
+    let retryTimer
+    const connect = async () => {
+      controller = new AbortController()
+      try {
+        const token = localStorage.getItem('teamflow_token')
+        const response = await fetch(api.projectChatEventsUrl(projectId), {
+          headers: token ? { Authorization: 'Bearer ' + token } : {},
+          signal: controller.signal,
+        })
+        if (!response.ok || !response.body) throw new Error('Chat connection unavailable')
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+        while (!cancelled) {
+          const { value, done } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+          const frames = buffer.split('\\n\\n')
+          buffer = frames.pop() || ''
+          for (const frame of frames) {
+            if (frame.includes('event: chat-message')) {
+              loadChat({ preserveUnread: true, silent: true })
+            }
+          }
+        }
+      } catch (error) {
+        if (!cancelled && error.name !== 'AbortError') console.warn('Team chat live connection reconnecting')
+      } finally {
+        if (!cancelled) retryTimer = window.setTimeout(connect, 1500)
       }
-    }, chatOpen ? 2500 : 6000)
-
-    return () => window.clearInterval(interval)
-  }, [projectId, loadChat, chatOpen])
+    }
+    connect()
+    return () => {
+      cancelled = true
+      controller?.abort()
+      window.clearTimeout(retryTimer)
+    }
+  }, [projectId, loadChat])
 
   useEffect(() => {
     const container = chatMessagesRef.current
