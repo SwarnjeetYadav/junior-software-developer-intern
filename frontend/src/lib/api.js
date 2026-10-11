@@ -1,4 +1,5 @@
 const API_BASE = import.meta.env.API_BASE_URL || 'https://anvaya-api-m4pu.onrender.com/api/v1'
+export const CHAT_SOCKET_URL = new URL(API_BASE, window.location.origin).origin
 
 async function request(path, options = {}) {
   const token = localStorage.getItem('teamflow_token')
@@ -38,7 +39,6 @@ export const api = {
   updateMemberRole: (projectId, userId, projectRole) => request('/projects/' + projectId + '/members/' + userId, { method: 'PATCH', body: JSON.stringify({ projectRole }) }),
   removeMember: (projectId, userId) => request('/projects/' + projectId + '/members/' + userId, { method: 'DELETE' }),
   listProjectChat: (projectId) => request('/projects/' + projectId + '/chat'),
-  projectChatEventsUrl: (projectId) => API_BASE + '/projects/' + projectId + '/chat/events',
   sendProjectChat: (projectId, message, context = {}) => request('/projects/' + projectId + '/chat', { method: 'POST', body: JSON.stringify({ message, replyToId: context.replyToId || null, taskId: context.taskId || null, mentions: context.mentions || [] }) }),
   reactProjectChat: (projectId, messageId, emoji) => request('/projects/' + projectId + '/chat/' + messageId + '/reactions', { method: 'POST', body: JSON.stringify({ emoji }) }),
   listProjectActivity: (projectId) => request('/projects/' + projectId + '/activity'),
