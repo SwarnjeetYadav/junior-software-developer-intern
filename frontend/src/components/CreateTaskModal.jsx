@@ -165,7 +165,7 @@ export default function CreateTaskModal({
             </label>
           ) : null}
 
-          <label className="field"><span>Task title</span><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. Finalize sprint review report" maxLength={180} /></label>
+          <label className="field"><span>Task title</span><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. Finalize sprint review report" minLength={2} maxLength={180} required /></label>
           <label className="field"><span>Description <small className="field-optional">Optional</small></span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Add context, expected outcome, or acceptance notes..." maxLength={4000} rows={3} /></label>
 
           <div className="field-grid">
