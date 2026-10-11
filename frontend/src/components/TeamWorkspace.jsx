@@ -235,11 +235,14 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
 
   useEffect(() => {
     if (!projectId) return undefined
-
     const cached = readChatCache(projectId)
     chatIdsRef.current = new Set(cached.map((item) => String(item._id)))
     setChat(cached)
     loadChat({ preserveUnread: true, silent: cached.length > 0 })
+  }, [projectId, loadChat])
+
+  useEffect(() => {
+    if (!projectId) return undefined
 
     const token = localStorage.getItem('teamflow_token')
     if (!token) return undefined
@@ -321,7 +324,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
       socket.off('chat:reaction', receiveReaction)
       socket.disconnect()
     }
-  }, [projectId, loadChat, currentUserId, chatOpen])
+  }, [projectId, currentUserId, chatOpen]
 
 
 
