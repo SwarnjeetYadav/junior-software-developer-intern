@@ -20,7 +20,7 @@ export const events = asyncHandler(async (req, res) => {
 
 export const send = asyncHandler(async (req, res) => {
   const data = await sendProjectMessage({ projectId: req.params.projectId, userId: req.user.id, role: req.user.role, message: req.body.message, replyToId: req.body.replyToId, taskId: req.body.taskId, mentions: req.body.mentions })
-  publishProjectChatMessage(req.params.projectId, data._id)
+  publishProjectChatMessage(req.params.projectId, data)
   res.status(201).json({ success: true, data })
 })
 

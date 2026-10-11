@@ -260,7 +260,25 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
           buffer = frames.pop() || ''
           for (const frame of frames) {
             if (frame.includes('event: chat-message')) {
-              loadChat({ preserveUnread: true, silent: true })
+              const dataLine = frame.split('\n').find((line) => line.startsWith('data:'))
+              if (!dataLine) continue
+              try {
+                const event = JSON.parse(dataLine.slice(5).trim())
+                if (event.message) {
+                  setChat((items) => {
+                    if (items.some((item) => String(item._id) === String(event.message._id))) return items
+                    const next = [...items, event.message].slice(-60)
+                    writeChatCache(projectId, next)
+                    return next
+                  })
+                  setStoredReadAt(projectId, Date.now())
+                  setChatUnread(0)
+                } else {
+                  loadChat({ preserveUnread: true, silent: true })
+                }
+              } catch {
+                loadChat({ preserveUnread: true, silent: true })
+              }
             }
           }
         }
@@ -280,8 +298,11 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
 
   useEffect(() => {
     const container = chatMessagesRef.current
-    if (!container) return
-    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+    if (!container || !chatOpen) return undefined
+    const frame = window.requestAnimationFrame(() => {
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+    })
+    return () => window.cancelAnimationFrame(frame)
   }, [chat.length, chatOpen, chatFullscreen])
 
   useEffect(() => {
@@ -678,7 +699,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
                 <small>Messages are shared with this project team.</small>
               </div>
 
-              <div className="team-chat-drawer-messages">
+              <div className="team-chat-drawer-messages" ref={chatMessagesRef}>
                 <ChatMessages messages={chat} currentUserId={currentUserId} loading={chatLoading} onReply={(item) => setChatReplyTo(item)} onReact={reactChat} />
               </div>
 
