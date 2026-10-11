@@ -2828,3 +2828,19 @@ html[data-density='compact'] .task-table td{padding:10px 9px}
 
 .login-legal-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}.login-legal-links a{font-size:12px;color:#5c50cb;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:620px){.login-footer{gap:8px;flex-wrap:wrap;justify-content:center}.login-legal-links{flex-basis:100%}}
+
+
+/* Team chat readability and responsive conversation flow */
+.team-chat-drawer-title strong{font-size:15px}
+.team-chat-drawer-title span{font-size:11px}
+.team-chat-drawer-meta{font-size:12px}
+.team-chat-drawer-meta small{font-size:10px}
+.team-chat-drawer-messages{scroll-behavior:smooth;overscroll-behavior:contain}
+.team-chat-message-head strong{font-size:12px}
+.team-chat-message-head span{font-size:10px}
+.team-chat-message-body p{font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.chat-message-actions button{font-size:11px}
+.team-chat-drawer-form input{font-size:13px;min-height:46px}
+.team-chat-drawer-footer{font-size:9px}
+.chat-reply-preview,.chat-task-context,.chat-mentions{font-size:11px}
+@media (max-width:640px){.team-chat-drawer-message-body p{font-size:14px}.team-chat-drawer-form input{font-size:14px}}

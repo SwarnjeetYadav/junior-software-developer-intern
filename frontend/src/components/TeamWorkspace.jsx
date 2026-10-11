@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Avatar from './Avatar'
 import Badge from './Badge'
 import Icon from './Icon'
@@ -132,6 +132,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
   const [message, setMessage] = useState('')
 
   const [chat, setChat] = useState([])
+  const chatMessagesRef = useRef(null)
   const [chatLoading, setChatLoading] = useState(false)
   const [chatMessage, setChatMessage] = useState('')
   const [chatSending, setChatSending] = useState(false)
@@ -236,12 +237,52 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
     setChat(cached)
     loadChat({ preserveUnread: true, silent: cached.length > 0 })
 
-    const interval = window.setInterval(() => {
-      loadChat({ preserveUnread: true, silent: true })
-    }, 12000)
-
-    return () => window.clearInterval(interval)
+    let cancelled = false
+    let controller
+    let retryTimer
+    const connect = async () => {
+      controller = new AbortController()
+      try {
+        const token = localStorage.getItem('teamflow_token')
+        const response = await fetch(api.projectChatEventsUrl(projectId), {
+          headers: token ? { Authorization: 'Bearer ' + token } : {},
+          signal: controller.signal,
+        })
+        if (!response.ok || !response.body) throw new Error('Chat connection unavailable')
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+        while (!cancelled) {
+          const { value, done } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+          const frames = buffer.split('\n\n')
+          buffer = frames.pop() || ''
+          for (const frame of frames) {
+            if (frame.includes('event: chat-message')) {
+              loadChat({ preserveUnread: true, silent: true })
+            }
+          }
+        }
+      } catch (error) {
+        if (!cancelled && error.name !== 'AbortError') console.warn('Team chat live connection reconnecting')
+      } finally {
+        if (!cancelled) retryTimer = window.setTimeout(connect, 1500)
+      }
+    }
+    connect()
+    return () => {
+      cancelled = true
+      controller?.abort()
+      window.clearTimeout(retryTimer)
+    }
   }, [projectId, loadChat])
+
+  useEffect(() => {
+    const container = chatMessagesRef.current
+    if (!container) return
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+  }, [chat.length, chatOpen, chatFullscreen])
 
   useEffect(() => {
     if (!projectId || !canManage) {
@@ -683,7 +724,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
                   <Icon name="send" size={16} />
                 </button>
               </form>
-              <div className="team-chat-drawer-footer">Press Esc to minimize · Auto-refresh every 8 seconds</div>
+              <div className="team-chat-drawer-footer">Press Esc to minimize · Checks for new messages every 2.5 seconds</div>
             </aside>
           )}
         </>
