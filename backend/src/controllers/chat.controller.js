@@ -12,9 +12,9 @@ export const events = asyncHandler(async (req, res) => {
   res.status(200)
   res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' })
   res.flushHeaders?.()
-  res.write('event: connected\\ndata: {}\\n\\n')
+  res.write('event: connected\ndata: {}\n\n')
   const unsubscribe = subscribeProjectChat(req.params.projectId, res)
-  const heartbeat = setInterval(() => { if (!res.destroyed && !res.writableEnded) res.write(': keep-alive\\n\\n') }, 25000)
+  const heartbeat = setInterval(() => { if (!res.destroyed && !res.writableEnded) res.write(': keep-alive\n\n') }, 25000)
   req.on('close', () => { clearInterval(heartbeat); unsubscribe() })
 })
 
