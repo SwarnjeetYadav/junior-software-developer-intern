@@ -86,19 +86,6 @@ export async function sendProjectMessage({ projectId, userId, role, message, rep
     reactions: [],
   })
 
-  const response = {
-    ...created.toObject(),
-    userId: {
-      _id: userId,
-      name: null,
-      email: null,
-      role,
-    },
-    replyToId: null,
-    mentions: [],
-    taskId: null,
-  }
-
   // Return the message immediately; secondary audit/notification work is intentionally non-blocking.
   setImmediate(async () => {
     try {
