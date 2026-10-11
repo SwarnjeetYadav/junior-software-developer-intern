@@ -256,7 +256,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
           const { value, done } = await reader.read()
           if (done) break
           buffer += decoder.decode(value, { stream: true })
-          const frames = buffer.split('\\n\\n')
+          const frames = buffer.split('\n\n')
           buffer = frames.pop() || ''
           for (const frame of frames) {
             if (frame.includes('event: chat-message')) {
