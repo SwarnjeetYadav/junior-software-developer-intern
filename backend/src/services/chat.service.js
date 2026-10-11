@@ -125,7 +125,12 @@ export async function sendProjectMessage({ projectId, userId, role, message, rep
     }
   })
 
-  return response
+  return ProjectMessage.findById(created._id)
+    .populate('userId', 'name email role')
+    .populate('replyToId', 'userId message createdAt')
+    .populate('mentions', 'name email')
+    .populate('taskId', 'title status priority')
+    .lean()
 }
 
 export async function toggleProjectMessageReaction({ projectId, messageId, userId, role, emoji }) {
