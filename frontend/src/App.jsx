@@ -31,7 +31,7 @@ function pageFromPath(pathname) {
 function LoadingScreen() {
   return (
     <div className="auth-loading-screen" role="status" aria-live="polite">
-      <div className="youtube-skeleton-brand"><span>AN</span></div>
+      <div className="youtube-skeleton-brand"><span>KE</span></div>
       <div className="youtube-skeleton-title" />
       <div className="youtube-skeleton-subtitle" />
     </div>
@@ -105,7 +105,7 @@ export default function App() {
   if (currentPath === '/privacy-policy') return <LegalPage type="privacy" />
   if (currentPath === '/terms-and-conditions') return <LegalPage type="terms" />
   if (currentPath === '/404' || (currentPath !== '/auth/login' && !Object.values(ROUTES).includes(currentPath))) {
-    return <div className="not-found-page"><span className="eyebrow">ANVAYA · 404</span><h1>That page has wandered off.</h1><p>The link may be outdated, or the page may have moved.</p><a className="primary-button primary-button-dark" href="/">Return to Anvaya</a><CookieConsent /></div>
+    return <div className="not-found-page"><span className="eyebrow">KENDRAM · 404</span><h1>That page has wandered off.</h1><p>The link may be outdated, or the page may have moved.</p><a className="primary-button primary-button-dark" href="/">Return to Kendram</a><CookieConsent /></div>
   }
   if (authLoading) return <LoadingScreen />
   if (!user) return <Login />
