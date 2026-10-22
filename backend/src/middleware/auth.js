@@ -25,6 +25,7 @@ export const requireAuth = asyncHandler(async (req, _res, next) => {
     name: user.name,
     email: user.email,
     role: user.role,
+    displayName: user.displayName || '', avatarUrl: user.avatarUrl || '', bio: user.bio || '', location: user.location || '', timezone: user.timezone || 'Asia/Kolkata',
   }
 
   next()
