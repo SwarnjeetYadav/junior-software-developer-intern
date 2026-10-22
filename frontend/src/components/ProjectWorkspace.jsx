@@ -387,7 +387,7 @@ export default function ProjectWorkspace({
 
           <aside className="project-overview-side">
             <section className="workspace-card insight-panel">
-              <div className="workspace-card-head"><div><span className="section-kicker">Anvaya Insights</span><h3>Project health</h3><p>Rules-based delivery signals.</p></div><Badge color={insights[0]?.severity === 'HIGH' ? 'rose' : insights[0]?.severity === 'MEDIUM' ? 'amber' : 'green'}>{insights[0]?.signal || 'Healthy'}</Badge></div>
+              <div className="workspace-card-head"><div><span className="section-kicker">Kendram Insights</span><h3>Project health</h3><p>Rules-based delivery signals.</p></div><Badge color={insights[0]?.severity === 'HIGH' ? 'rose' : insights[0]?.severity === 'MEDIUM' ? 'amber' : 'green'}>{insights[0]?.signal || 'Healthy'}</Badge></div>
               <div className="insight-stack">
                 {insights.slice(0, 4).map((insight, index) => (
                   <button className="insight-card" type="button" key={insight.type || 'insight-' + index} onClick={() => {
