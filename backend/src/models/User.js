@@ -4,6 +4,11 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 80 },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    displayName: { type: String, trim: true, maxlength: 50, default: '' },
+    avatarUrl: { type: String, trim: true, maxlength: 2048, default: '' },
+    bio: { type: String, trim: true, maxlength: 240, default: '' },
+    location: { type: String, trim: true, maxlength: 80, default: '' },
+    timezone: { type: String, trim: true, maxlength: 80, default: 'Asia/Kolkata' },
     passwordHash: { type: String, required: true, select: false },
     role: {
       type: String,
