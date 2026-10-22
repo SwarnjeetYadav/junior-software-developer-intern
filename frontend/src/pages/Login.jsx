@@ -53,12 +53,12 @@ export default function Login() {
 
       <section className="login-card">
         <div className="login-brand">
-          <span className="brand-mark">AN</span>
-          <div><strong>Anvaya</strong><small>Smart project workspace</small></div>
+          <span className="brand-mark" aria-hidden="true">KE</span>
+          <div><strong>Kendram</strong><small>Project & team workspace</small></div>
         </div>
 
         <div className="login-copy">
-          <span className="eyebrow">{isRegister ? 'New to Anvaya' : 'Welcome back'}</span>
+          <span className="eyebrow">{isRegister ? 'New to Kendram' : 'Welcome back'}</span>
           <h1>{isRegister ? 'Create your workspace account.' : 'Work with clarity.'}</h1>
           <p>{isRegister ? 'Create an account to start managing tasks and projects.' : 'Sign in to manage projects, tasks, ownership, and team workload.'}</p>
         </div>
@@ -86,11 +86,11 @@ export default function Login() {
         <p className="login-note">
           {isRegister
             ? 'New accounts are created as Team Members. Project Manager/Admin access is controlled by the backend.'
-            : 'Demo mode uses local mock data. Sign in uses the Anvaya API.'}
+            : 'Demo mode uses local mock data. Sign in uses the Kendram API.'}
         </p>
       </section>
 
-      <div className="login-footer"><span>Anvaya</span><span>Designed for focused team execution</span><nav className="login-legal-links" aria-label="Legal"><a href="/privacy-policy">Privacy Policy</a><a href="/terms-and-conditions">Terms &amp; Conditions</a></nav></div>
+      <div className="login-footer"><span>Kendram</span><span>Designed for focused team execution</span><nav className="login-legal-links" aria-label="Legal"><a href="/privacy-policy">Privacy Policy</a><a href="/terms-and-conditions">Terms &amp; Conditions</a></nav></div>
       <CookieConsent />
     </div>
   )
