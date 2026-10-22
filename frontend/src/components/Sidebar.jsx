@@ -1,6 +1,6 @@
 import Icon from './Icon'
 import Avatar from './Avatar'
-import { currentUser, navItems } from '../data/teamflowMock'
+import { currentUser } from '../data/teamflowMock'
 
 function displayRole(role = '') {
   return role
@@ -12,65 +12,52 @@ function displayRole(role = '') {
 
 export default function Sidebar({ page, onNavigate, open, onClose, user, liveData }) {
   const displayUser = user || currentUser
-  const openTaskCount = liveData?.connected
-    ? liveData.tasks.filter((task) => task.assigneeId && String(task.assigneeId) === String(displayUser.id) && task.statusValue !== 'COMPLETED').length
-    : '…'
 
   return (
-    <aside className={'sidebar ' + (open ? 'sidebar-open' : '')}>
-      <div className="sidebar-top">
+    <aside className={'sidebar kendram-sidebar ' + (open ? 'sidebar-open' : '')}>
+      <div className="sidebar-top kendram-sidebar-top">
         <button className="brand" type="button" onClick={() => onNavigate('Overview')} aria-label="Go to overview">
-          <span className="brand-mark" aria-hidden="true">KE</span>
-          <span><strong>Kendram</strong><small>Team workspace</small></span>
+          <span className="brand-mark kendram-brand-mark" aria-hidden="true"><span /></span>
+          <span className="kendram-brand-name">Kendram</span>
         </button>
         <button className="icon-button sidebar-close" type="button" onClick={onClose} aria-label="Close navigation">
           <Icon name="close" size={19} />
         </button>
       </div>
 
-      <div className="workspace-switcher">
-        <span className="workspace-logo">P</span>
-        <span className="workspace-copy"><small>Workspace</small><strong>{liveData?.connected ? 'My Workspace' : 'Product Team'}</strong></span>
-        <span className="chevron">⌄</span>
-      </div>
-
-      <nav className="nav-groups" aria-label="Primary navigation">
-        <div className="nav-label">Workspace</div>
-        {navItems.slice(0, 5).map((item) => (
-          <button
-            key={item.label}
-            type="button"
-            className={'nav-item ' + (page === item.label ? 'nav-item-active' : '')}
-            onClick={() => { onNavigate(item.label); onClose() }}
-          >
-            <span className="nav-icon"><Icon name={item.icon} size={17} /></span>
-            <span>{item.label}</span>
-            {item.label === 'My Tasks' ? <span className="nav-count">{openTaskCount}</span> : null}
-          </button>
-        ))}
-
-        <div className="nav-label nav-label-spaced">Manage</div>
-        <button
-          type="button"
-          className={'nav-item ' + (page === 'Settings' ? 'nav-item-active' : '')}
-          onClick={() => { onNavigate('Settings'); onClose() }}
-        >
-          <span className="nav-icon"><Icon name="settings" size={17} /></span>
-          <span>Settings</span>
-        </button>
+      <nav className="nav-groups kendram-nav" aria-label="Primary navigation">
+        {[
+          { label: 'Dashboard', page: 'Overview', icon: 'home' },
+          { label: 'My Tasks', page: 'My Tasks', icon: 'check' },
+          { label: 'Projects', page: 'Projects', icon: 'folder' },
+          { label: 'Team', page: 'Team', icon: 'users' },
+          { label: 'Calendar', page: 'Calendar', icon: 'calendar' },
+          { label: 'Chat', page: 'Chat', icon: 'chat' },
+          { label: 'Reports', page: 'Reports', icon: 'chart' },
+          { label: 'Settings', page: 'Settings', icon: 'settings' },
+        ].map((item) => {
+          const active = item.page === page || (item.page === 'Chat' && page === 'Team')
+          return (
+            <button key={item.label} type="button" className={'nav-item kendram-nav-item ' + (active ? 'nav-item-active' : '')}
+              onClick={() => { onNavigate(item.page === 'Chat' ? 'Team' : item.page); onClose() }}
+              aria-current={active ? 'page' : undefined}>
+              <span className="nav-icon"><Icon name={item.icon} size={19} /></span>
+              <span className="kendram-nav-label">{item.label}</span>
+              {item.label === 'Chat' ? <span className="kendram-chat-badge">3</span> : null}
+            </button>
+          )
+        })}
       </nav>
 
-      <div className="sidebar-bottom">
-        <div className="sidebar-tip">
-          <div className="tip-icon"><Icon name="spark" size={16} /></div>
-          <div><strong>Smart assignment</strong><span>Balance workloads automatically.</span></div>
-        </div>
-
-        <div className="profile-mini">
-          <Avatar initials={displayUser.initials || displayUser.name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'AN'} color="violet" size="lg" />
-          <span><strong>{displayUser.name || currentUser.name}</strong><small>{displayRole(displayUser.role || currentUser.role)}</small></span>
-          <Icon name="settings" size={16} />
-        </div>
+      <div className="kendram-sidebar-footer">
+        <Avatar initials={displayUser.initials || displayUser.name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'SY'} color="violet" size="lg" />
+        <span className="kendram-profile-copy">
+          <strong>{displayUser.name || currentUser.name}</strong>
+          <small>{displayRole(displayUser.role || currentUser.role)}</small>
+        </span>
+        <button className="kendram-profile-settings" type="button" onClick={() => { onNavigate('Settings'); onClose() }} aria-label="Open Settings">
+          <Icon name="settings" size={17} />
+        </button>
       </div>
     </aside>
   )

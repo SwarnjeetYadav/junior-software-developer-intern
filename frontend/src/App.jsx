@@ -19,6 +19,7 @@ const ROUTES = {
   Projects: '/projects',
   'My Tasks': '/my-tasks',
   Team: '/team',
+  Calendar: '/calendar',
   Reports: '/reports',
   Settings: '/settings',
 }

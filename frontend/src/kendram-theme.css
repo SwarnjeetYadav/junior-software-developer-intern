@@ -123,3 +123,31 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   .login-card{width:min(100% - 28px,460px);padding:25px 22px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Reference-matched Kendram sidebar */
+.kendram-sidebar{width:240px;padding:22px 14px 15px;gap:0;background:linear-gradient(160deg,#172130 0%,#111a28 100%);border:1px solid rgba(255,255,255,.075);border-left:0;box-shadow:5px 0 22px rgba(16,24,38,.08)}
+.kendram-sidebar-top{padding:0 10px 27px;min-height:53px;justify-content:flex-start}
+.kendram-brand{gap:11px;min-width:0}
+.kendram-brand-mark{width:32px;height:32px;min-width:32px;border-radius:50%;box-shadow:none;background:transparent;overflow:visible}
+.kendram-brand-mark:before{width:15px;height:19px;left:2px;top:1px;border-radius:100% 100% 100% 0;background:#ef7658;transform:rotate(-36deg)}
+.kendram-brand-mark:after{width:14px;height:18px;right:0;top:10px;border-radius:100% 0 100% 100%;background:#e9a05f;transform:rotate(35deg)}
+.kendram-brand-mark span{position:absolute;z-index:1;left:9px;top:16px;width:13px;height:12px;background:#d9573f;border-radius:100% 100% 65% 65%;transform:rotate(2deg)}
+.kendram-brand-name{font-family:'Manrope',sans-serif;font-size:23px;font-weight:800;letter-spacing:-.055em;color:#fff;white-space:nowrap}
+.kendram-sidebar .sidebar-close{display:none}
+.kendram-nav{display:flex;flex-direction:column;gap:5px}
+.kendram-nav .nav-item{width:100%;min-height:43px;padding:0 12px;display:flex;align-items:center;gap:12px;border:0;border-radius:10px;color:#e0e4ec;background:transparent;font-size:14px;font-weight:500;text-align:left;transition:background .16s ease,color .16s ease,transform .16s ease}
+.kendram-nav .nav-item:hover{background:rgba(255,255,255,.075);color:#fff}
+.kendram-nav .nav-item-active{background:linear-gradient(105deg,#454b58,#3a414f);color:#fff;box-shadow:inset 0 1px rgba(255,255,255,.035)}
+.kendram-nav .nav-icon{width:20px;height:20px;display:grid;place-items:center;flex:0 0 20px;color:currentColor}
+.kendram-nav .nav-icon svg{width:19px;height:19px}
+.kendram-nav-label{flex:1}
+.kendram-chat-badge{display:grid;place-items:center;min-width:23px;height:23px;padding:0 6px;border-radius:999px;background:#f45b52;color:#fff;font-size:12px;font-weight:700;line-height:1;box-shadow:0 2px 6px rgba(244,91,82,.2)}
+.kendram-sidebar-footer{display:flex;align-items:center;gap:10px;margin-top:auto;padding:14px 6px 1px;border-top:1px solid rgba(255,255,255,.08)}
+.kendram-profile-copy{min-width:0;display:flex;flex:1;flex-direction:column;gap:3px}
+.kendram-profile-copy strong{overflow:hidden;color:#f6f7fa;font-size:12px;text-overflow:ellipsis;white-space:nowrap}
+.kendram-profile-copy small{color:#aeb7c5;font-size:10px}
+.kendram-profile-settings{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:8px;background:transparent;color:#b8c1ce}
+.kendram-profile-settings:hover{background:rgba(255,255,255,.08);color:#fff}
+.app-main{width:calc(100% - 240px);margin-left:240px}
+@media(max-width:1100px){.kendram-sidebar{width:230px}.app-main{width:calc(100% - 230px);margin-left:230px}}
+@media(max-width:760px){.kendram-sidebar{width:270px;transform:translateX(-105%);transition:transform .24s ease;box-shadow:20px 0 50px rgba(10,15,25,.22);border-radius:0}.kendram-sidebar.sidebar-open{transform:translateX(0)}.app-main{width:100%;margin-left:0}.kendram-sidebar .sidebar-close{display:grid}}
