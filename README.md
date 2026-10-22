@@ -2,9 +2,9 @@
 
 ## Project
 
-**Anvaya - Smart Task Management and Collaboration Platform**
+**Kendram - Smart Task Management and Collaboration Platform**
 
-This repository records the weekly internship documentation and the actual Anvaya project build.
+This repository records the weekly internship documentation and the actual Kendram project build.
 
 ## Internship
 
@@ -99,7 +99,7 @@ GitHub Actions validates backend unit tests, backend API integration tests, fron
 
 ### Frontend
 
-- Responsive Anvaya workspace
+- Responsive Kendram workspace
 - Live authenticated workspace loading
 - Live project listing and creation
 - Project-aware live task creation
@@ -123,7 +123,7 @@ GitHub Actions validates backend unit tests, backend API integration tests, fron
 - Tasks and explainable Smart Assignment 2.0
 - Kanban board, list, calendar and timeline views
 - Task dependencies with cycle prevention and blocker notifications
-- Project analytics and Anvaya Insights
+- Project analytics and Kendram Insights
 - Permission-aware global search / Ctrl+K command palette
 - Project invitations and onboarding
 - Activity logging
@@ -143,7 +143,7 @@ See `DEVELOPMENT-LOG.md` for the implementation history.
 
 ## Advanced Workspace
 
-The current Anvaya workspace follows the advanced product specification:
+The current Kendram workspace follows the advanced product specification:
 
 - **Project views:** Overview, Board, List, Calendar, Timeline, Activity.
 - **Smart Assignment 2.0:** top-three explainable recommendations based on workload, due-date fit, project role, priority load and availability.
