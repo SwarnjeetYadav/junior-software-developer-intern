@@ -160,7 +160,7 @@ export default function ReportsWorkspace({ projects = [], tasks = [], onSelectTa
 
           <section className="report-surface">
             <div className="report-surface-head">
-              <div><span className="section-kicker">Anvaya Insights</span><h3>What deserves attention</h3><p>Each signal explains the condition and the next useful action.</p></div>
+              <div><span className="section-kicker">Kendram Insights</span><h3>What deserves attention</h3><p>Each signal explains the condition and the next useful action.</p></div>
               <Badge color={riskCount ? 'amber' : 'green'}>{riskCount ? riskCount + ' risk items' : 'Healthy'}</Badge>
             </div>
             <div className="reports-insights-grid reports-insights-refined">
