@@ -77,7 +77,7 @@ function unreadCountFor(messages, currentUserId, readAt) {
   }).length
 }
 
-function ChatMessages({ messages, currentUserId, loading, onReply, onReact }) {
+function ChatMessages({ messages, currentUserId, loading, onReply, onReact, onCopy }) {
   if (loading && !messages.length) {
     return <div className="comment-empty team-chat-loading-state">Loading team conversation...</div>
   }
@@ -110,6 +110,7 @@ function ChatMessages({ messages, currentUserId, loading, onReply, onReact }) {
           <p>{item.message}</p>
           <div className="chat-message-actions">
             <button type="button" onClick={() => onReply?.(item)} aria-label="Reply to message">Reply</button>
+            <button type="button" onClick={() => onCopy?.(item.message)} aria-label="Copy message">Copy</button>
             {['👍', '✅', '❤️'].map((emoji) => (
               <button type="button" key={emoji} onClick={() => onReact?.(item, emoji)} aria-label={'React ' + emoji}>{emoji}{reactionCounts[emoji] ? ' ' + reactionCounts[emoji] : ''}</button>
             ))}
@@ -139,6 +140,9 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
   const [chatMessage, setChatMessage] = useState('')
   const [chatSending, setChatSending] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
+  const [chatSearchOpen, setChatSearchOpen] = useState(false)
+  const [chatSearch, setChatSearch] = useState('')
+  const [chatNotice, setChatNotice] = useState('')
   const [chatFullscreen, setChatFullscreen] = useState(false)
   const [chatUnread, setChatUnread] = useState(0)
   const [chatReplyTo, setChatReplyTo] = useState(null)
@@ -152,6 +156,11 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
   }, [projects, projectId])
 
   const selectedProject = projects.find((project) => project._id === projectId)
+  const visibleChat = useMemo(() => {
+    const term = chatSearch.trim().toLowerCase()
+    if (!term) return chat
+    return chat.filter((item) => [item.message, item.userId?.name, item.replyToId?.message].some((value) => String(value || '').toLowerCase().includes(term)))
+  }, [chat, chatSearch])
   const currentMembers = membersByProject?.[projectId] || []
 
   const currentMembership = currentMembers.find(
@@ -514,6 +523,16 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
     }
   }
 
+  const copyChatMessage = async (value) => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setChatNotice('Message copied')
+    } catch {
+      setChatNotice('Copy is not available in this browser')
+    }
+    window.setTimeout(() => setChatNotice(''), 1800)
+  }
+
   const reactChat = async (item, emoji) => {
     try {
       const result = await api.reactProjectChat(projectId, item._id, emoji)
@@ -702,6 +721,9 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
                 </div>
 
                 <div className="team-chat-drawer-actions">
+                  <button type="button" className="team-chat-icon-button" onClick={() => { setChatSearchOpen((value) => !value); setChatSearch('') }} aria-label={chatSearchOpen ? 'Close message search' : 'Search messages'} title="Search messages">
+                    <Icon name="search" size={16} />
+                  </button>
                   <button type="button" className="team-chat-icon-button" onClick={() => loadChat({ preserveUnread: true })} disabled={chatLoading} aria-label="Refresh team chat" title="Refresh chat">
                     <Icon name="refresh" size={16} />
                   </button>
@@ -720,6 +742,8 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
                 </div>
               </div>
 
+              {chatSearchOpen ? <div className="team-chat-searchbar"><Icon name="search" size={16} /><input autoFocus value={chatSearch} onChange={(event) => setChatSearch(event.target.value)} placeholder="Search messages or people…" aria-label="Search messages" /><button type="button" onClick={() => { setChatSearch(''); setChatSearchOpen(false) }} aria-label="Close search"><Icon name="close" size={15} /></button></div> : null}
+
               <div className="team-chat-drawer-meta">
                 <div>
                   <span>{currentMembers.length} member{currentMembers.length === 1 ? '' : 's'}</span>
@@ -730,7 +754,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
               </div>
 
               <div className="team-chat-drawer-messages" ref={chatMessagesRef}>
-                <ChatMessages messages={chat} currentUserId={currentUserId} loading={chatLoading} onReply={(item) => setChatReplyTo(item)} onReact={reactChat} />
+                <ChatMessages messages={visibleChat} currentUserId={currentUserId} loading={chatLoading} onReply={(item) => setChatReplyTo(item)} onReact={reactChat} onCopy={copyChatMessage} />
               </div>
 
               {chatReplyTo ? (
@@ -753,6 +777,7 @@ export default function TeamWorkspace({ projects, membersByProject, currentUserI
                   ))}
                 </div>
               ) : null}
+              {chatNotice ? <div className="team-chat-notice" role="status">{chatNotice}</div> : null}
               <form className="team-chat-drawer-form" onSubmit={sendChat}>
                 <input
                   value={chatMessage}
