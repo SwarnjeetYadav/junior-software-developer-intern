@@ -120,7 +120,7 @@ export default function CreateTaskModal({
         await onCreate({
           id: 'AN-' + Math.floor(130 + Math.random() * 60),
           title: cleanTitle,
-          project: selectedProject?.name || 'Anvaya Web App',
+          project: selectedProject?.name || 'Kendram Web',
           assignee: chosen?.initials || 'SY',
           assigneeName: chosen?.name || 'Swarnjeet Yadav',
           priority,
@@ -175,7 +175,7 @@ export default function CreateTaskModal({
           </div>
 
           <div className="field">
-            <div className="field-with-helper"><span>Assignee</span><small>Choose a teammate manually or let Anvaya recommend one.</small></div>
+            <div className="field-with-helper"><span>Assignee</span><small>Choose a teammate manually or let Kendram recommend one.</small></div>
             {liveMode ? (
               <div className="smart-assignment-panel">
                 <div className="smart-panel-head"><div><strong>Smart Assignment 2.0</strong><span>Explainable workload-aware recommendations</span></div><Badge color="violet">TOP 3</Badge></div>

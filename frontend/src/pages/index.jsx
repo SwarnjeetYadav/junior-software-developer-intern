@@ -133,7 +133,7 @@ function MemberManager({ projects, membersByProject, onChanged }) {
   return (
     <div className="member-manager">
       <div className="member-manager-head">
-        <div><span className="eyebrow">Live membership</span><h2>Manage project members</h2><p>Add active Anvaya users to the selected project.</p></div>
+        <div><span className="eyebrow">Live membership</span><h2>Manage project members</h2><p>Add active Kendram users to the selected project.</p></div>
         <select value={projectId} onChange={(event) => setProjectId(event.target.value)} aria-label="Project for member management">
           {projects.map((project) => <option key={project._id} value={project._id}>{project.name}</option>)}
         </select>
@@ -388,7 +388,7 @@ export function GenericPage({
       <div className="panel">
         <SectionHeader
           title={page === 'My Tasks' ? 'Your task queue' : 'Task queue'}
-          subtitle={liveData.connected ? rows.length + ' matching task' + (rows.length === 1 ? '' : 's') + ' from the Anvaya API.' : 'Demo task data for the UI review.'}
+          subtitle={liveData.connected ? rows.length + ' matching task' + (rows.length === 1 ? '' : 's') + ' from the Kendram API.' : 'Demo task data for the UI review.'}
         />
         <TaskTable tasks={rows} onSelectTask={onSelectTask} />
       </div>
