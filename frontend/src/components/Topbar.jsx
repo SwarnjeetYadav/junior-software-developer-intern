@@ -52,8 +52,8 @@ export default function Topbar({ page, onOpenMenu, onLogout, onExitDemo, demoMod
 
         <div className="profile-menu">
           <button className="user-chip" type="button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen}>
-            <Avatar initials={user.initials || user.name?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'TF'} color="violet" size="sm" />
-            <span className="user-chip-name">{user.name}</span>
+            {user.avatarUrl ? <img className="topbar-profile-photo" src={user.avatarUrl} alt="" /> : <Avatar initials={user.initials || (user.displayName || user.name)?.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'TF'} color="violet" size="sm" />}
+            <span className="user-chip-name">{user.displayName || user.name}</span>
             <span className="chevron">⌄</span>
           </button>
           {menuOpen ? <div className="profile-dropdown"><strong>{displayRole(user.role || 'PROJECT_MANAGER')}</strong>{demoMode ? <span>Demo workspace</span> : <span>Connected to API</span>}<button type="button" onClick={onLogout}>{demoMode ? 'Exit demo & return to login' : 'Sign out'}</button></div> : null}
