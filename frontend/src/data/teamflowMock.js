@@ -59,6 +59,7 @@ export const pageCopy = {
   Projects: ['Portfolio', 'Projects', 'Keep every initiative visible, accountable, and moving forward.'],
   'My Tasks': ['Personal workspace', 'My Tasks', 'See your priorities, deadlines, and work in one focused queue.'],
   Team: ['People', 'Team', 'Understand ownership, workload, and availability at a glance.'],
+  Calendar: ['Schedule', 'Calendar', 'Keep upcoming work and deadlines visible alongside your task queue.'],
   Reports: ['Insights', 'Reports', 'Turn project activity into concise, actionable visibility.'],
   Settings: ['Workspace', 'Settings', 'Configure workspace preferences and account controls.'],
 }
