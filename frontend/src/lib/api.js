@@ -27,6 +27,7 @@ export const api = {
   login: (body) => request('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
   register: (body) => request('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
   me: () => request('/auth/me'),
+  updateProfile: (profile) => request('/auth/profile', { method: 'PATCH', body: JSON.stringify(profile) }),
   listProjects: () => request('/projects'),
   getProject: (projectId) => request('/projects/' + projectId),
   createProject: (body) => request('/projects', { method: 'POST', body: JSON.stringify(body) }),

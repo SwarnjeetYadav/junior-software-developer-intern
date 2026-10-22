@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Badge from './Badge'
 import Icon from './Icon'
 import { api } from '../lib/api'
+import { useAuth } from '../auth/AuthProvider'
 
 const NOTIFICATION_OPTIONS = [
   ['taskAssignment', 'Task assignments', 'Get notified when a task is assigned or reassigned to you.'],
@@ -12,6 +13,11 @@ const NOTIFICATION_OPTIONS = [
 ]
 
 export default function SettingsWorkspace({ user, projectCount = 0, taskCount = 0 }) {
+  const { updateUser } = useAuth()
+  const [profile, setProfile] = useState(() => ({ name: user?.name || '', displayName: user?.displayName || '', avatarUrl: user?.avatarUrl || '', bio: user?.bio || '', location: user?.location || '', timezone: user?.timezone || 'Asia/Kolkata' }))
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileMessage, setProfileMessage] = useState('')
+  const [profileError, setProfileError] = useState('')
   const [preferences, setPreferences] = useState(null)
   const [saving, setSaving] = useState('')
   const [message, setMessage] = useState('')
@@ -61,12 +67,23 @@ export default function SettingsWorkspace({ user, projectCount = 0, taskCount = 
 
   return (
     <div className="settings-workspace">
-      <section className="panel settings-profile-panel">
-        <div className="settings-profile">
-          <div className="settings-avatar">{user?.name?.split(' ').map((item) => item[0]).join('').slice(0, 2).toUpperCase() || 'AN'}</div>
-          <div><span className="eyebrow">Account</span><h2>{user?.name || 'Account'}</h2><p>{user?.email || '—'} · {user?.role?.replaceAll('_', ' ') || 'User'}</p></div>
-          <Badge color="green">Active</Badge>
-        </div>
+      <section className="panel settings-profile-panel kendram-profile-panel">
+        <div className="workspace-section-head"><div><span className="eyebrow">Your account</span><h3>Profile settings</h3><p>Make your identity easy for your teammates to recognize.</p></div><Icon name="user" size={20} /></div>
+        <form className="kendram-profile-form" onSubmit={async (event) => { event.preventDefault(); setProfileSaving(true); setProfileMessage(''); setProfileError(''); try { const result = await api.updateProfile(profile); updateUser(result.data); setProfile(result.data); setProfileMessage('Your profile has been saved.') } catch (err) { setProfileError(err.message || 'Could not save your profile.') } finally { setProfileSaving(false) } }}>
+          <div className="kendram-profile-identity">{profile.avatarUrl ? <img className="kendram-profile-avatar" src={profile.avatarUrl} alt="Profile preview" onError={(event) => { event.currentTarget.style.display = 'none' }} /> : <div className="kendram-profile-avatar kendram-profile-avatar-fallback">{(profile.displayName || profile.name || 'K').trim().split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase()}</div>}<div className="kendram-profile-avatar-copy"><strong>Profile photo</strong><span>Paste a public HTTPS image URL. Square images work best.</span></div>{profile.avatarUrl ? <button className="kendram-profile-remove-photo" type="button" onClick={() => setProfile((current) => ({ ...current, avatarUrl: '' }))}>Remove</button> : null}</div>
+          <label className="kendram-profile-field"><span>Profile image URL</span><input type="url" value={profile.avatarUrl} maxLength={2048} placeholder="https://example.com/your-photo.jpg" onChange={(event) => setProfile((current) => ({ ...current, avatarUrl: event.target.value }))} /><small>Use a secure HTTPS link to an image.</small></label>
+          <div className="kendram-profile-fields-grid">
+            <label className="kendram-profile-field"><span>Full name <b>*</b></span><input required maxLength={80} value={profile.name} placeholder="Your full name" onChange={(event) => setProfile((current) => ({ ...current, name: event.target.value }))} /></label>
+            <label className="kendram-profile-field"><span>Display name</span><input maxLength={50} value={profile.displayName} placeholder="How teammates see you" onChange={(event) => setProfile((current) => ({ ...current, displayName: event.target.value }))} /><small>Optional preferred name.</small></label>
+            <label className="kendram-profile-field"><span>Email address</span><input value={user?.email || ''} disabled /><small>Email changes are disabled for account security.</small></label>
+            <label className="kendram-profile-field"><span>Role</span><input value={(user?.role || 'TEAM_MEMBER').replaceAll('_', ' ')} disabled /></label>
+            <label className="kendram-profile-field"><span>Location</span><input maxLength={80} value={profile.location} placeholder="e.g. Patna, India" onChange={(event) => setProfile((current) => ({ ...current, location: event.target.value }))} /></label>
+            <label className="kendram-profile-field"><span>Time zone</span><select value={profile.timezone} onChange={(event) => setProfile((current) => ({ ...current, timezone: event.target.value }))}><option value="Asia/Kolkata">India Standard Time (IST)</option><option value="UTC">UTC</option><option value="Asia/Dubai">Gulf Standard Time</option><option value="Europe/London">United Kingdom</option><option value="America/New_York">US Eastern</option><option value="America/Los_Angeles">US Pacific</option><option value="Asia/Singapore">Singapore</option><option value="Australia/Sydney">Australia Eastern</option></select></label>
+          </div>
+          <label className="kendram-profile-field"><span>About you</span><textarea maxLength={240} rows={3} value={profile.bio} placeholder="A short introduction for your team…" onChange={(event) => setProfile((current) => ({ ...current, bio: event.target.value }))} /><small>{profile.bio.length}/240 characters</small></label>
+          {profileMessage ? <div className="success-banner" role="status">{profileMessage}</div> : null}{profileError ? <div className="workspace-error-banner" role="alert">{profileError}</div> : null}
+          <div className="kendram-profile-actions"><button className="kendram-profile-reset" type="button" onClick={() => { setProfile({ name: user?.name || '', displayName: user?.displayName || '', avatarUrl: user?.avatarUrl || '', bio: user?.bio || '', location: user?.location || '', timezone: user?.timezone || 'Asia/Kolkata' }); setProfileMessage(''); setProfileError('') }}>Discard changes</button><button className="kendram-profile-save" type="submit" disabled={profileSaving}>{profileSaving ? 'Saving…' : 'Save profile'}</button></div>
+        </form>
       </section>
 
       <div className="settings-grid">

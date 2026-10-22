@@ -88,6 +88,8 @@ export function AuthProvider({ children }) {
     return result.data.user
   }
 
+  const updateUser = (nextUser) => { const merged = { ...(user || {}), ...nextUser }; localStorage.setItem('teamflow_user', JSON.stringify(merged)); setUser(merged); return merged }
+
   const enterDemo = () => {
     const demoUser = { id: 'demo-user', name: 'Swarnjeet Yadav', initials: 'SY', role: 'PROJECT_MANAGER' }
     clearStoredSession()
@@ -104,7 +106,7 @@ export function AuthProvider({ children }) {
   }
 
   const value = useMemo(
-    () => ({ user, demoMode, authLoading, login, register, enterDemo, logout }),
+    () => ({ user, demoMode, authLoading, login, register, updateUser, enterDemo, logout }),
     [user, demoMode, authLoading],
   )
 

@@ -189,3 +189,28 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .team-chat-drawer-footer{padding:0 15px 10px;background:#fffdfa;color:#98949a;font-size:10px}
 .chat-mention-menu{max-height:180px;overflow:auto;border:1px solid #eaded4;border-radius:12px;background:#fffdfa;box-shadow:0 10px 24px rgba(25,32,42,.1)}
 @media(max-width:600px){.team-chat-drawer{width:100vw;height:100dvh;max-height:100dvh;right:0;bottom:0;border-radius:0;border:0}.team-chat-drawer-fullscreen{inset:0}.team-chat-drawer-header{padding-top:max(14px,env(safe-area-inset-top))}.team-chat-drawer-form{padding-bottom:max(12px,env(safe-area-inset-bottom))}.team-chat-message-body{max-width:calc(100% - 34px)}}
+
+/* Kendram account profile settings */
+.kendram-profile-panel{padding:24px;background:#fffdfa;border:1px solid #eee4db;border-radius:18px}
+.kendram-profile-form{display:flex;flex-direction:column;gap:18px;margin-top:20px}
+.kendram-profile-identity{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid #eee4db;border-radius:14px;background:linear-gradient(120deg,#fffaf5,#f8f0e8)}
+.kendram-profile-avatar{width:68px;height:68px;flex:0 0 68px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 3px 12px rgba(30,36,48,.12)}
+.kendram-profile-avatar-fallback{display:grid;place-items:center;background:#f6ded4;color:#a7422c;font-size:21px;font-weight:800}
+.kendram-profile-avatar-copy{display:flex;flex:1;flex-direction:column;gap:5px;min-width:0}
+.kendram-profile-avatar-copy strong{font-size:14px;color:#283142}
+.kendram-profile-avatar-copy span,.kendram-profile-field small{font-size:11px;line-height:1.45;color:#898991}
+.kendram-profile-remove-photo{border:1px solid #eadbd2;border-radius:9px;background:#fffdfa;color:#a7422c;padding:8px 11px;font-size:12px}
+.kendram-profile-fields-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.kendram-profile-field{display:flex;flex-direction:column;gap:7px;min-width:0;color:#313949;font-size:12px;font-weight:700}
+.kendram-profile-field b{color:#b9472e}
+.kendram-profile-field input,.kendram-profile-field select,.kendram-profile-field textarea{width:100%;min-width:0;border:1px solid #e7ddd4;border-radius:10px;background:#fff;color:#293243;padding:11px 12px;font-size:13px;font-weight:500;outline:none;transition:border-color .15s,box-shadow .15s}
+.kendram-profile-field input:focus,.kendram-profile-field select:focus,.kendram-profile-field textarea:focus{border-color:#cf795f;box-shadow:0 0 0 3px rgba(185,71,46,.09)}
+.kendram-profile-field input:disabled{background:#f6f2ee;color:#85858c;cursor:not-allowed}
+.kendram-profile-field textarea{resize:vertical;line-height:1.5}
+.kendram-profile-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:16px;border-top:1px solid #f0e8e1}
+.kendram-profile-actions button{padding:10px 15px;border-radius:10px;font-size:12px;font-weight:700}
+.kendram-profile-reset{border:1px solid #e7ddd4;background:#fffdfa;color:#5e6571}
+.kendram-profile-save{border:1px solid #b9472e;background:#b9472e;color:#fff;box-shadow:0 4px 10px rgba(185,71,46,.15)}
+.kendram-profile-save:hover:not(:disabled){background:#a63c27}.kendram-profile-save:disabled{opacity:.6;cursor:wait}
+.topbar-profile-photo{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid #eaded4}
+@media(max-width:650px){.kendram-profile-panel{padding:17px}.kendram-profile-fields-grid{grid-template-columns:1fr}.kendram-profile-identity{align-items:flex-start;flex-wrap:wrap}.kendram-profile-avatar-copy{min-width:calc(100% - 90px)}.kendram-profile-actions{flex-wrap:wrap}.kendram-profile-actions button{flex:1}}
