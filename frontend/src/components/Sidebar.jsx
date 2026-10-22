@@ -20,8 +20,8 @@ export default function Sidebar({ page, onNavigate, open, onClose, user, liveDat
     <aside className={'sidebar ' + (open ? 'sidebar-open' : '')}>
       <div className="sidebar-top">
         <button className="brand" type="button" onClick={() => onNavigate('Overview')} aria-label="Go to overview">
-          <span className="brand-mark">AN</span>
-          <span><strong>Anvaya</strong><small>Smart workspace</small></span>
+          <span className="brand-mark" aria-hidden="true">KE</span>
+          <span><strong>Kendram</strong><small>Team workspace</small></span>
         </button>
         <button className="icon-button sidebar-close" type="button" onClick={onClose} aria-label="Close navigation">
           <Icon name="close" size={19} />
